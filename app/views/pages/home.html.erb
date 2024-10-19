@@ -24,8 +24,8 @@
         <div class="navbar-end">
           <div class="navbar-item">
             <div class="buttons">
-              <%= link_to "Registrarse", signup_path, class: "button is-light" %>
-              <%= link_to "Iniciar sesión", login_path, class: "button is-primary" %>
+              <%= link_to "Registrarse", new_user_registration_path, class: "button is-light" %>
+              <%= link_to "Iniciar sesión", new_user_session_path, class: "button is-primary" %>
             </div>
           </div>
         </div>
@@ -40,10 +40,11 @@
         <h1 class="title">
           UBB Cyber Security Academy
         </h1>
-        <%= link_to "Comenzar", login_path, class: "button is-dark" %> <!-- Redirección al login -->
+        <%= link_to "Comenzar", new_user_session_path, class: "button is-dark" %> <!-- Redirección al login -->
       </div>
     </div>
   </section>
+
 
   <!-- Sección de Testimonios -->
   <section class="section testimonials has-background-light">

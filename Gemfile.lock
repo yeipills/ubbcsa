@@ -106,6 +106,12 @@ GEM
     debug (1.9.2)
       irb (~> 1.10)
       reline (>= 0.3.8)
+    devise (4.9.4)
+      bcrypt (~> 3.0)
+      orm_adapter (~> 0.1)
+      railties (>= 4.1.0)
+      responders
+      warden (~> 1.2.3)
     dotenv (3.1.2)
     dotenv-rails (3.1.2)
       dotenv (= 3.1.2)
@@ -225,6 +231,7 @@ GEM
     omniauth-oauth2 (1.8.0)
       oauth2 (>= 1.4, < 3)
       omniauth (~> 2.0)
+    orm_adapter (0.5.0)
     pg (1.5.7)
     psych (5.1.2)
       stringio
@@ -280,6 +287,9 @@ GEM
     regexp_parser (2.9.2)
     reline (0.5.9)
       io-console (~> 0.5)
+    responders (3.1.1)
+      actionpack (>= 5.2)
+      railties (>= 5.2)
     rexml (3.3.2)
       strscan
     rubyzip (2.3.2)
@@ -340,6 +350,8 @@ GEM
       concurrent-ruby (~> 1.0)
     uri (0.13.0)
     version_gem (1.1.4)
+    warden (1.2.9)
+      rack (>= 2.0.9)
     web-console (4.2.1)
       actionview (>= 6.0.0)
       activemodel (>= 6.0.0)
@@ -368,6 +380,7 @@ DEPENDENCIES
   bulma-rails
   capybara
   debug
+  devise
   dotenv-rails
   font-awesome-rails
   httparty

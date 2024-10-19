@@ -1,22 +1,28 @@
 class User < ApplicationRecord
-  has_secure_password
-  belongs_to :role
+  # Include default devise modules. Others available are:
+  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :validatable
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :validatable
+
+  belongs_to :role, optional: true
   belongs_to :career, optional: true
-  has_many :enrollments
+  has_many :enrollments, dependent: :destroy
   has_many :courses, through: :enrollments
-  has_many :notifications
+  has_many :notifications, dependent: :destroy
+  has_many :friends, dependent: :destroy
+  has_many :followers, dependent: :destroy
+  has_many :professors, dependent: :destroy
 
-  validates :nombre_completo, presence: true
-  validates :email, presence: true, uniqueness: true
-  validates :user_name, presence: true, uniqueness: true
-  validates :password, length: { minimum: 6 }, if: -> { new_record? || !password.nil? }
+  validates :nombre_completo, :email, :user_name, presence: true
+  validates :email, :user_name, uniqueness: true
 
-  def self.from_omniauth(auth)
-    where(provider: auth.provider, uid: auth.uid).first_or_create do |user|
-      user.nombre_completo = auth.info.name
-      user.email = auth.info.email
-      user.user_name = auth.info.email.split('@').first
-      user.password = SecureRandom.hex(15)
-    end
-  end
+  # Relaciones de seguidores
+  has_many :followed_users, class_name: 'Follower', foreign_key: 'user_id', dependent: :destroy
+  has_many :followers, through: :followed_users, source: :follower
+
+  # Relaciones de seguidos
+  has_many :following_users, class_name: 'Follower', foreign_key: 'follower_id', dependent: :destroy
+  has_many :following, through: :following_users, source: :user
 end
