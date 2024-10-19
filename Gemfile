@@ -71,11 +71,9 @@ gem 'httparty'
 gem 'bcrypt', '~> 3.1.7'
 gem 'omniauth'
 gem 'omniauth-google-oauth2'
-
 gem 'pundit'
 gem 'bulma-rails'
 gem 'sassc-rails'
-# Gemfile
 gem 'dotenv-rails', groups: [:development, :test]
-
 gem "font-awesome-rails"
+gem 'devise'

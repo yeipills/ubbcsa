@@ -1,5 +1,5 @@
-# config/routes.rb
 Rails.application.routes.draw do
+  devise_for :users
   root 'pages#home'
   
   get 'main', to: 'pages#main'
@@ -14,13 +14,6 @@ Rails.application.routes.draw do
   resources :materials
   resources :enrollments
   resources :notifications
-
-  get 'signup', to: 'users#new'
-  post 'signup', to: 'users#create'
-
-  get 'login', to: 'sessions#new'
-  post 'login', to: 'sessions#create'
-  delete 'logout', to: 'sessions#destroy'
 
   # Rutas para OmniAuth
   get '/auth/:provider/callback', to: 'sessions#google_auth'

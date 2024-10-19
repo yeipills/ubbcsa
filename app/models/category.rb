@@ -1,4 +1,5 @@
-# app/models/category.rb
 class Category < ApplicationRecord
-  # Aquí puedes agregar validaciones y relaciones necesarias
+  has_many :courses, dependent: :restrict_with_exception
+
+  validates :name, presence: true
 end
