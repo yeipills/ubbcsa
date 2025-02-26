@@ -40,28 +40,31 @@ end
 
 namespace :supabase do
   desc "Ejecuta pruebas saltando extensiones específicas de Supabase"
-  task :test => :environment do
-    puts " Ejecutando pruebas omitiendo extensiones de Supabase..."
+  task test: :environment do
+    puts "🧪 Ejecutando pruebas omitiendo extensiones de Supabase..."
     ENV['SCHEMA'] = 'false'
     Rake::Task["test"].invoke
   end
   
   desc "Crea base de datos sin cargar extensiones de Supabase"
-  task :db_create => :environment do
-    puts " Creando base de datos compatible con CI..."
-    ENV['SCHEMA'] = 'false'
-    Rake::Task["db:create"].invoke
+  task db_create: :environment do
+    puts "🔄 Creando base de datos compatible con CI..."
+    system({ "SCHEMA" => "false" }, "bundle exec rails db:create")
   end
   
   desc "Migra base de datos sin cargar extensiones de Supabase"
-  task :migrate => :environment do
-    puts " Migrando base de datos compatible con CI..."
-    ENV['SCHEMA'] = 'false'
-    Rake::Task["db:migrate"].invoke
+  task migrate: :environment do
+    puts "🔄 Migrando base de datos compatible con CI..."
+    system({ "SCHEMA" => "false" }, "bundle exec rails db:migrate")
+  end
+  
+  desc "Lanza tareas CI en secuencia correcta"
+  task ci: [:db_create, :migrate, :test] do
+    puts "✅ CI completado con éxito"
   end
   
   desc "Ayuda para solucionar problemas con extensiones de Supabase"
-  task :help => :environment do
+  task help: :environment do
     puts <<~HELP
       ╔════════════════════════════════════════════════════╗
       ║               AYUDA PARA SUPABASE                  ║
@@ -77,12 +80,25 @@ namespace :supabase do
          $ SCHEMA=false bundle exec rails db:create
          $ bundle exec rake supabase:db_create
          
-      3. Para CI/GitHub Actions:
-         Usa 'supabase/postgres:13.3.0' como imagen
-         o establece SCHEMA=false en tus comandos
+      3. Para migrar base de datos sin extensiones:
+         $ SCHEMA=false bundle exec rails db:migrate
+         $ bundle exec rake supabase:migrate
+         
+      4. Para ejecutar todo el flujo de CI:
+         $ bundle exec rake supabase:ci
+         
+      5. Para CI/GitHub Actions:
+         Usa 'postgres:13' como imagen
+         y establece SCHEMA=false en tus comandos
          
       Para más información, consulta:
       docs/SUPABASE.md
     HELP
   end
+end
+
+# Alias para mantener compatibilidad con código existente
+namespace :test do
+  desc "Ejecuta tests sin extensiones problemáticas de Supabase"
+  task safe: ["supabase:test"]
 end

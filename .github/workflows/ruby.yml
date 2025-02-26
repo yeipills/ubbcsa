@@ -47,14 +47,8 @@ jobs:
         gem install bundler
         bundle install --jobs 4 --retry 3
         
-    - name: Configurar base de datos
-      run: bundle exec rake supabase:db_create
-        
-    - name: Migrar esquema 
-      run: bundle exec rake supabase:migrate
-        
-    - name: Run tests
-      run: bundle exec rake supabase:test
+    - name: Ejecutar flujo completo de CI
+      run: bundle exec rake supabase:ci
       
     - name: Run rubocop
       run: bundle exec rubocop --parallel

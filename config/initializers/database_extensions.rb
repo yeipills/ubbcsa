@@ -2,28 +2,25 @@
 # Solo habilita extensiones específicas de Supabase cuando se ejecuta en producción o desarrollo con Supabase
 
 # Enfoque más simple y directo para saltear extensiones de Supabase en entornos CI
-Rails.configuration.to_prepare do
-  if ActiveRecord::Base.connection.adapter_name == 'PostgreSQL' && ENV['SCHEMA'] == 'false'
-    # Solo mostramos este mensaje una vez durante la inicialización
-    puts "⚠️ Modo de compatibilidad activado: las extensiones específicas de Supabase serán ignoradas"
+if ENV['SCHEMA'] == 'false'
+  puts "⚠️ Modo de compatibilidad activado: las extensiones específicas de Supabase serán ignoradas"
 
-    # Monkey patch para prevenir errores con extensiones no disponibles
-    module ActiveRecord
-      module ConnectionAdapters
-        module PostgreSQL
-          module SchemaStatements
-            alias_method :original_enable_extension, :enable_extension
+  # Monkey patch para prevenir errores con extensiones no disponibles
+  module ActiveRecord
+    module ConnectionAdapters
+      module PostgreSQL
+        module SchemaStatements
+          alias_method :original_enable_extension, :enable_extension if method_defined?(:enable_extension)
+          
+          def enable_extension(name, **)
+            supabase_extensions = %w[pg_graphql pgjwt pgsodium]
             
-            def enable_extension(name, **)
-              supabase_extensions = %w[pg_graphql pgjwt pgsodium]
-              
-              if supabase_extensions.include?(name)
-                puts "⚠️ Saltando extensión #{name} (no disponible en este entorno)"
-                return
-              end
-              
-              original_enable_extension(name, **)
+            if supabase_extensions.include?(name)
+              puts "⚠️ Saltando extensión #{name} (no disponible en este entorno)"
+              return
             end
+            
+            original_enable_extension(name, **)
           end
         end
       end
