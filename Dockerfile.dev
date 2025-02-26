@@ -1,0 +1,34 @@
+FROM ruby:3.3.4-slim
+
+# Establecer directorio de trabajo
+WORKDIR /app
+
+# Instalar dependencias del sistema
+RUN apt-get update -qq && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    nodejs \
+    npm \
+    git \
+    vim \
+    curl \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar Node.js y npm
+RUN npm install -g yarn
+
+# Copiar archivos de configuración
+COPY Gemfile Gemfile.lock ./
+
+# Instalar gemas
+RUN bundle install
+
+# Copiar el resto de la aplicación
+COPY . ./
+
+# Configurar puerto
+EXPOSE 3000
+
+# Iniciar la aplicación
+CMD ["rails", "server", "-b", "0.0.0.0"]
