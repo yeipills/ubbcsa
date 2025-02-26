@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:13
+        image: supabase/postgres:13.3.0
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_USER: postgres
@@ -46,13 +46,13 @@ jobs:
         gem install bundler
         bundle install --jobs 4 --retry 3
         
-    - name: Set up database
+    - name: Create database without schema
       run: |
         bundle exec rails db:create
-        bundle exec rails db:schema:load
+        bundle exec rails db:test:prepare SCHEMA=false
         
     - name: Run tests
-      run: bundle exec rspec
+      run: bundle exec rails test SCHEMA=false
       
     - name: Run rubocop
       run: bundle exec rubocop --parallel

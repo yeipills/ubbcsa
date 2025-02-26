@@ -86,12 +86,17 @@ npm install
 Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
     
 ```bash
-# Base de datos
+# Base de datos local
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=tu_usuario
 DB_PASSWORD=tu_contraseña
 DB_NAME=ciberseguridad_dev
+
+# Si usas Supabase (recomendado)
+SUPABASE_URL=https://tu-proyecto.supabase.co
+SUPABASE_KEY=tu_api_key
+SUPABASE_DB_URL=postgresql://postgres:tu_password@db.tu-proyecto.supabase.co:5432/postgres
 
 # Configuración de Docker 
 SIMULAR_DOCKER=false
@@ -99,15 +104,21 @@ SIMULAR_DOCKER=false
 # Otras configuraciones
 RAILS_ENV=development
 ```
+
+Para más información sobre cómo configurar Supabase, consulta la [documentación de Supabase](docs/SUPABASE.md).
     
 ### Paso 4: Configurar la base de datos
     
 ```bash
+# Para base de datos local
 rails db:create
 rails db:migrate
 rails db:seed  # Para cargar datos iniciales
+
+# Si tienes problemas con extensiones de Supabase en entorno local
+SCHEMA=false rails db:test:prepare  # Para entorno de pruebas
 ```
-    
+
 ### Paso 5: Iniciar los servicios
     
 ```bash
