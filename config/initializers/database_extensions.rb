@@ -1,41 +1,32 @@
 # Este inicializador gestiona las extensiones de base de datos para diferentes entornos
 # Solo habilita extensiones específicas de Supabase cuando se ejecuta en producción o desarrollo con Supabase
 
-module ActiveRecord
-  module Tasks
-    class PostgreSQLDatabaseTasks
-      # Override para saltar extensiones no disponibles en CI/Test
-      def load_schema_with_extension_safeguarding(format = ActiveRecord.schema_format, file = nil)
-        skip_unsafe_extensions = ENV['SCHEMA'] == 'false'
-        
-        if skip_unsafe_extensions
-          puts "⚠️ Saltando carga de extensiones específicas de Supabase (pg_graphql, etc.)"
-          
-          # Reescribir temporalmente el schema.rb para saltear extensiones problemáticas
-          original_schema = File.read(schema_file(format))
-          modified_schema = original_schema.dup
-          
-          # Comentar las extensiones específicas de Supabase
-          %w[pg_graphql pgjwt pgsodium].each do |ext|
-            modified_schema.gsub!(/^(\s*enable_extension\s+"#{ext}")/, '# \1')
+# Enfoque más simple y directo para saltear extensiones de Supabase en entornos CI
+Rails.configuration.to_prepare do
+  if ActiveRecord::Base.connection.adapter_name == 'PostgreSQL' && ENV['SCHEMA'] == 'false'
+    # Solo mostramos este mensaje una vez durante la inicialización
+    puts "⚠️ Modo de compatibilidad activado: las extensiones específicas de Supabase serán ignoradas"
+
+    # Monkey patch para prevenir errores con extensiones no disponibles
+    module ActiveRecord
+      module ConnectionAdapters
+        module PostgreSQL
+          module SchemaStatements
+            alias_method :original_enable_extension, :enable_extension
+            
+            def enable_extension(name, **)
+              supabase_extensions = %w[pg_graphql pgjwt pgsodium]
+              
+              if supabase_extensions.include?(name)
+                puts "⚠️ Saltando extensión #{name} (no disponible en este entorno)"
+                return
+              end
+              
+              original_enable_extension(name, **)
+            end
           end
-          
-          # Escribir schema modificado temporalmente
-          temp_schema = Tempfile.new(['schema', '.rb'])
-          temp_schema.write(modified_schema)
-          temp_schema.close
-          
-          # Cargar esquema modificado
-          load_schema_for(format, temp_schema.path)
-          temp_schema.unlink
-        else
-          # Carga normal del esquema
-          load_schema_for(format, file)
         end
       end
-      
-      alias_method :original_load_schema, :load_schema
-      alias_method :load_schema, :load_schema_with_extension_safeguarding
     end
   end
 end

@@ -31,35 +31,47 @@ Supabase incluye extensiones personalizadas como:
 
 Estas extensiones no están disponibles en entornos de PostgreSQL estándar, lo que puede causar problemas al ejecutar tests o en entornos CI.
 
-## Ejecución de tests
+## Solución implementada
 
-### Tests en entorno local
+Para facilitar el desarrollo en entornos que no tienen las extensiones de Supabase, hemos implementado:
 
-Para ejecutar tests sin problemas con extensiones de Supabase:
+1. Un sistema de detección que omite las extensiones problemáticas cuando se establece `SCHEMA=false`
+2. Tareas Rake específicas para trabajar con bases de datos sin estas extensiones
+
+## Comandos disponibles
+
+### Para desarrollo local
 
 ```bash
+# Ver ayuda sobre Supabase
+bundle exec rake supabase:help
+
+# Crear base de datos sin extensiones de Supabase
+bundle exec rake supabase:db_create
+
+# Migrar base de datos sin extensiones de Supabase
+bundle exec rake supabase:migrate
+
+# Ejecutar pruebas sin extensiones de Supabase
+bundle exec rake supabase:test
+```
+
+### Forma alternativa (usar directamente la variable de entorno)
+
+```bash
+# Crear base de datos sin extensiones de Supabase
+SCHEMA=false bundle exec rails db:create
+
+# Migrar base de datos sin extensiones de Supabase
+SCHEMA=false bundle exec rails db:migrate
+
+# Ejecutar pruebas sin extensiones de Supabase
 SCHEMA=false bundle exec rails test
 ```
 
-O usando la tarea rake personalizada:
+## CI/GitHub Actions
 
-```bash
-bundle exec rake test:safe
-```
-
-### CI/GitHub Actions
-
-Nuestro archivo de CI está configurado para usar:
-
-```yaml
-- name: Create database without schema
-  run: |
-    bundle exec rails db:create
-    bundle exec rails db:test:prepare SCHEMA=false
-    
-- name: Run tests
-  run: bundle exec rails test SCHEMA=false
-```
+El archivo de CI está configurado para establecer automáticamente `SCHEMA=false` y usar las tareas rake específicas para Supabase.
 
 ## Migraciones y esquema
 
@@ -90,8 +102,8 @@ end
 Este error ocurre cuando el esquema intenta habilitar extensiones de Supabase en un entorno que no las tiene disponibles.
 
 Solución:
-- Ejecuta con `SCHEMA=false`
-- Usa la imagen Docker de Supabase para desarrollo local
+- Ejecuta con `SCHEMA=false` o usa nuestras tareas rake: `bundle exec rake supabase:db_create`
+- Si el error persiste, puedes intentar modificar manualmente el archivo `db/schema.rb` comentando las líneas que contienen `enable_extension "pg_graphql"` y otras extensiones de Supabase
 
 ### Error: "function not available"
 

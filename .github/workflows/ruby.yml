@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: supabase/postgres:13.3.0
+        image: postgres:13
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_USER: postgres
@@ -31,6 +31,7 @@ jobs:
       DB_USER: postgres
       DB_PASSWORD: postgres
       DB_NAME: ciberseguridad_test
+      SCHEMA: "false"  # Ignorar extensiones de Supabase
       
     steps:
     - uses: actions/checkout@v3
@@ -46,13 +47,14 @@ jobs:
         gem install bundler
         bundle install --jobs 4 --retry 3
         
-    - name: Create database without schema
-      run: |
-        bundle exec rails db:create
-        bundle exec rails db:test:prepare SCHEMA=false
+    - name: Configurar base de datos
+      run: bundle exec rake supabase:db_create
+        
+    - name: Migrar esquema 
+      run: bundle exec rake supabase:migrate
         
     - name: Run tests
-      run: bundle exec rails test SCHEMA=false
+      run: bundle exec rake supabase:test
       
     - name: Run rubocop
       run: bundle exec rubocop --parallel
