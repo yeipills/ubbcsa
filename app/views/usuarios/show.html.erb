@@ -1,0 +1,85 @@
+<!-- app/views/usuarios/show.html.erb -->
+<div class="container mx-auto px-4 py-8">
+  <!-- Perfil Header -->
+  <div class="bg-white rounded-lg shadow mb-6">
+    <div class="p-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <div class="bg-gray-200 rounded-full p-6">
+            <i class="fas fa-user text-2xl text-gray-600"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold"><%= @usuario.nombre_completo %></h1>
+            <p class="text-gray-600"><%= @usuario.email %></p>
+          </div>
+        </div>
+        
+        <!-- Estadísticas Rápidas -->
+        <div class="flex space-x-6">
+          <div class="text-center">
+            <div class="text-2xl font-bold"><%= @estadisticas.total_labs_completados %></div>
+            <div class="text-gray-600">Labs Completados</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold"><%= @estadisticas.horas_totales %></div>
+            <div class="text-gray-600">Horas Totales</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold"><%= @estadisticas.nivel_actual %></div>
+            <div class="text-gray-600">Nivel Actual</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left Column -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Actividad Reciente -->
+      <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+          <h2 class="text-xl font-bold mb-4">Actividad Reciente</h2>
+          <div class="space-y-4">
+            <%= render partial: 'actividad', 
+                       collection: @laboratorios_recientes %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráfico de Progreso -->
+      <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+          <h2 class="text-xl font-bold mb-4">Progreso Semanal</h2>
+          <div id="progress-chart" class="h-64">
+            <%= render 'shared/progress_chart', 
+                       data: @estadisticas.progreso_semanal %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="space-y-6">
+      <!-- Logros -->
+      <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+          <h2 class="text-xl font-bold mb-4">Logros</h2>
+          <div class="grid grid-cols-2 gap-4">
+            <%= render partial: 'logro', collection: @logros %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categorías Dominadas -->
+      <div class="bg-white rounded-lg shadow">
+        <div class="p-6">
+          <h2 class="text-xl font-bold mb-4">Especialidades</h2>
+          <%= render 'especialidades', 
+                     especialidades: @estadisticas.especialidades %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

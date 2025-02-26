@@ -1,0 +1,30 @@
+
+<!-- app/views/admin/monitor/_sesion_activa.html.erb -->
+<div class="bg-gray-700 rounded-lg p-4">
+  <div class="flex justify-between items-start">
+    <div>
+      <h3 class="text-white font-medium">
+        <%= sesion_activa.usuario.nombre_completo %>
+      </h3>
+      <p class="text-gray-400 text-sm">
+        <%= sesion_activa.laboratorio.nombre %>
+      </p>
+    </div>
+    <div class="text-right">
+      <span class="text-gray-400 text-sm">
+        <%= time_ago_in_words(sesion_activa.created_at) %>
+      </span>
+      <div class="mt-1">
+        <%= session_status_badge(sesion_activa.status) %>
+      </div>
+    </div>
+  </div>
+  
+  <div class="mt-2">
+    <div class="w-full bg-gray-600 rounded-full h-2">
+      <div class="bg-blue-500 rounded-full h-2"
+           style="width: <%= sesion_activa.progreso %>%">
+      </div>
+    </div>
+  </div>
+</div>

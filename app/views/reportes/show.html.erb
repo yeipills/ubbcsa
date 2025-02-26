@@ -1,0 +1,57 @@
+<!-- app/views/reportes/show.html.erb -->
+<div class="container mx-auto px-4 py-8">
+  <!-- Header con Filtros de Período -->
+  <div class="mb-8">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold">Análisis de Desempeño</h1>
+      
+      <div class="flex gap-4">
+        <%= link_to "Semana", reportes_path(periodo: 'week'), 
+            class: "px-4 py-2 rounded-lg #{@periodo == 'week' ? 'bg-blue-500 text-white' : 'bg-gray-200'}" %>
+        <%= link_to "Mes", reportes_path(periodo: 'month'), 
+            class: "px-4 py-2 rounded-lg #{@periodo == 'month' ? 'bg-blue-500 text-white' : 'bg-gray-200'}" %>
+        <%= link_to "Año", reportes_path(periodo: 'year'), 
+            class: "px-4 py-2 rounded-lg #{@periodo == 'year' ? 'bg-blue-500 text-white' : 'bg-gray-200'}" %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid Principal -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Métricas Principales -->
+    <div class="lg:col-span-2">
+      <!-- Gráfico de Actividad -->
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-bold mb-4">Actividad</h2>
+        <div class="h-64">
+          <%= render 'shared/activity_chart', data: @metricas.actividad %>
+        </div>
+      </div>
+
+      <!-- Laboratorios Completados -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-bold mb-4">Laboratorios Completados</h2>
+        <div class="space-y-4">
+          <%= render partial: 'laboratorio_completado', 
+                     collection: @laboratorios_completados %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="space-y-6">
+      <!-- Resumen de Métricas -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-bold mb-4">Resumen</h2>
+        <%= render 'resumen_metricas', metricas: @metricas %>
+      </div>
+
+      <!-- Habilidades por Categoría -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-bold mb-4">Habilidades</h2>
+        <%= render 'habilidades_radar', 
+                   habilidades: @habilidades_adquiridas %>
+      </div>
+    </div>
+  </div>
+</div>

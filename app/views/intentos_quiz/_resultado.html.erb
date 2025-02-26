@@ -1,0 +1,46 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <h1 class="text-2xl font-bold mb-6">Resultados del Quiz</h1>
+
+      <div class="bg-gray-50 p-4 rounded-lg mb-6">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-gray-600">Puntaje Total:</p>
+            <p class="text-3xl font-bold text-blue-600">
+              <%= number_to_percentage(@intento.puntaje_total, precision: 1) %>
+            </p>
+          </div>
+          <div>
+            <p class="text-gray-600">Tiempo Utilizado:</p>
+            <p class="text-3xl font-bold text-gray-700">
+              <%= distance_of_time_in_words(@intento.iniciado_en, @intento.finalizado_en) %>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <% @intento.respuestas.includes(:pregunta, :opcion).each do |respuesta| %>
+          <div class="border rounded-lg p-4 <%= respuesta.es_correcta? ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50' %>">
+            <h3 class="font-medium mb-2">
+              <%= respuesta.pregunta.contenido %>
+            </h3>
+            <div class="ml-4">
+              <p class="text-gray-700">Tu respuesta: <%= respuesta.opcion&.contenido || respuesta.respuesta_texto %></p>
+              <p class="text-sm <%= respuesta.es_correcta? ? 'text-green-600' : 'text-red-600' %> mt-2">
+                <%= respuesta.es_correcta? ? '✓ Correcto' : '✗ Incorrecto' %>
+                (<%= respuesta.puntaje_obtenido %>/<%= respuesta.pregunta.puntaje %> puntos)
+              </p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="mt-8">
+        <%= link_to 'Volver a Quizzes', quizzes_path, 
+            class: "bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600" %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,20 @@
+<!-- app/views/reportes/_laboratorio_completado.html.erb -->
+<div class="flex items-center justify-between p-4 border rounded-lg">
+  <div>
+    <h3 class="font-semibold"><%= laboratorio_completado.laboratorio.nombre %></h3>
+    <div class="flex items-center space-x-4 text-sm text-gray-600">
+      <span>
+        <i class="far fa-clock"></i>
+        <%= time_ago_in_words(laboratorio_completado.completed_at) %>
+      </span>
+      <span>
+        <i class="far fa-check-circle"></i>
+        <%= number_to_percentage(laboratorio_completado.score, precision: 0) %>
+      </span>
+    </div>
+  </div>
+  
+  <%= link_to "Ver Detalles", 
+      laboratorio_sesion_path(laboratorio_completado.laboratorio, laboratorio_completado),
+      class: "px-4 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200" %>
+</div>

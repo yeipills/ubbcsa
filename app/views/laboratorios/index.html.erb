@@ -1,0 +1,158 @@
+<!-- app/views/laboratorios/index.html.erb -->
+<div class="min-h-screen bg-gray-900">
+  <!-- Navbar -->
+  <%= content_for :navbar do %>
+    <%= render 'shared/navbar' %>
+  <% end %>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    
+    <!-- 🔹 Encabezado y Filtros -->
+    <div class="mb-8">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-bold text-white">Laboratorios</h1>
+          <p class="mt-2 text-gray-400">Explora y practica tus habilidades en entornos controlados</p>
+        </div>
+
+        <!-- Filtros -->
+        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <select class="bg-gray-800 text-white rounded-md border border-gray-700 px-3 py-2 w-full sm:w-auto focus:border-blue-500 focus:ring-blue-500">
+            <option value="">Todos los tipos</option>
+            <option value="pentesting">Pentesting</option>
+            <option value="forense">Análisis Forense</option>
+            <option value="redes">Redes</option>
+          </select>
+
+          <select class="bg-gray-800 text-white rounded-md border border-gray-700 px-3 py-2 w-full sm:w-auto focus:border-blue-500 focus:ring-blue-500">
+            <option value="">Todas las dificultades</option>
+            <option value="principiante">Principiante</option>
+            <option value="intermedio">Intermedio</option>
+            <option value="avanzado">Avanzado</option>
+          </select>
+
+          <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 font-medium">
+            Aplicar Filtros
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🔹 Grid de Laboratorios -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+      <% @laboratorios.each do |lab| %>
+        <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-700 hover:border-blue-500 transition-all duration-200">
+          <div class="p-6">
+            <!-- Nivel de dificultad -->
+            <% difficulty_badge_class = case lab.nivel_dificultad
+                 when 'principiante' then 'bg-green-900 text-green-300'
+                 when 'intermedio' then 'bg-yellow-900 text-yellow-300'
+                 else 'bg-red-900 text-red-300'
+               end 
+            %>
+            
+            <!-- Encabezado con título y badge de dificultad -->
+            <div class="flex justify-between items-start mb-4">
+              <h2 class="text-xl font-bold text-white"><%= lab.nombre %></h2>
+              <span class="px-2 py-1 text-xs font-medium rounded-full <%= difficulty_badge_class %>">
+                <%= lab.nivel_dificultad.capitalize %>
+              </span>
+            </div>
+            
+            <!-- Descripción -->
+            <p class="text-gray-400 mb-4 line-clamp-3"><%= lab.descripcion %></p>
+            
+            <!-- Metadatos -->
+            <div class="grid grid-cols-2 gap-2 mb-4 text-sm text-gray-400">
+              <div class="flex items-center">
+                <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span><%= lab.duracion_estimada %> min</span>
+              </div>
+
+              <div class="flex items-center">
+                <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+                </svg>
+                <span><%= lab.tipo.capitalize %></span>
+              </div>
+
+              <div class="flex items-center col-span-2">
+                <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span><%= lab.curso.nombre %></span>
+              </div>
+            </div>
+
+            <!-- Botón de Acción -->
+            <div class="pt-4 border-t border-gray-700">
+              <%= link_to laboratorio_path(lab), 
+                  class: "w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium transition-colors duration-200" do %>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Iniciar Laboratorio
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Estado Vacío -->
+    <% if @laboratorios.empty? %>
+      <div class="bg-gray-800 rounded-lg p-8 text-center border border-gray-700">
+        <svg class="mx-auto h-16 w-16 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+        </svg>
+        <h3 class="mt-4 text-xl font-medium text-white">No hay laboratorios disponibles</h3>
+        <p class="mt-2 text-gray-400">
+          No se encontraron laboratorios que coincidan con los criterios de búsqueda.
+        </p>
+        <div class="mt-6">
+          <%= link_to "Ver todos los laboratorios", laboratorios_path, 
+              class: "px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium inline-flex items-center" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Limpiar filtros
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Paginación (si es necesaria) -->
+    <% if @laboratorios.respond_to?(:total_pages) && @laboratorios.total_pages > 1 %>
+      <div class="mt-8 flex justify-center">
+        <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+          <%= link_to url_for(page: @laboratorios.prev_page), class: "relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700" do %>
+            <span class="sr-only">Anterior</span>
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          <% end %>
+          
+          <% (1..@laboratorios.total_pages).each do |page| %>
+            <% if page == @laboratorios.current_page %>
+              <span class="relative inline-flex items-center px-4 py-2 border border-blue-600 bg-blue-600 text-sm font-medium text-white">
+                <%= page %>
+              </span>
+            <% else %>
+              <%= link_to page, url_for(page: page), class: "relative inline-flex items-center px-4 py-2 border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700" %>
+            <% end %>
+          <% end %>
+          
+          <%= link_to url_for(page: @laboratorios.next_page), class: "relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700" do %>
+            <span class="sr-only">Siguiente</span>
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          <% end %>
+        </nav>
+      </div>
+    <% end %>
+  </div>
+</div>

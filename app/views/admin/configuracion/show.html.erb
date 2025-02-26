@@ -1,0 +1,171 @@
+<!-- app/views/admin/configuracion/show.html.erb -->
+<div class="min-h-screen bg-gray-100">
+  <%= render 'admin/shared/sidebar' %>
+
+  <div class="ml-64 p-8">
+    <h1 class="text-3xl font-bold mb-8">Configuración del Sistema</h1>
+
+    <!-- Tabs de Configuración -->
+    <div class="mb-8">
+      <nav class="flex space-x-4" aria-label="Tabs">
+        <button class="px-4 py-2 text-sm font-medium rounded-lg 
+                       bg-blue-500 text-white" 
+                data-tab="general">
+          General
+        </button>
+        <button class="px-4 py-2 text-sm font-medium rounded-lg 
+                       bg-gray-200 hover:bg-gray-300" 
+                data-tab="limites">
+          Límites del Sistema
+        </button>
+        <button class="px-4 py-2 text-sm font-medium rounded-lg 
+                       bg-gray-200 hover:bg-gray-300" 
+                data-tab="notificaciones">
+          Notificaciones
+        </button>
+        <button class="px-4 py-2 text-sm font-medium rounded-lg 
+                       bg-gray-200 hover:bg-gray-300" 
+                data-tab="backups">
+          Backups
+        </button>
+      </nav>
+    </div>
+
+    <!-- Contenido de las Tabs -->
+    <div class="space-y-6">
+      <!-- Configuración General -->
+      <div class="tab-content" id="general">
+        <div class="bg-white rounded-lg shadow p-6">
+          <%= form_with model: @configuracion, url: admin_configuracion_path, class: "space-y-6" do |f| %>
+            <div class="grid grid-cols-1 gap-6">
+              <div>
+                <h3 class="text-lg font-medium mb-4">Configuración General</h3>
+                
+                <div class="space-y-4">
+                  <div>
+                    <%= f.label :nombre_sistema, class: "block text-sm font-medium text-gray-700" %>
+                    <%= f.text_field :nombre_sistema, 
+                        class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+                  </div>
+
+                  <div>
+                    <%= f.label :descripcion_sistema, class: "block text-sm font-medium text-gray-700" %>
+                    <%= f.text_area :descripcion_sistema, rows: 3,
+                        class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+                  </div>
+
+                  <div>
+                    <%= f.label :zona_horaria, class: "block text-sm font-medium text-gray-700" %>
+                    <%= f.time_zone_select :zona_horaria, nil, {},
+                        class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="text-lg font-medium mb-4">Seguridad</h3>
+                
+                <div class="space-y-4">
+                  <div>
+                    <%= f.label :intentos_maximos_login, class: "block text-sm font-medium text-gray-700" %>
+                    <%= f.number_field :intentos_maximos_login,
+                        class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+                  </div>
+
+                  <div>
+                    <%= f.label :tiempo_sesion_minutos, class: "block text-sm font-medium text-gray-700" %>
+                    <%= f.number_field :tiempo_sesion_minutos,
+                        class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+                  </div>
+
+                  <div class="flex items-center">
+                    <%= f.check_box :requiere_2fa, 
+                        class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+                    <%= f.label :requiere_2fa, "Requerir autenticación de dos factores",
+                        class: "ml-2 block text-sm text-gray-900" %>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end">
+              <%= f.submit "Guardar Cambios",
+                  class: "px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Límites del Sistema -->
+      <div class="tab-content hidden" id="limites">
+        <div class="bg-white rounded-lg shadow p-6">
+          <%= form_with model: @limites_sistema, url: admin_system_limits_path, class: "space-y-6" do |f| %>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 class="text-lg font-medium mb-4">Recursos por Laboratorio</h3>
+                
+                <div class="space-y-4">
+                  <div>
+                    <%= f.label :max_cpu_usage, "Uso máximo de CPU (%)", 
+                        class: "block text-sm font-medium text-gray-700" %>
+                    <%= f.number_field :max_cpu_usage,
+                        class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+                  </div>
+
+                  <div>
+                    <%= f.label :max_memory_usage, "Uso máximo de memoria (MB)", 
+                        class: "block text-sm font-medium text-gray-700" %>
+                    <%= f.number_field :max_memory_usage,
+                        class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+                  </div>
+
+                  <div>
+                    <%= f.label :max_storage, "Almacenamiento máximo (GB)", 
+                        class: "block text-sm font-medium text-gray-700" %>
+                    <%= f.number_field :max_storage,
+                        class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 class="text-lg font-medium mb-4">Límites de Usuario</h3>
+                
+                <div class="space-y-4">
+                  <div>
+                    <%= f.label :max_concurrent_sessions, "Sesiones concurrentes máximas", 
+                        class: "block text-sm font-medium text-gray-700" %>
+                    <%= f.number_field :max_concurrent_sessions,
+                        class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+                  </div>
+
+                  <div>
+                    <%= f.label :session_timeout_minutes, "Tiempo máximo de sesión (minutos)", 
+                        class: "block text-sm font-medium text-gray-700" %>
+                    <%= f.number_field :session_timeout_minutes,
+                        class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end">
+              <%= f.submit "Guardar Límites",
+                  class: "px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Notificaciones -->
+      <div class="tab-content hidden" id="notificaciones">
+        <!-- Similar structure for notification settings -->
+      </div>
+
+      <!-- Backups -->
+      <div class="tab-content hidden" id="backups">
+        <!-- Similar structure for backup settings -->
+      </div>
+    </div>
+  </div>
+</div>

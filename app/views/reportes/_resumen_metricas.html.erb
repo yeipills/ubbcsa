@@ -1,0 +1,26 @@
+<!-- app/views/reportes/_resumen_metricas.html.erb -->
+<div class="space-y-6">
+  <div class="flex justify-between items-center">
+    <div class="text-gray-600">Tiempo Total</div>
+    <div class="font-semibold"><%= format_duration(metricas.tiempo_total) %></div>
+  </div>
+  
+  <div class="flex justify-between items-center">
+    <div class="text-gray-600">Labs Completados</div>
+    <div class="font-semibold"><%= metricas.total_completados %></div>
+  </div>
+  
+  <div class="flex justify-between items-center">
+    <div class="text-gray-600">Promedio de Finalización</div>
+    <div class="font-semibold">
+      <%= number_to_percentage(metricas.tasa_finalizacion, precision: 1) %>
+    </div>
+  </div>
+  
+  <div class="flex justify-between items-center">
+    <div class="text-gray-600">Precisión Promedio</div>
+    <div class="font-semibold">
+      <%= number_to_percentage(metricas.precision_promedio, precision: 1) %>
+    </div>
+  </div>
+</div>

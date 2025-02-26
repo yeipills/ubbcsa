@@ -1,0 +1,62 @@
+<%= form_with(model: curso, local: true, class: "space-y-6") do |f| %>
+  <% if curso.errors.any? %>
+    <div class="bg-red-500 bg-opacity-10 border-l-4 border-red-500 text-red-100 p-4 rounded-md mb-6" role="alert">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h2 class="text-sm font-medium text-red-200"><%= pluralize(curso.errors.count, "error") %> impidieron guardar este curso:</h2>
+          <ul class="mt-1 list-disc list-inside text-sm text-red-200">
+            <% curso.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <fieldset class="p-4 bg-gray-900 rounded-lg border border-gray-700">
+    <legend class="px-2 text-sm font-medium text-gray-300">Información básica</legend>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="space-y-2">
+        <%= f.label :nombre, class: "block text-sm font-medium text-gray-300" %>
+        <%= f.text_field :nombre, class: "mt-1 block w-full rounded-md border-gray-700 bg-gray-900 text-white focus:border-blue-500 focus:ring-blue-500 placeholder-gray-500", placeholder: "Nombre del curso" %>
+        <p class="text-xs text-gray-500">Ej: Programación Avanzada</p>
+      </div>
+
+      <div class="space-y-2">
+        <%= f.label :codigo, class: "block text-sm font-medium text-gray-300" %>
+        <%= f.text_field :codigo, class: "mt-1 block w-full rounded-md border-gray-700 bg-gray-900 text-white focus:border-blue-500 focus:ring-blue-500 placeholder-gray-500", placeholder: "Código único" %>
+        <p class="text-xs text-gray-500">Ej: CS101</p>
+      </div>
+    </div>
+  </fieldset>
+
+  <div class="space-y-2">
+    <%= f.label :descripcion, class: "block text-sm font-medium text-gray-300" %>
+    <%= f.text_area :descripcion, rows: 4, class: "mt-1 block w-full rounded-md border-gray-700 bg-gray-900 text-white focus:border-blue-500 focus:ring-blue-500 placeholder-gray-500", placeholder: "Describe el contenido y objetivos del curso..." %>
+    <p class="text-xs text-gray-500">Una descripción clara ayudará a los estudiantes a entender el contenido del curso</p>
+  </div>
+  
+  <div class="space-y-2">
+    <label class="flex items-center">
+      <%= f.check_box :activo, class: "h-4 w-4 rounded border-gray-700 bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-900" %>
+      <span class="ml-2 text-sm text-gray-300">Curso activo</span>
+    </label>
+  </div>
+
+  <div class="flex justify-between space-x-3 pt-4">
+    <%= link_to "Cancelar", cursos_path, class: "inline-flex items-center px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500" %>
+    <%= f.button type: "submit", class: "inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500" do %>
+      <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+      </svg>
+      <%= curso.persisted? ? "Actualizar curso" : "Crear curso" %>
+    <% end %>
+  </div>
+<% end %>

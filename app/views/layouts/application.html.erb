@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html class="h-full">
+<head>
+  <title>UBB CSA - <%= content_for?(:title) ? yield(:title) : "Autenticación" %></title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= javascript_importmap_tags %>
+</head>
+<body class="h-full antialiased">
+  <% unless controller_name == 'home' ||
+    (controller_name == 'sessions' || controller_name == 'registrations') && controller.devise_controller? %>
+    <%= render "shared/navbar" %>
+  <% end %>
+  
+  <% unless content_for?(:navbar) %>
+    <%= render 'shared/navbar' %>
+  <% end %>
+  
+  <%= render "shared/flash" %>
+  
+  <main>
+    <%= yield %>
+  </main>
+
+  <%# Script para manejar las notificaciones %>
+  <script>
+    document.addEventListener('turbo:load', () => {
+      // Función para cerrar una notificación
+      function closeNotification(notification) {
+        notification.classList.add('animate-fade-out');
+        setTimeout(() => notification.remove(), 300);
+      }
+
+      // Manejador de click para los botones de cerrar
+      document.querySelectorAll('.flash-message button').forEach(button => {
+        button.addEventListener('click', () => {
+          const notification = button.closest('.flash-message');
+          closeNotification(notification);
+        });
+      });
+
+      // Auto-cerrar notificaciones después de 5 segundos
+      document.querySelectorAll('.flash-message').forEach(notification => {
+        setTimeout(() => {
+          if (notification && notification.isConnected) {
+            closeNotification(notification);
+          }
+        }, 5000);
+      });
+    });
+  </script>
+</body>
+</html>

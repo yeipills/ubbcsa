@@ -1,0 +1,108 @@
+<!-- app/views/admin/monitor/index.html.erb -->
+<div class="min-h-screen bg-gray-900">
+  <%= render 'admin/shared/sidebar' %>
+
+  <div class="ml-64 p-8">
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-2xl font-bold text-white">Monitor del Sistema</h1>
+      
+      <div class="flex items-center space-x-4">
+        <div class="px-4 py-2 bg-green-500 text-white rounded-lg">
+          <span class="animate-pulse">●</span>
+          Sistema Activo
+        </div>
+        
+        <button class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
+                data-action="click->monitor#refreshData">
+          <i class="fas fa-sync-alt mr-2"></i>Actualizar
+        </button>
+      </div>
+    </div>
+
+    <!-- Grid Principal -->
+    <div class="grid grid-cols-12 gap-6">
+      <!-- Métricas del Sistema -->
+      <div class="col-span-8">
+        <div class="grid grid-cols-3 gap-4 mb-6">
+          <%= render 'metric_card', 
+              title: 'CPU Usage',
+              value: @metricas_sistema.cpu_usage,
+              unit: '%',
+              trend: @metricas_sistema.cpu_trend,
+              color: cpu_status_color(@metricas_sistema.cpu_usage) %>
+          
+          <%= render 'metric_card',
+              title: 'Memory Usage',
+              value: @metricas_sistema.memory_usage,
+              unit: '%',
+              trend: @metricas_sistema.memory_trend,
+              color: memory_status_color(@metricas_sistema.memory_usage) %>
+          
+          <%= render 'metric_card',
+              title: 'Network Traffic',
+              value: @metricas_sistema.network_traffic,
+              unit: 'MB/s',
+              trend: @metricas_sistema.network_trend,
+              color: network_status_color(@metricas_sistema.network_traffic) %>
+        </div>
+
+        <!-- Gráficos de Rendimiento -->
+        <div class="bg-gray-800 rounded-lg p-6 mb-6">
+          <h2 class="text-xl font-bold text-white mb-4">Rendimiento del Sistema</h2>
+          <div class="h-96" data-controller="performance-chart">
+            <canvas id="performanceChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-span-4 space-y-6">
+        <!-- Sesiones Activas -->
+        <div class="bg-gray-800 rounded-lg p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-white">Sesiones Activas</h2>
+            <span class="px-3 py-1 bg-blue-500 text-white rounded-full text-sm">
+              <%= @sesiones_activas.count %> activas
+            </span>
+          </div>
+          
+          <div class="space-y-4 max-h-96 overflow-y-auto">
+            <%= render partial: 'sesion_activa', 
+                       collection: @sesiones_activas %>
+          </div>
+        </div>
+
+        <!-- Alertas en Tiempo Real -->
+        <div class="bg-gray-800 rounded-lg p-6">
+          <h2 class="text-xl font-bold text-white mb-4">Alertas</h2>
+          <div class="space-y-4 max-h-96 overflow-y-auto">
+            <%= render partial: 'alerta', 
+                       collection: @alertas_recientes %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logs del Sistema -->
+    <div class="mt-6 bg-gray-800 rounded-lg p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-white">Logs del Sistema</h2>
+        <div class="flex items-center space-x-4">
+          <select class="bg-gray-700 text-white rounded px-3 py-1">
+            <option>Todos los niveles</option>
+            <option>Error</option>
+            <option>Warning</option>
+            <option>Info</option>
+          </select>
+          <button class="text-gray-400 hover:text-white">
+            <i class="fas fa-download"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="font-mono text-sm text-gray-300 bg-gray-900 p-4 rounded-lg h-64 overflow-y-auto">
+        <%= render 'system_logs' %>
+      </div>
+    </div>
+  </div>
+</div>

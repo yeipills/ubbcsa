@@ -1,0 +1,21 @@
+<div class="flex items-center justify-between py-2 px-4 hover:bg-gray-50 rounded">
+  <div class="flex items-center space-x-3">
+    <span class="text-gray-500"><%= opcion.orden %>.</span>
+    <span class="<%= opcion.es_correcta? ? 'text-green-600 font-medium' : 'text-gray-700' %>">
+      <%= opcion.contenido %>
+    </span>
+  </div>
+  
+  <div class="flex space-x-2">
+    <%= link_to edit_quiz_pregunta_opcion_path(opcion.pregunta, opcion), 
+        class: "text-blue-600 hover:text-blue-800" do %>
+      <i class="fas fa-edit"></i>
+    <% end %>
+    <%= button_to quiz_pregunta_opcion_path(opcion.pregunta, opcion), 
+        method: :delete,
+        class: "text-red-600 hover:text-red-800",
+        data: { confirm: "¿Estás seguro?" } do %>
+      <i class="fas fa-trash"></i>
+    <% end %>
+  </div>
+</div>

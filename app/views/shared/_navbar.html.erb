@@ -1,0 +1,219 @@
+<%# app/views/shared/_navbar.html.erb %>
+<nav class="sticky top-0 z-20 <%= current_page?(root_path) ? 'bg-transparent' : 'bg-gray-900/95 backdrop-blur-sm border-b border-gray-800' %> transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16 items-center">
+      
+      <%# Logo con efecto hover %>
+      <%= link_to root_path, class: "flex items-center space-x-3 hover:opacity-80 transition-opacity duration-200" do %>
+        <div class="flex items-center justify-center h-10 w-10 bg-blue-600 rounded-lg shadow-lg">
+          <span class="text-lg font-bold text-white">UBB</span>
+        </div>
+        <span class="text-xl font-bold text-white">CSA</span>
+      <% end %>
+
+      <%# Menú Desktop %>
+      <div class="hidden md:flex items-center space-x-6">
+        <% if usuario_signed_in? %>
+          <%# Enlaces principales con indicadores mejorados %>
+          <div class="flex items-center space-x-5">
+            <%= link_to dashboard_path, 
+                class: "text-gray-300 hover:text-white text-sm font-medium transition-colors duration-200 relative #{current_page?(dashboard_path) ? 'text-white' : ''}" do %>
+              Dashboard
+              <% if current_page?(dashboard_path) %>
+                <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-blue-500 rounded-full"></span>
+              <% end %>
+            <% end %>
+
+            <%= link_to cursos_path, 
+                class: "text-gray-300 hover:text-white text-sm font-medium transition-colors duration-200 relative #{controller_name == 'cursos' ? 'text-white' : ''}" do %>
+              Cursos
+              <% if controller_name == 'cursos' %>
+                <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-blue-500 rounded-full"></span>
+              <% end %>
+            <% end %>
+
+            <%= link_to laboratorios_path, 
+                class: "text-gray-300 hover:text-white text-sm font-medium transition-colors duration-200 relative #{controller_name == 'laboratorios' ? 'text-white' : ''}" do %>
+              Laboratorios
+              <% if controller_name == 'laboratorios' %>
+                <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-blue-500 rounded-full"></span>
+              <% end %>
+            <% end %>
+          </div>
+
+          <%# Perfil usuario con hover mejorado %>
+          <div class="flex items-center space-x-3 bg-gray-800 px-4 py-2 rounded-lg border border-transparent hover:border-gray-700 transition-all duration-200">
+            <div class="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
+              <span class="text-sm font-medium text-white">
+                <%= current_usuario.email[0].upcase %>
+              </span>
+            </div>
+            <span class="text-sm text-gray-300">
+              <%= current_usuario.email %>
+            </span>
+          </div>
+
+          <%# Cerrar sesión con efecto hover mejorado %>
+          <%= button_to destroy_usuario_session_path, 
+              method: :delete,
+              class: "px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 shadow-sm hover:shadow transition-all duration-200 flex items-center",
+              data: { turbo: false } do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Cerrar sesión
+          <% end %>
+
+        <% else %>
+          <%# Links de autenticación mejorados %>
+          <div class="flex items-center space-x-4">
+            <%= link_to new_usuario_session_path,
+                class: "text-gray-300 hover:text-white text-sm font-medium transition-colors duration-200 flex items-center" do %>
+              <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
+              Iniciar sesión
+            <% end %>
+                
+            <%= link_to new_usuario_registration_path,
+                class: "px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-sm hover:shadow transition-all duration-200 flex items-center" do %>
+              <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+              Registrarse
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <%# Menú Móvil Toggle mejorado %>
+      <div class="md:hidden">
+        <button id="mobile-menu-button" class="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 transition-all duration-200">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <%# Menú Móvil Expandible con márgenes ajustados %>
+  <div id="mobile-menu" class="hidden md:hidden bg-gray-900 border-t border-gray-800 py-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="space-y-4 animate-fade-in-down shadow-lg">
+        <% if usuario_signed_in? %>
+          <%# Enlaces móviles con indicadores de navegación %>
+          <div class="space-y-3 mb-4">
+            <%= link_to dashboard_path, 
+                class: "block py-2 px-3 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm font-medium transition-colors duration-200 #{current_page?(dashboard_path) ? 'text-white bg-gray-800 border-l-2 border-blue-500 pl-4' : ''}" do %>
+              <div class="flex items-center">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Dashboard
+              </div>
+            <% end %>
+
+            <%= link_to cursos_path, 
+                class: "block py-2 px-3 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm font-medium transition-colors duration-200 #{controller_name == 'cursos' ? 'text-white bg-gray-800 border-l-2 border-blue-500 pl-4' : ''}" do %>
+              <div class="flex items-center">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                Cursos
+              </div>
+            <% end %>
+
+            <%= link_to laboratorios_path, 
+                class: "block py-2 px-3 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm font-medium transition-colors duration-200 #{controller_name == 'laboratorios' ? 'text-white bg-gray-800 border-l-2 border-blue-500 pl-4' : ''}" do %>
+              <div class="flex items-center">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+                Laboratorios
+              </div>
+            <% end %>
+          </div>
+          
+          <!-- Perfil en móvil -->
+          <div class="flex items-center space-x-3 bg-gray-800 px-4 py-3 rounded-lg mb-4 border border-gray-700">
+            <div class="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
+              <span class="text-sm font-medium text-white">
+                <%= current_usuario.email[0].upcase %>
+              </span>
+            </div>
+            <span class="text-sm text-gray-300 truncate">
+              <%= current_usuario.email %>
+            </span>
+          </div>
+          
+          <!-- Botón de cerrar sesión en móvil -->
+          <%= button_to destroy_usuario_session_path, 
+              method: :delete,
+              class: "w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-all duration-200 shadow-sm",
+              data: { turbo: false } do %>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Cerrar sesión
+          <% end %>
+
+        <% else %>
+          <!-- Enlaces móviles para usuarios no autenticados -->
+          <div class="space-y-3">
+            <%= link_to new_usuario_session_path,
+                class: "w-full flex items-center px-4 py-3 text-sm font-medium text-white bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 transition-all duration-200" do %>
+              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
+              Iniciar sesión
+            <% end %>
+                
+            <%= link_to new_usuario_registration_path,
+                class: "w-full flex items-center px-4 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all duration-200 mt-3 shadow-sm" do %>
+              <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+              Registrarse
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<style>
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-fade-in-down {
+    animation: fadeInDown 0.3s ease-out;
+  }
+</style>
+
+<%= javascript_tag do %>
+  document.addEventListener("DOMContentLoaded", function() {
+    const menuButton = document.getElementById("mobile-menu-button");
+    const mobileMenu = document.getElementById("mobile-menu");
+
+    menuButton.addEventListener("click", function() {
+      mobileMenu.classList.toggle("hidden");
+    });
+    
+    // Ocultar menú al hacer clic fuera
+    document.addEventListener("click", function(event) {
+      if (!menuButton.contains(event.target) && !mobileMenu.contains(event.target) && !mobileMenu.classList.contains("hidden")) {
+        mobileMenu.classList.add("hidden");
+      }
+    });
+  });
+<% end %>

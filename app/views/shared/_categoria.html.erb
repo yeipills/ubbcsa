@@ -1,0 +1,10 @@
+<!-- app/views/shared/_categoria.html.erb -->
+<div class="bg-white rounded-lg shadow p-6 text-center hover:shadow-lg transition-shadow">
+  <div class="mb-4">
+    <%= categoria_icon(categoria) %>
+  </div>
+  <h4 class="text-lg font-semibold mb-2"><%= categoria %></h4>
+  <p class="text-gray-600">
+    <%= pluralize(Laboratorio.where(categoria: categoria).count, 'laboratorio') %>
+  </p>
+</div>

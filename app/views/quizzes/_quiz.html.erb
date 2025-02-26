@@ -1,0 +1,27 @@
+<div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+  <div class="flex justify-between items-start">
+    <div>
+      <h3 class="text-lg font-semibold text-gray-900"><%= quiz.titulo %></h3>
+      <p class="text-sm text-gray-500 mt-1"><%= truncate(quiz.descripcion, length: 100) %></p>
+    </div>
+    <span class="px-2 py-1 text-xs font-medium rounded-full <%= estado_quiz_badge(quiz.estado) %>">
+      <%= quiz.estado.titleize %>
+    </span>
+  </div>
+  
+  <div class="mt-4 text-sm text-gray-600">
+    <div class="flex items-center mb-2">
+      <i class="far fa-clock mr-2"></i>
+      <%= quiz.tiempo_limite %> minutos
+    </div>
+    <div class="flex items-center">
+      <i class="far fa-question-circle mr-2"></i>
+      <%= quiz.preguntas.count %> preguntas
+    </div>
+  </div>
+
+  <div class="mt-4 flex justify-end">
+    <%= link_to "Ver detalles", quiz_path(quiz), 
+        class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200" %>
+  </div>
+</div>

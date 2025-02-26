@@ -1,0 +1,30 @@
+<div class="fixed bottom-4 right-4 max-w-sm bg-white rounded-lg shadow-lg border-l-4 p-4"
+     data-controller="alert"
+     data-alert-auto-dismiss-value="true"
+     data-alert-dismiss-after-value="5000">
+  <div class="flex items-start">
+    <div class="flex-shrink-0">
+      <% if alert_type == 'success' %>
+        <i class="fas fa-check-circle text-green-400"></i>
+      <% elsif alert_type == 'error' %>
+        <i class="fas fa-exclamation-circle text-red-400"></i>
+      <% else %>
+        <i class="fas fa-info-circle text-blue-400"></i>
+      <% end %>
+    </div>
+    <div class="ml-3 w-0 flex-1 pt-0.5">
+      <p class="text-sm font-medium text-gray-900">
+        <%= title %>
+      </p>
+      <p class="mt-1 text-sm text-gray-500">
+        <%= message %>
+      </p>
+    </div>
+    <div class="ml-4 flex-shrink-0 flex">
+      <button class="inline-flex text-gray-400 hover:text-gray-500"
+              data-action="alert#dismiss">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+</div>

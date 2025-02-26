@@ -1,0 +1,51 @@
+<!-- app/views/admin/reportes/_rendimiento_usuarios_table.html.erb -->
+<table class="min-w-full divide-y divide-gray-200">
+  <thead>
+    <tr>
+      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+        Usuario
+      </th>
+      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+        Labs Completados
+      </th>
+      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+        Tiempo Total
+      </th>
+      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+        Tasa de Éxito
+      </th>
+    </tr>
+  </thead>
+  <tbody class="divide-y divide-gray-200">
+    <% usuarios.each do |usuario| %>
+      <tr>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 h-10 w-10">
+              <div class="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
+                <i class="fas fa-user text-gray-600"></i>
+              </div>
+            </div>
+            <div class="ml-4">
+              <div class="text-sm font-medium text-gray-900">
+                <%= usuario.nombre_completo %>
+              </div>
+              <div class="text-sm text-gray-500">
+                <%= usuario.email %>
+              </div>
+            </div>
+          </div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <%= usuario.laboratorios_completados %>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <%= format_duration(usuario.tiempo_total) %>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          <%= number_to_percentage(usuario.tasa_exito, precision: 1) %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

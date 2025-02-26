@@ -1,0 +1,77 @@
+<div class="bg-white rounded-lg shadow p-6 mt-4">
+  <h2 class="text-xl font-bold mb-4">Documentación del Laboratorio</h2>
+
+  <div class="space-y-4">
+    <% case @laboratorio.tipo %>
+    <% when 'pentesting' %>
+      <div class="prose">
+        <h3>Guía de Pentesting</h3>
+        <p>Este laboratorio está diseñado para practicar:</p>
+        <ul>
+          <li>Reconocimiento (nmap, dirb)</li>
+          <li>Explotación (metasploit)</li>
+          <li>Post-explotación</li>
+        </ul>
+
+        <h4>Comandos Útiles</h4>
+        <pre><code>
+# Escaneo básico
+nmap -sV target_ip
+
+# Búsqueda de directorios web
+dirb http://target_ip
+
+# Iniciar Metasploit
+msfconsole
+        </code></pre>
+      </div>
+
+    <% when 'forense' %>
+      <div class="prose">
+        <h3>Guía de Análisis Forense</h3>
+        <p>Herramientas disponibles:</p>
+        <ul>
+          <li>Autopsy</li>
+          <li>Volatility</li>
+          <li>TestDisk</li>
+        </ul>
+
+        <h4>Procedimiento Recomendado</h4>
+        <ol>
+          <li>Crear copia de trabajo</li>
+          <li>Verificar hashes</li>
+          <li>Análisis de línea temporal</li>
+          <li>Recuperación de archivos</li>
+        </ol>
+      </div>
+
+    <% when 'redes' %>
+      <div class="prose">
+        <h3>Guía de Análisis de Redes</h3>
+        <p>Prácticas disponibles:</p>
+        <ul>
+          <li>Captura de tráfico</li>
+          <li>Análisis de protocolos</li>
+          <li>Detección de anomalías</li>
+        </ul>
+
+        <h4>Comandos Wireshark</h4>
+        <pre><code>
+# Filtros útiles
+http
+tcp.port == 80
+ip.addr == target_ip
+        </code></pre>
+      </div>
+    <% end %>
+
+    <div class="mt-4 p-4 bg-yellow-50 rounded-lg">
+      <h4 class="font-semibold text-yellow-800">Consideraciones de Seguridad</h4>
+      <ul class="list-disc ml-4 text-yellow-700">
+        <li>No realizar ataques fuera del entorno controlado</li>
+        <li>Mantener la confidencialidad de los hallazgos</li>
+        <li>Reportar cualquier problema de seguridad al profesor</li>
+      </ul>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,55 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold"><%= @quiz.titulo %></h1>
+        <div class="flex items-center space-x-4">
+          <div data-controller="quiz-timer" 
+               data-quiz-timer-tiempo-value="<%= @quiz.tiempo_limite * 60 %>"
+               data-quiz-timer-intento-id-value="<%= @intento.id %>">
+            <span class="text-lg font-mono" data-quiz-timer-target="timer">--:--</span>
+          </div>
+          <%= button_to 'Finalizar Intento', 
+              finalizar_quiz_intento_path(@quiz, @intento),
+              method: :post,
+              class: "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600",
+              data: { confirm: "¿Estás seguro de que quieres finalizar?" } %>
+        </div>
+      </div>
+
+      <%= form_with(model: [@quiz, @intento], local: true, class: "space-y-8") do |f| %>
+        <% @preguntas.each do |pregunta| %>
+          <div class="bg-gray-50 p-6 rounded-lg">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">
+              <%= pregunta.orden %>. <%= pregunta.contenido %>
+            </h3>
+
+            <div class="space-y-3">
+              <% case pregunta.tipo %>
+              <% when 'opcion_multiple' %>
+                <% pregunta.opciones.each do |opcion| %>
+                  <label class="flex items-center space-x-3 p-2 hover:bg-gray-100 rounded cursor-pointer">
+                    <%= radio_button_tag "respuesta[#{pregunta.id}]", opcion.id, 
+                        @respuestas[pregunta.id]&.opcion_id == opcion.id,
+                        class: "form-radio" %>
+                    <span class="text-gray-700"><%= opcion.contenido %></span>
+                  </label>
+                <% end %>
+              <% when 'respuesta_corta' %>
+                <%= text_area_tag "respuesta[#{pregunta.id}]", 
+                    @respuestas[pregunta.id]&.respuesta_texto,
+                    class: "w-full rounded-md border-gray-300 shadow-sm",
+                    rows: 3 %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="flex justify-end">
+          <%= f.submit 'Guardar Respuestas', 
+              class: "bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

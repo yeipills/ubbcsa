@@ -1,0 +1,11 @@
+<!-- app/views/laboratorios/_objetivo.html.erb -->
+<div class="flex items-center space-x-3">
+  <div class="flex-shrink-0">
+    <% if objetivo.completado?(@sesion) %>
+      <i class="fas fa-check-circle text-green-500"></i>
+    <% else %>
+      <i class="far fa-circle text-gray-400"></i>
+    <% end %>
+  </div>
+  <p class="text-gray-700"><%= objetivo.descripcion %></p>
+</div>

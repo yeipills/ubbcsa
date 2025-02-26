@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    depends_on:
+      - wetty
+
+  wetty:
+      build:
+        context: .
+        dockerfile: Dockerfile.wetty
+      ports:
+        - "3001:3001"
+      volumes:
+        - ./start.sh:/start.sh
+      environment:
+        - SSH_AUTH=password
+
+networks:
+  default:
+    driver: bridge

@@ -1,0 +1,21 @@
+<div class="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4">
+  <div class="container mx-auto flex justify-between items-center">
+    <button class="text-blue-600 hover:text-blue-800"
+            data-action="click->quiz#previousQuestion"
+            <%= 'disabled' if @current_pregunta == @quiz.preguntas.first %>>
+      <i class="fas fa-chevron-left mr-2"></i>
+      Anterior
+    </button>
+    
+    <div class="text-gray-600">
+      Pregunta <%= @current_pregunta.orden %> de <%= @quiz.preguntas.count %>
+    </div>
+    
+    <button class="text-blue-600 hover:text-blue-800"
+            data-action="click->quiz#nextQuestion"
+            <%= 'disabled' if @current_pregunta == @quiz.preguntas.last %>>
+      Siguiente
+      <i class="fas fa-chevron-right ml-2"></i>
+    </button>
+  </div>
+</div>

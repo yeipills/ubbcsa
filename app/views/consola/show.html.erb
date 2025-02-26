@@ -1,0 +1,89 @@
+<!-- app/views/consolas/show.html.erb -->
+<div class="min-h-screen bg-gray-900">
+    <%= content_for :navbar do %>
+    <%= render 'shared/navbar' %>
+  <% end %>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Encabezado -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-white">
+          <%= @sesion_laboratorio.laboratorio.nombre %>
+        </h1>
+        <p class="text-gray-400">
+          <%= @sesion_laboratorio.laboratorio.tipo.titleize %>
+        </p>
+      </div>
+      <div class="flex items-center space-x-4">
+        <span class="px-3 py-1 rounded-full text-sm
+                   <%= @sesion_laboratorio.activa? ? 'bg-green-500' : 'bg-red-500' %> text-white">
+          <%= @sesion_laboratorio.estado.titleize %>
+        </span>
+        <span class="text-gray-400" data-controller="timer">
+          Tiempo activo: <span data-timer-target="display">00:00:00</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Terminal y Panel Lateral -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <!-- Terminal -->
+        <div class="h-full w-full bg-[#1a1b26] relative" data-controller="wetty">
+          <iframe 
+            src="<%= terminal_sesion_laboratorio_consola_path(@sesion) %>"
+            class="w-full h-full border-0"
+            data-wetty-target="terminal">
+          </iframe>
+        </div>
+
+      <!-- Panel Lateral -->
+      <div class="space-y-4">
+        <!-- Recursos -->
+        <div class="bg-gray-800 rounded-lg p-4">
+          <h3 class="text-lg font-medium text-white mb-4">Recursos</h3>
+          <div class="space-y-4" data-controller="metrics">
+            <div class="flex justify-between text-gray-400">
+              <span>CPU</span>
+              <span data-metrics-target="cpu">0%</span>
+            </div>
+            <div class="flex justify-between text-gray-400">
+              <span>Memoria</span>
+              <span data-metrics-target="memory">0%</span>
+            </div>
+            <div class="flex justify-between text-gray-400">
+              <span>Red</span>
+              <span data-metrics-target="network">0 KB/s</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ejercicios -->
+        <div class="bg-gray-800 rounded-lg p-4">
+          <h3 class="text-lg font-medium text-white mb-4">Ejercicios</h3>
+          <div class="space-y-2">
+            <% @ejercicios.each do |ejercicio| %>
+              <div class="bg-gray-700 rounded p-3">
+                <h4 class="text-white font-medium"><%= ejercicio.titulo %></h4>
+                <p class="text-gray-400 text-sm"><%= ejercicio.descripcion %></p>
+                <div class="mt-2">
+                  <%= button_to 'Verificar',
+                      verificar_ejercicio_path(ejercicio),
+                      class: 'text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600' %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Historial -->
+        <div class="bg-gray-800 rounded-lg p-4">
+          <h3 class="text-lg font-medium text-white mb-4">Historial</h3>
+          <div class="h-48 overflow-y-auto text-gray-400 text-sm"
+               data-controller="history">
+            <!-- Los comandos se agregarán dinámicamente aquí -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

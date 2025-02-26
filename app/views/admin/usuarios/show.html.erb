@@ -1,0 +1,101 @@
+<!-- app/views/admin/usuarios/show.html.erb -->
+<div class="min-h-screen bg-gray-100">
+  <%= render 'admin/shared/sidebar' %>
+
+  <div class="ml-64 p-8">
+    <!-- Header -->
+    <div class="flex justify-between items-start mb-8">
+      <div>
+        <h1 class="text-3xl font-bold mb-2"><%= @usuario.nombre_completo %></h1>
+        <p class="text-gray-600"><%= @usuario.email %></p>
+      </div>
+      
+      <div class="flex gap-4">
+        <%= link_to edit_admin_usuario_path(@usuario),
+            class: "px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600" do %>
+          <i class="fas fa-edit mr-2"></i>Editar
+        <% end %>
+        
+        <%= button_to admin_usuario_path(@usuario),
+            method: :delete,
+            class: "px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600",
+            data: { confirm: "¿Estás seguro?" } do %>
+          <i class="fas fa-trash mr-2"></i>Eliminar
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Grid Principal -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Sección Principal -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Actividad Reciente -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Actividad Reciente</h2>
+          <div class="space-y-4">
+            <%= render partial: 'actividad', 
+                       collection: @actividad_reciente %>
+          </div>
+        </div>
+
+        <!-- Gráfico de Progreso -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Progreso en el Tiempo</h2>
+          <div class="h-96">
+            <%= render 'admin/shared/progress_chart',
+                data: @estadisticas.progreso_temporal %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+        <!-- Detalles del Usuario -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Detalles</h2>
+          <dl class="space-y-4">
+            <div>
+              <dt class="text-sm text-gray-600">Rol</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                <%= @usuario.rol.titleize %>
+              </dd>
+            </div>
+            
+            <div>
+              <dt class="text-sm text-gray-600">Estado</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                <span class="px-2 py-1 rounded-full text-xs
+                           <%= @usuario.activo? ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                  <%= @usuario.activo? ? 'Activo' : 'Inactivo' %>
+                </span>
+              </dd>
+            </div>
+            
+            <div>
+              <dt class="text-sm text-gray-600">Fecha de Registro</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                <%= l @usuario.created_at, format: :long %>
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Estadísticas</h2>
+          <%= render 'estadisticas_usuario',
+              stats: @estadisticas %>
+        </div>
+
+        <!-- Logros -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Logros</h2>
+          <div class="grid grid-cols-2 gap-4">
+            <%= render partial: 'logro',
+                collection: @usuario.logros %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

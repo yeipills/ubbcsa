@@ -1,0 +1,49 @@
+<div class="min-h-screen bg-gray-900">
+      <%= content_for :navbar do %>
+    <%= render 'shared/navbar' %>
+  <% end %>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-gray-800 rounded-lg p-6">
+      <h1 class="text-2xl font-bold text-white mb-6">Nuevo Quiz</h1>
+
+      <%= form_with(model: [@curso, @quiz], class: "space-y-6") do |f| %>
+        <div class="grid grid-cols-1 gap-6">
+          <div>
+            <%= f.label :titulo, class: "block text-sm font-medium text-gray-300" %>
+            <%= f.text_field :titulo, class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+          </div>
+
+          <div>
+            <%= f.label :descripcion, class: "block text-sm font-medium text-gray-300" %>
+            <%= f.text_area :descripcion, rows: 3, class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+          </div>
+
+          <div>
+            <%= f.label :laboratorio_id, "Laboratorio", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.collection_select :laboratorio_id, @laboratorios, :id, :nombre, 
+                { prompt: "Seleccione un laboratorio" }, 
+                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <%= f.label :tiempo_limite, "Tiempo límite (minutos)", class: "block text-sm font-medium text-gray-300" %>
+              <%= f.number_field :tiempo_limite, min: 1, class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+            </div>
+
+            <div>
+              <%= f.label :intentos_permitidos, class: "block text-sm font-medium text-gray-300" %>
+              <%= f.number_field :intentos_permitidos, min: 1, class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end space-x-3 mt-6">
+          <%= link_to "Cancelar", curso_path(@curso), class: "px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 rounded-md hover:bg-gray-600" %>
+          <%= f.submit "Crear Quiz", class: "px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-500" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

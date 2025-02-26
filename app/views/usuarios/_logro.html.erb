@@ -1,0 +1,8 @@
+<!-- app/views/usuarios/_logro.html.erb -->
+<div class="text-center p-4 <%= logro.completado? ? 'opacity-100' : 'opacity-50' %>">
+  <div class="mb-2">
+    <i class="<%= logro.icono %> text-2xl <%= logro.completado? ? 'text-yellow-500' : 'text-gray-400' %>"></i>
+  </div>
+  <h3 class="font-medium text-sm"><%= logro.nombre %></h3>
+  <p class="text-xs text-gray-600"><%= logro.descripcion %></p>
+</div>

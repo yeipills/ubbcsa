@@ -1,0 +1,77 @@
+<div class="min-h-screen bg-gray-900">
+    <%= content_for :navbar do %>
+    <%= render 'shared/navbar' %>
+  <% end %>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold text-white">Quizzes</h1>
+        <p class="mt-2 text-sm sm:text-base text-gray-400">Gestiona y realiza evaluaciones en línea</p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+        <% if current_usuario.profesor? %>
+          <!-- Selector de curso para crear quiz -->
+          <div class="dropdown">
+            <button class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200 w-full sm:w-auto">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              Nuevo Quiz
+            </button>
+            <div class="dropdown-content bg-gray-800 rounded-lg shadow-lg mt-2">
+              <% current_usuario.cursos_como_profesor.each do |curso| %>
+                <%= link_to new_curso_quiz_path(curso), class: "block px-4 py-2 text-white hover:bg-gray-700" do %>
+                  Crear Quiz en <%= curso.nombre %>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Filtros -->
+        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <select class="bg-gray-800 text-white rounded-md border border-gray-700 px-3 py-2 w-full sm:w-auto">
+            <option value="">Todos los cursos</option>
+            <% current_usuario.cursos.each do |curso| %>
+              <option value="<%= curso.id %>"><%= curso.nombre %></option>
+            <% end %>
+          </select>
+
+          <select class="bg-gray-800 text-white rounded-md border border-gray-700 px-3 py-2 w-full sm:w-auto">
+            <option value="">Todos los estados</option>
+            <option value="borrador">Borrador</option>
+            <option value="publicado">Publicado</option>
+            <option value="cerrado">Cerrado</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid de Quizzes -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <% @quizzes.each do |quiz| %>
+        <!-- ... contenido del quiz ... -->
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<style>
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  min-width: 200px;
+  z-index: 1;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+</style>

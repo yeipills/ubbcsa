@@ -1,0 +1,20 @@
+<!-- app/views/admin/reportes/_top_laboratorio.html.erb -->
+<div class="flex items-center justify-between p-4 border rounded-lg">
+  <div class="flex items-center space-x-4">
+    <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+      <i class="<%= laboratorio_icon(top_laboratorio.categoria) %> text-gray-600"></i>
+    </div>
+    <div>
+      <h3 class="font-medium"><%= top_laboratorio.nombre %></h3>
+      <p class="text-sm text-gray-600">
+        <%= pluralize(top_laboratorio.total_sesiones, 'sesión', 'sesiones') %>
+      </p>
+    </div>
+  </div>
+  <div class="text-right">
+    <div class="text-sm font-medium text-gray-900">
+      <%= number_to_percentage(top_laboratorio.tasa_exito, precision: 1) %>
+    </div>
+    <div class="text-sm text-gray-600">tasa de éxito</div>
+  </div>
+</div>

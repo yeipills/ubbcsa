@@ -1,0 +1,6 @@
+<!-- app/views/shared/_metrics_chart.html.erb -->
+<div class="metrics-chart"
+     data-controller="metrics"
+     data-metrics-data="<%= @metricas.to_json %>">
+  <canvas id="metricsChart"></canvas>
+</div>

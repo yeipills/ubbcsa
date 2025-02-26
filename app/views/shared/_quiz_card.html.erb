@@ -1,0 +1,34 @@
+<%# app/views/shared/_quiz_card.html.erb %>
+<div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+  <div class="flex justify-between items-start">
+    <div>
+      <h3 class="text-lg font-semibold text-gray-900"><%= quiz.titulo %></h3>
+      <p class="text-sm text-gray-500 mt-1"><%= quiz.descripcion %></p>
+    </div>
+    <span class="px-2 py-1 text-xs font-medium rounded-full <%= estado_quiz_badge(quiz.estado) %>">
+      <%= quiz.estado.titleize %>
+    </span>
+  </div>
+  
+  <div class="mt-4 flex items-center text-sm text-gray-500">
+    <span class="mr-4">
+      <i class="far fa-clock mr-1"></i>
+      <%= quiz.tiempo_limite %> minutos
+    </span>
+    <span>
+      <i class="far fa-question-circle mr-1"></i>
+      <%= quiz.preguntas.count %> preguntas
+    </span>
+  </div>
+
+  <div class="mt-4 flex justify-between items-center">
+    <%= link_to "Ver detalles", quiz_path(quiz), 
+        class: "text-blue-600 hover:text-blue-800" %>
+    
+    <% if quiz.publicado? && !current_usuario.profesor? %>
+      <%= button_to "Iniciar Quiz", iniciar_intento_quiz_path(quiz), 
+          method: :post,
+          class: "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" %>
+    <% end %>
+  </div>
+</div>

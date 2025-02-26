@@ -1,0 +1,18 @@
+<!-- app/views/usuarios/_actividad.html.erb -->
+<div class="flex items-center justify-between p-4 border-b last:border-0">
+  <div class="flex items-center space-x-4">
+    <div class="w-2 h-2 rounded-full <%= actividad_status_color(actividad.status) %>"></div>
+    <div>
+      <h3 class="font-semibold"><%= actividad.laboratorio.nombre %></h3>
+      <p class="text-sm text-gray-600"><%= time_ago_in_words(actividad.updated_at) %> atrás</p>
+    </div>
+  </div>
+  <div class="text-right">
+    <div class="text-sm font-medium <%= actividad_status_color(actividad.status, :text) %>">
+      <%= actividad.status.humanize %>
+    </div>
+    <div class="text-sm text-gray-600">
+      <%= number_to_percentage(actividad.progreso, precision: 0) %>
+    </div>
+  </div>
+</div>

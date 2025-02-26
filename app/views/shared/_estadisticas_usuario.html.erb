@@ -1,0 +1,21 @@
+<!-- app/views/shared/_estadisticas_usuario.html.erb -->
+<div class="bg-white rounded-lg shadow p-6">
+  <h3 class="text-xl font-bold mb-4">Tus Estadísticas</h3>
+  
+  <div class="space-y-4">
+    <div class="flex justify-between items-center py-2 border-b">
+      <span class="text-gray-600">Tiempo Total</span>
+      <span class="font-semibold"><%= format_duration(estadisticas.tiempo_total) %></span>
+    </div>
+    
+    <div class="flex justify-between items-center py-2 border-b">
+      <span class="text-gray-600">Labs Completados</span>
+      <span class="font-semibold"><%= estadisticas.labs_completados %></span>
+    </div>
+    
+    <div class="flex justify-between items-center py-2">
+      <span class="text-gray-600">Tasa de Éxito</span>
+      <span class="font-semibold"><%= number_to_percentage(estadisticas.tasa_exito, precision: 1) %></span>
+    </div>
+  </div>
+</div>

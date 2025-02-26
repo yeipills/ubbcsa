@@ -1,0 +1,111 @@
+<!-- app/views/admin/reportes/index.html.erb -->
+<div class="min-h-screen bg-gray-100">
+  <%= render 'admin/shared/sidebar' %>
+
+  <div class="ml-64 p-8">
+    <!-- Header y Filtros -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold mb-6">Reportes y Análisis</h1>
+
+      <div class="flex gap-4 mb-6">
+        <%= link_to "Semana", admin_reportes_path(periodo: 'week'), 
+            class: "px-4 py-2 rounded-lg #{@periodo == 'week' ? 'bg-blue-500 text-white' : 'bg-gray-200'}" %>
+        <%= link_to "Mes", admin_reportes_path(periodo: 'month'), 
+            class: "px-4 py-2 rounded-lg #{@periodo == 'month' ? 'bg-blue-500 text-white' : 'bg-gray-200'}" %>
+        <%= link_to "Año", admin_reportes_path(periodo: 'year'), 
+            class: "px-4 py-2 rounded-lg #{@periodo == 'year' ? 'bg-blue-500 text-white' : 'bg-gray-200'}" %>
+      </div>
+
+      <!-- Filtros por Categoría -->
+      <div class="flex gap-4">
+        <%= form_with url: admin_reportes_path, method: :get, class: "flex gap-4" do |f| %>
+          <%= f.hidden_field :periodo, value: @periodo %>
+          <%= f.select :categoria, 
+              Laboratorio.categorias.keys,
+              { prompt: 'Todas las categorías' },
+              class: "rounded border-gray-300",
+              onchange: 'this.form.submit()' %>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Grid Principal -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Métricas Principales -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Gráfico de Uso del Sistema -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Uso del Sistema</h2>
+          <div class="h-96">
+            <%= render 'admin/shared/usage_chart',
+                data: @estadisticas.uso_sistema %>
+          </div>
+        </div>
+
+        <!-- Top Laboratorios -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Laboratorios Más Utilizados</h2>
+          <div class="space-y-4">
+            <%= render partial: 'top_laboratorio',
+                collection: @top_laboratorios %>
+          </div>
+        </div>
+
+        <!-- Rendimiento de Usuarios -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Rendimiento de Usuarios</h2>
+          <div class="overflow-x-auto">
+            <table class="min-w-full">
+              <%= render 'rendimiento_usuarios_table',
+                  usuarios: @rendimiento_usuarios %>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+        <!-- Resumen de Métricas -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Resumen</h2>
+          <%= render 'resumen_metricas',
+              stats: @estadisticas %>
+        </div>
+
+        <!-- Distribución por Categoría -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Distribución por Categoría</h2>
+          <div class="h-64">
+            <%= render 'admin/shared/category_distribution',
+                data: @estadisticas.distribucion_categorias %>
+          </div>
+        </div>
+
+        <!-- Alertas del Sistema -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Alertas del Sistema</h2>
+          <%= render 'admin/shared/alerts_list',
+              alerts: @estadisticas.alertas_sistema %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección de Exportación -->
+    <div class="mt-8 bg-white rounded-lg shadow p-6">
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold">Exportar Datos</h2>
+        <div class="flex gap-4">
+          <%= link_to admin_reportes_path(format: :csv, **request.query_parameters),
+              class: "px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700" do %>
+            <i class="fas fa-file-csv mr-2"></i>CSV
+          <% end %>
+          
+          <%= link_to admin_reportes_path(format: :pdf, **request.query_parameters),
+              class: "px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700" do %>
+            <i class="fas fa-file-pdf mr-2"></i>PDF
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

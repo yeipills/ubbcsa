@@ -1,0 +1,40 @@
+<div class="bg-white p-6 rounded-lg shadow mb-4" id="pregunta_<%= pregunta.id %>">
+  <div class="flex justify-between items-start">
+    <div class="flex-1">
+      <h3 class="text-lg font-medium text-gray-900">
+        <%= pregunta.orden %>. <%= pregunta.contenido %>
+      </h3>
+      <p class="text-sm text-gray-500 mt-1">
+        <%= pregunta.puntaje %> puntos | Tipo: <%= pregunta.tipo.humanize %>
+      </p>
+    </div>
+    
+    <% if current_usuario.profesor? %>
+      <div class="flex space-x-2">
+        <%= link_to edit_quiz_pregunta_path(pregunta.quiz, pregunta), 
+            class: "text-blue-600 hover:text-blue-800" do %>
+          <i class="fas fa-edit"></i>
+        <% end %>
+        <%= button_to quiz_pregunta_path(pregunta.quiz, pregunta), 
+            method: :delete,
+            class: "text-red-600 hover:text-red-800",
+            data: { confirm: "¿Estás seguro?" } do %>
+          <i class="fas fa-trash"></i>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="mt-4 space-y-2">
+    <% pregunta.opciones.each do |opcion| %>
+      <div class="flex items-center space-x-3 p-2 rounded <%= opcion.es_correcta? ? 'bg-green-50' : 'bg-gray-50' %>">
+        <% if pregunta.opcion_multiple? %>
+          <input type="radio" disabled <%= 'checked' if opcion.es_correcta? %>>
+        <% end %>
+        <span class="<%= opcion.es_correcta? ? 'text-green-700' : 'text-gray-700' %>">
+          <%= opcion.contenido %>
+        </span>
+      </div>
+    <% end %>
+  </div>
+</div>

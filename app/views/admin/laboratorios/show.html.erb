@@ -1,0 +1,131 @@
+<!-- app/views/admin/laboratorios/show.html.erb -->
+<div class="min-h-screen bg-gray-100">
+  <%= render 'admin/shared/sidebar' %>
+
+  <div class="ml-64 p-8">
+    <!-- Header -->
+    <div class="flex justify-between items-start mb-8">
+      <div>
+        <h1 class="text-3xl font-bold mb-2"><%= @laboratorio.nombre %></h1>
+        <p class="text-gray-600"><%= @laboratorio.descripcion %></p>
+      </div>
+      
+      <div class="flex gap-4">
+        <%= link_to edit_admin_laboratorio_path(@laboratorio),
+            class: "px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600" do %>
+          <i class="fas fa-edit mr-2"></i>Editar
+        <% end %>
+        
+        <%= button_to admin_laboratorio_path(@laboratorio),
+            method: :delete,
+            class: "px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600",
+            data: { confirm: "¿Estás seguro?" } do %>
+          <i class="fas fa-trash mr-2"></i>Eliminar
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Grid Principal -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Sección Principal -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Estado del Sistema -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Estado del Sistema</h2>
+          <div class="grid grid-cols-3 gap-4">
+            <%= render 'admin/shared/system_metric', 
+                title: 'CPU Usage',
+                value: @estadisticas.cpu_usage,
+                unit: '%',
+                color: 'blue' %>
+            
+            <%= render 'admin/shared/system_metric',
+                title: 'Memory Usage',
+                value: @estadisticas.memory_usage,
+                unit: '%',
+                color: 'green' %>
+            
+            <%= render 'admin/shared/system_metric',
+                title: 'Network Traffic',
+                value: @estadisticas.network_traffic,
+                unit: 'MB/s',
+                color: 'purple' %>
+          </div>
+        </div>
+
+        <!-- Gráfico de Métricas -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Métricas de Rendimiento</h2>
+          <div class="h-96">
+            <%= render 'admin/shared/performance_chart',
+                data: @metricas_recientes %>
+          </div>
+        </div>
+
+        <!-- Sesiones Activas -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Sesiones Activas</h2>
+          <div class="space-y-4">
+            <%= render partial: 'sesion_activa',
+                collection: @sesiones_activas %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="space-y-6">
+        <!-- Detalles del Laboratorio -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Detalles</h2>
+          <dl class="space-y-4">
+            <div>
+              <dt class="text-sm text-gray-600">Categoría</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                <%= @laboratorio.categoria.titleize %>
+              </dd>
+            </div>
+            
+            <div>
+              <dt class="text-sm text-gray-600">Dificultad</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                <%= @laboratorio.dificultad %>
+              </dd>
+            </div>
+            
+            <div>
+              <dt class="text-sm text-gray-600">Duración Estimada</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                <%= @laboratorio.duracion_estimada %> minutos
+              </dd>
+            </div>
+            
+            <div>
+              <dt class="text-sm text-gray-600">Recursos</dt>
+              <dd class="mt-1 text-sm text-gray-900">
+                <ul class="list-disc list-inside">
+                  <% @laboratorio.recursos.each do |recurso| %>
+                    <li><%= recurso %></li>
+                  <% end %>
+                </ul>
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- Alertas y Logs -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Alertas Recientes</h2>
+          <%= render 'admin/shared/alerts_list',
+              alerts: @laboratorio.alertas_recientes %>
+        </div>
+
+        <!-- Estadísticas de Uso -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Estadísticas de Uso</h2>
+          <%= render 'estadisticas_uso',
+              stats: @estadisticas %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

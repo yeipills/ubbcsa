@@ -1,0 +1,432 @@
+📦ciberseguridad_mvp
+ ┣ 📂app
+ ┃ ┣ 📂assets
+ ┃ ┃ ┣ 📂config
+ ┃ ┃ ┃ ┗ 📜manifest.js
+ ┃ ┃ ┣ 📂images
+ ┃ ┃ ┃ ┗ 📜.keep
+ ┃ ┃ ┣ 📂stylesheets
+ ┃ ┃ ┃ ┣ 📜application.css
+ ┃ ┃ ┃ ┣ 📜application.tailwind.css
+ ┃ ┃ ┃ ┗ 📜dashboard.scss
+ ┃ ┃ ┗ 📂tailwind
+ ┃ ┃ ┃ ┗ 📜application.css
+ ┃ ┣ 📂channels
+ ┃ ┃ ┣ 📂application_cable
+ ┃ ┃ ┃ ┣ 📜channel.rb
+ ┃ ┃ ┃ ┗ 📜connection.rb
+ ┃ ┃ ┣ 📜laboratorio_channel.rb
+ ┃ ┃ ┣ 📜metrics_channel.rb
+ ┃ ┃ ┗ 📜quiz_channel.rb
+ ┃ ┣ 📂controllers
+ ┃ ┃ ┣ 📂admin
+ ┃ ┃ ┃ ┣ 📜base_controller.rb
+ ┃ ┃ ┃ ┣ 📜configuracion_controller.rb
+ ┃ ┃ ┃ ┣ 📜dashboard_controller.rb
+ ┃ ┃ ┃ ┣ 📜laboratorios_controller.rb
+ ┃ ┃ ┃ ┣ 📜monitor_controller.rb
+ ┃ ┃ ┃ ┣ 📜reportes_controller.rb
+ ┃ ┃ ┃ ┗ 📜usuarios_controller.rb
+ ┃ ┃ ┣ 📂concerns
+ ┃ ┃ ┃ ┗ 📜role_verifiable.rb
+ ┃ ┃ ┣ 📂usuarios
+ ┃ ┃ ┃ ┣ 📜registrations_controller.rb
+ ┃ ┃ ┃ ┗ 📜sessions_controller.rb
+ ┃ ┃ ┣ 📜application_controller.rb
+ ┃ ┃ ┣ 📜consola_controller.rb
+ ┃ ┃ ┣ 📜cursos_controller.rb
+ ┃ ┃ ┣ 📜dashboard_controller.rb
+ ┃ ┃ ┣ 📜home_controller.rb
+ ┃ ┃ ┣ 📜intentos_quiz_controller.rb
+ ┃ ┃ ┣ 📜laboratorios_controller.rb
+ ┃ ┃ ┣ 📜perfil_controller.rb
+ ┃ ┃ ┣ 📜quiz_opciones_controller.rb
+ ┃ ┃ ┣ 📜quiz_preguntas_controller.rb
+ ┃ ┃ ┣ 📜quizzes_controller.rb
+ ┃ ┃ ┣ 📜reportes_controller.rb
+ ┃ ┃ ┣ 📜sesion_laboratorios_controller.rb
+ ┃ ┃ ┣ 📜usuarios_controller.rb
+ ┃ ┃ ┗ 📜wetty_controller.rb
+ ┃ ┣ 📂helpers
+ ┃ ┃ ┣ 📜application_helper.rb
+ ┃ ┃ ┣ 📜cursos_helper.rb
+ ┃ ┃ ┣ 📜dashboard_helper.rb
+ ┃ ┃ ┣ 📜home_helper.rb
+ ┃ ┃ ┣ 📜laboratorios_helper.rb
+ ┃ ┃ ┣ 📜quizzes_helper.rb
+ ┃ ┃ ┗ 📜usuarios_helper.rb
+ ┃ ┣ 📂javascript
+ ┃ ┃ ┣ 📂channels
+ ┃ ┃ ┃ ┗ 📜laboratorio_channel.js
+ ┃ ┃ ┣ 📂components
+ ┃ ┃ ┃ ┗ 📜MetricsChart.jsx
+ ┃ ┃ ┣ 📂controllers
+ ┃ ┃ ┃ ┣ 📜activity_chart_controller.js
+ ┃ ┃ ┃ ┣ 📜alert_controller.js
+ ┃ ┃ ┃ ┣ 📜application.js
+ ┃ ┃ ┃ ┣ 📜flash_controller.js
+ ┃ ┃ ┃ ┣ 📜hello_controller.js
+ ┃ ┃ ┃ ┣ 📜index.js
+ ┃ ┃ ┃ ┣ 📜metrics_controller.js
+ ┃ ┃ ┃ ┣ 📜quiz_controller.js
+ ┃ ┃ ┃ ┣ 📜quiz_form_controller.js
+ ┃ ┃ ┃ ┣ 📜quiz_timer_controller.js
+ ┃ ┃ ┃ ┣ 📜terminal_controller.js
+ ┃ ┃ ┃ ┣ 📜theme_controller.js
+ ┃ ┃ ┃ ┗ 📜wetty_controller.js
+ ┃ ┃ ┗ 📜application.js
+ ┃ ┣ 📂jobs
+ ┃ ┃ ┣ 📜application_job.rb
+ ┃ ┃ ┣ 📜monitor_laboratorio_job.rb
+ ┃ ┃ ┣ 📜monitor_metrics_job.rb
+ ┃ ┃ ┗ 📜quiz_notification_job.rb
+ ┃ ┣ 📂mailers
+ ┃ ┃ ┣ 📜application_mailer.rb
+ ┃ ┃ ┗ 📜quiz_mailer.rb
+ ┃ ┣ 📂models
+ ┃ ┃ ┣ 📂concerns
+ ┃ ┃ ┃ ┣ 📜.keep
+ ┃ ┃ ┃ ┣ 📜alertas_concern.rb
+ ┃ ┃ ┃ ┣ 📜metricas_concern.rb
+ ┃ ┃ ┃ ┣ 📜progreso_concern.rb
+ ┃ ┃ ┃ ┗ 📜security_loggable.rb
+ ┃ ┃ ┣ 📜application_record.rb
+ ┃ ┃ ┣ 📜curso.rb
+ ┃ ┃ ┣ 📜curso_estudiante.rb
+ ┃ ┃ ┣ 📜ejercicio.rb
+ ┃ ┃ ┣ 📜intento_quiz.rb
+ ┃ ┃ ┣ 📜laboratorio.rb
+ ┃ ┃ ┣ 📜log_terminal.rb
+ ┃ ┃ ┣ 📜metrica_laboratorio.rb
+ ┃ ┃ ┣ 📜quiz.rb
+ ┃ ┃ ┣ 📜quiz_notification.rb
+ ┃ ┃ ┣ 📜quiz_opcion.rb
+ ┃ ┃ ┣ 📜quiz_pregunta.rb
+ ┃ ┃ ┣ 📜respuesta_quiz.rb
+ ┃ ┃ ┣ 📜security_alert.rb
+ ┃ ┃ ┣ 📜sesion_laboratorio.rb
+ ┃ ┃ ┗ 📜usuario.rb
+ ┃ ┣ 📂policies
+ ┃ ┃ ┣ 📜curso_policy.rb
+ ┃ ┃ ┣ 📜intento_quiz_policy.rb
+ ┃ ┃ ┣ 📜laboratorio_policy.rb
+ ┃ ┃ ┗ 📜quiz_policy.rb
+ ┃ ┣ 📂services
+ ┃ ┃ ┣ 📜dashboard_service.rb
+ ┃ ┃ ┣ 📜ejercicio_verification_service.rb
+ ┃ ┃ ┣ 📜externo_api.rb
+ ┃ ┃ ┣ 📜laboratorio_service.rb
+ ┃ ┃ ┣ 📜metrics_service.rb
+ ┃ ┃ ┗ 📜terminal_service.rb
+ ┃ ┗ 📂views
+ ┃ ┃ ┣ 📂admin
+ ┃ ┃ ┃ ┣ 📂configuracion
+ ┃ ┃ ┃ ┃ ┗ 📜show.html.erb
+ ┃ ┃ ┃ ┣ 📂dashboard
+ ┃ ┃ ┃ ┃ ┗ 📜index.html.erb
+ ┃ ┃ ┃ ┣ 📂laboratorios
+ ┃ ┃ ┃ ┃ ┣ 📜_estadisticas_uso.html.erb
+ ┃ ┃ ┃ ┃ ┣ 📜_laboratorio.html.erb
+ ┃ ┃ ┃ ┃ ┣ 📜_sesion_activa.html.erb
+ ┃ ┃ ┃ ┃ ┣ 📜index.html.erb
+ ┃ ┃ ┃ ┃ ┣ 📜new.html.erb
+ ┃ ┃ ┃ ┃ ┗ 📜show.html.erb
+ ┃ ┃ ┃ ┣ 📂monitor
+ ┃ ┃ ┃ ┃ ┣ 📜_alerta.html.erb
+ ┃ ┃ ┃ ┃ ┣ 📜_metric_card.html.erb
+ ┃ ┃ ┃ ┃ ┣ 📜_sesion_activa.html.erb
+ ┃ ┃ ┃ ┃ ┗ 📜index.html.erb
+ ┃ ┃ ┃ ┣ 📂reportes
+ ┃ ┃ ┃ ┃ ┣ 📜_rendimiento_usuarios_table.html.erb
+ ┃ ┃ ┃ ┃ ┣ 📜_top_laboratorio.html.erb
+ ┃ ┃ ┃ ┃ ┗ 📜index.html.erb
+ ┃ ┃ ┃ ┣ 📂shared
+ ┃ ┃ ┃ ┃ ┣ 📜_metric_card.html.erb
+ ┃ ┃ ┃ ┃ ┗ 📜_sidebar.html.erb
+ ┃ ┃ ┃ ┗ 📂usuarios
+ ┃ ┃ ┃ ┃ ┣ 📜index.html.erb
+ ┃ ┃ ┃ ┃ ┗ 📜show.html.erb
+ ┃ ┃ ┣ 📂consola
+ ┃ ┃ ┃ ┗ 📜show.html.erb
+ ┃ ┃ ┣ 📂cursos
+ ┃ ┃ ┃ ┣ 📜_curso.html.erb
+ ┃ ┃ ┃ ┣ 📜_curso_card.html.erb
+ ┃ ┃ ┃ ┣ 📜_form.html.erb
+ ┃ ┃ ┃ ┣ 📜_laboratorio.html.erb
+ ┃ ┃ ┃ ┣ 📜edit.html.erb
+ ┃ ┃ ┃ ┣ 📜index.html.erb
+ ┃ ┃ ┃ ┣ 📜new.html.erb
+ ┃ ┃ ┃ ┗ 📜show.html.erb
+ ┃ ┃ ┣ 📂dashboard
+ ┃ ┃ ┃ ┣ 📜_active_sessions.html.erb
+ ┃ ┃ ┃ ┣ 📜_available_labs.html.erb
+ ┃ ┃ ┃ ┣ 📜_progress_panel.html.erb
+ ┃ ┃ ┃ ┣ 📜_quick_actions.html.erb
+ ┃ ┃ ┃ ┣ 📜_recent_activity.html.erb
+ ┃ ┃ ┃ ┣ 📜_stats.html.erb
+ ┃ ┃ ┃ ┣ 📜_stats_card.html.erb
+ ┃ ┃ ┃ ┣ 📜_user_progress.html.erb
+ ┃ ┃ ┃ ┗ 📜index.html.erb
+ ┃ ┃ ┣ 📂home
+ ┃ ┃ ┃ ┗ 📜index.html.erb
+ ┃ ┃ ┣ 📂intentos_quiz
+ ┃ ┃ ┃ ┣ 📜_form.html.erb
+ ┃ ┃ ┃ ┣ 📜_resultado.html.erb
+ ┃ ┃ ┃ ┗ 📜show.html.erb
+ ┃ ┃ ┣ 📂laboratorios
+ ┃ ┃ ┃ ┣ 📜_documentacion.html.erb
+ ┃ ┃ ┃ ┣ 📜_form.html.erb
+ ┃ ┃ ┃ ┣ 📜_laboratorio_activo.html.erb
+ ┃ ┃ ┃ ┣ 📜_objetivo.html.erb
+ ┃ ┃ ┃ ┣ 📜index.html.erb
+ ┃ ┃ ┃ ┣ 📜new.html.erb
+ ┃ ┃ ┃ ┗ 📜show.html.erb
+ ┃ ┃ ┣ 📂layouts
+ ┃ ┃ ┃ ┣ 📜application.html.erb
+ ┃ ┃ ┃ ┣ 📜devise.html.erb
+ ┃ ┃ ┃ ┣ 📜mailer.html.erb
+ ┃ ┃ ┃ ┗ 📜mailer.text.erb
+ ┃ ┃ ┣ 📂quiz_opciones
+ ┃ ┃ ┃ ┣ 📜_form.html.erb
+ ┃ ┃ ┃ ┗ 📜_opcion.html.erb
+ ┃ ┃ ┣ 📂quiz_preguntas
+ ┃ ┃ ┃ ┣ 📜_form.html.erb
+ ┃ ┃ ┃ ┗ 📜_pregunta.html.erb
+ ┃ ┃ ┣ 📂quizzes
+ ┃ ┃ ┃ ┣ 📜_form.html.erb
+ ┃ ┃ ┃ ┣ 📜_quiz.html.erb
+ ┃ ┃ ┃ ┣ 📜edit.html.erb
+ ┃ ┃ ┃ ┣ 📜index.html.erb
+ ┃ ┃ ┃ ┣ 📜new.html.erb
+ ┃ ┃ ┃ ┗ 📜show.html.erb
+ ┃ ┃ ┣ 📂reportes
+ ┃ ┃ ┃ ┣ 📜_habilidades_radar.html.erb
+ ┃ ┃ ┃ ┣ 📜_laboratorio_completado.html.erb
+ ┃ ┃ ┃ ┣ 📜_resumen_metricas.html.erb
+ ┃ ┃ ┃ ┗ 📜show.html.erb
+ ┃ ┃ ┣ 📂sesion_laboratorios
+ ┃ ┃ ┃ ┣ 📜_acciones.html.erb
+ ┃ ┃ ┃ ┣ 📜_actividad.html.erb
+ ┃ ┃ ┃ ┣ 📜_metricas.html.erb
+ ┃ ┃ ┃ ┗ 📜show.html.erb
+ ┃ ┃ ┣ 📂shared
+ ┃ ┃ ┃ ┣ 📜_activity_chart.html.erb
+ ┃ ┃ ┃ ┣ 📜_categoria.html.erb
+ ┃ ┃ ┃ ┣ 📜_error_messages.html.erb
+ ┃ ┃ ┃ ┣ 📜_estadisticas_usuario.html.erb
+ ┃ ┃ ┃ ┣ 📜_flash.html.erb
+ ┃ ┃ ┃ ┣ 📜_metrics_chart.html.erb
+ ┃ ┃ ┃ ┣ 📜_navbar.html.erb
+ ┃ ┃ ┃ ┣ 📜_pregunta_card.html.erb
+ ┃ ┃ ┃ ┣ 📜_pregunta_navigation.html.erb
+ ┃ ┃ ┃ ┣ 📜_quiz_alert.html.erb
+ ┃ ┃ ┃ ┣ 📜_quiz_card.html.erb
+ ┃ ┃ ┃ ┣ 📜_quiz_progress.html.erb
+ ┃ ┃ ┃ ┣ 📜_quiz_stats.html.erb
+ ┃ ┃ ┃ ┣ 📜_quiz_timer.html.erb
+ ┃ ┃ ┃ ┣ 📜_resultados_chart.html.erb
+ ┃ ┃ ┃ ┗ 📜_terminal.html.erb
+ ┃ ┃ ┣ 📂usuarios
+ ┃ ┃ ┃ ┣ 📂confirmations
+ ┃ ┃ ┃ ┃ ┗ 📜new.html.erb
+ ┃ ┃ ┃ ┣ 📂mailer
+ ┃ ┃ ┃ ┃ ┣ 📜confirmation_instructions.html.erb
+ ┃ ┃ ┃ ┃ ┣ 📜email_changed.html.erb
+ ┃ ┃ ┃ ┃ ┣ 📜password_change.html.erb
+ ┃ ┃ ┃ ┃ ┣ 📜reset_password_instructions.html.erb
+ ┃ ┃ ┃ ┃ ┗ 📜unlock_instructions.html.erb
+ ┃ ┃ ┃ ┣ 📂passwords
+ ┃ ┃ ┃ ┃ ┣ 📜edit.html.erb
+ ┃ ┃ ┃ ┃ ┗ 📜new.html.erb
+ ┃ ┃ ┃ ┣ 📂registrations
+ ┃ ┃ ┃ ┃ ┣ 📜edit.html.erb
+ ┃ ┃ ┃ ┃ ┗ 📜new.html.erb
+ ┃ ┃ ┃ ┣ 📂sessions
+ ┃ ┃ ┃ ┃ ┗ 📜new.html.erb
+ ┃ ┃ ┃ ┣ 📂shared
+ ┃ ┃ ┃ ┃ ┣ 📜_error_messages.html.erb
+ ┃ ┃ ┃ ┃ ┗ 📜_links.html.erb
+ ┃ ┃ ┃ ┣ 📂unlocks
+ ┃ ┃ ┃ ┃ ┗ 📜new.html.erb
+ ┃ ┃ ┃ ┣ 📜_actividad.html.erb
+ ┃ ┃ ┃ ┣ 📜_especialidades.html.erb
+ ┃ ┃ ┃ ┣ 📜_logro.html.erb
+ ┃ ┃ ┃ ┗ 📜show.html.erb
+ ┃ ┃ ┗ 📂wetty
+ ┃ ┃ ┃ ┗ 📜show.html.erb
+ ┣ 📂bin
+ ┃ ┣ 📜bundle
+ ┃ ┣ 📜dev
+ ┃ ┣ 📜docker-entrypoint
+ ┃ ┣ 📜rails
+ ┃ ┣ 📜rake
+ ┃ ┗ 📜setup
+ ┣ 📂config
+ ┃ ┣ 📂environments
+ ┃ ┃ ┣ 📜development.rb
+ ┃ ┃ ┣ 📜production.rb
+ ┃ ┃ ┗ 📜test.rb
+ ┃ ┣ 📂initializers
+ ┃ ┃ ┣ 📜assets.rb
+ ┃ ┃ ┣ 📜content_security_policy.rb
+ ┃ ┃ ┣ 📜devise.rb
+ ┃ ┃ ┣ 📜filter_parameter_logging.rb
+ ┃ ┃ ┣ 📜inflections.rb
+ ┃ ┃ ┗ 📜permissions_policy.rb
+ ┃ ┣ 📂locales
+ ┃ ┃ ┣ 📜devise.en.yml
+ ┃ ┃ ┣ 📜en.yml
+ ┃ ┃ ┗ 📜es.yml
+ ┃ ┣ 📜application.rb
+ ┃ ┣ 📜boot.rb
+ ┃ ┣ 📜cable.yml
+ ┃ ┣ 📜credentials.yml.enc
+ ┃ ┣ 📜database.yml
+ ┃ ┣ 📜environment.rb
+ ┃ ┣ 📜importmap.rb
+ ┃ ┣ 📜puma.rb
+ ┃ ┣ 📜routes.rb
+ ┃ ┣ 📜storage.yml
+ ┃ ┗ 📜tailwind.config.js
+ ┣ 📂db
+ ┃ ┣ 📂migrate
+ ┃ ┃ ┣ 📜20250213210224_ajustar_estructura_tablas.rb
+ ┃ ┃ ┣ 📜20250213210613_agregar_indices.rb
+ ┃ ┃ ┣ 📜20250213210629_ajustar_valores_por_defecto.rb
+ ┃ ┃ ┣ 📜20250213210645_ajustar_tipos_datos.rb
+ ┃ ┃ ┣ 📜20250213212708_ajustar_precision_tiempos.rb
+ ┃ ┃ ┣ 📜20250213212727_ajustar_campos_not_null.rb
+ ┃ ┃ ┣ 📜20250213212740_agregar_foreign_keys.rb
+ ┃ ┃ ┣ 📜20250213223548_create_curso_estudiantes.rb
+ ┃ ┃ ┣ 📜20250214210022_create_quizzes.rb
+ ┃ ┃ ┣ 📜20250214210023_create_quiz_preguntas.rb
+ ┃ ┃ ┣ 📜20250214210024_create_quiz_opciones.rb
+ ┃ ┃ ┣ 📜20250214210025_create_intentos_quiz.rb
+ ┃ ┃ ┣ 📜20250214210627_create_respuestas_quiz.rb
+ ┃ ┃ ┣ 📜20250216231839_drop_evaluacion_tables.rb
+ ┃ ┃ ┣ 📜20250221002946_create_metrica_laboratorios.rb
+ ┃ ┃ ┗ 📜20250224203558_add_estado_to_cursos.rb
+ ┃ ┣ 📜schema.rb
+ ┃ ┗ 📜seeds.rb
+ ┣ 📂labs
+ ┃ ┣ 📂forense
+ ┃ ┃ ┣ 📂data
+ ┃ ┃ ┣ 📂scripts
+ ┃ ┃ ┣ 📂tools
+ ┃ ┃ ┗ 📜init.sh
+ ┃ ┣ 📂pentesting
+ ┃ ┃ ┣ 📂data
+ ┃ ┃ ┣ 📂scripts
+ ┃ ┃ ┣ 📂tools
+ ┃ ┃ ┗ 📜init.sh
+ ┃ ┣ 📂redes
+ ┃ ┃ ┣ 📂data
+ ┃ ┃ ┣ 📂scripts
+ ┃ ┃ ┣ 📂tools
+ ┃ ┃ ┗ 📜init.sh
+ ┃ ┣ 📜control.sh
+ ┃ ┣ 📜init.sh
+ ┃ ┗ 📜monitor.sh
+ ┣ 📂lib
+ ┃ ┣ 📂assets
+ ┃ ┃ ┗ 📜.keep
+ ┃ ┗ 📂tasks
+ ┃ ┃ ┣ 📜.keep
+ ┃ ┃ ┗ 📜quiz.rake
+ ┣ 📂public
+ ┃ ┣ 📜404.html
+ ┃ ┣ 📜422.html
+ ┃ ┣ 📜500.html
+ ┃ ┣ 📜apple-touch-icon-precomposed.png
+ ┃ ┣ 📜apple-touch-icon.png
+ ┃ ┣ 📜favicon.ico
+ ┃ ┗ 📜robots.txt
+ ┣ 📂spec
+ ┃ ┣ 📂controllers
+ ┃ ┃ ┣ 📜intentos_quiz_controller_spec.rb
+ ┃ ┃ ┣ 📜quiz_opciones_controller_spec.rb
+ ┃ ┃ ┣ 📜quiz_preguntas_controller_spec.rb
+ ┃ ┃ ┗ 📜quizzes_controller_spec.rb
+ ┃ ┣ 📂factories
+ ┃ ┃ ┣ 📜cursos.rb
+ ┃ ┃ ┣ 📜intentos_quiz.rb
+ ┃ ┃ ┣ 📜laboratorios.rb
+ ┃ ┃ ┣ 📜quiz_opciones.rb
+ ┃ ┃ ┣ 📜quiz_preguntas.rb
+ ┃ ┃ ┣ 📜quizzes.rb
+ ┃ ┃ ┣ 📜respuestas_quiz.rb
+ ┃ ┃ ┣ 📜sesion_laboratorios.rb
+ ┃ ┃ ┗ 📜usuarios.rb
+ ┃ ┣ 📂helpers
+ ┃ ┃ ┣ 📜cursos_helper_spec.rb
+ ┃ ┃ ┣ 📜dashboard_helper_spec.rb
+ ┃ ┃ ┣ 📜home_helper_spec.rb
+ ┃ ┃ ┗ 📜laboratorios_helper_spec.rb
+ ┃ ┣ 📂jobs
+ ┃ ┣ 📂models
+ ┃ ┃ ┣ 📜curso_spec.rb
+ ┃ ┃ ┣ 📜intento_quiz_spec.rb
+ ┃ ┃ ┣ 📜laboratorio_spec.rb
+ ┃ ┃ ┣ 📜quiz_opcion_spec.rb
+ ┃ ┃ ┣ 📜quiz_pregunta_spec.rb
+ ┃ ┃ ┣ 📜quiz_spec.rb
+ ┃ ┃ ┣ 📜respuesta_quiz_spec.rb
+ ┃ ┃ ┣ 📜sesion_laboratorio_spec.rb
+ ┃ ┃ ┗ 📜usuario_spec.rb
+ ┃ ┣ 📂requests
+ ┃ ┃ ┣ 📜cursos_spec.rb
+ ┃ ┃ ┣ 📜dashboard_spec.rb
+ ┃ ┃ ┣ 📜home_spec.rb
+ ┃ ┃ ┗ 📜laboratorios_spec.rb
+ ┃ ┗ 📂views
+ ┃ ┃ ┣ 📂cursos
+ ┃ ┃ ┃ ┣ 📜index.html.tailwindcss_spec.rb
+ ┃ ┃ ┃ ┗ 📜show.html.tailwindcss_spec.rb
+ ┃ ┃ ┣ 📂dashboard
+ ┃ ┃ ┃ ┗ 📜index.html.tailwindcss_spec.rb
+ ┃ ┃ ┣ 📂home
+ ┃ ┃ ┃ ┗ 📜index.html.tailwindcss_spec.rb
+ ┃ ┃ ┗ 📂laboratorios
+ ┃ ┃ ┃ ┣ 📜index.html.tailwindcss_spec.rb
+ ┃ ┃ ┃ ┗ 📜show.html.tailwindcss_spec.rb
+ ┣ 📂test
+ ┃ ┣ 📂channels
+ ┃ ┃ ┗ 📂application_cable
+ ┃ ┃ ┃ ┗ 📜connection_test.rb
+ ┃ ┣ 📂controllers
+ ┃ ┃ ┗ 📜.keep
+ ┃ ┣ 📂fixtures
+ ┃ ┃ ┗ 📂files
+ ┃ ┃ ┃ ┗ 📜.keep
+ ┃ ┣ 📂helpers
+ ┃ ┃ ┗ 📜.keep
+ ┃ ┣ 📂integration
+ ┃ ┃ ┗ 📜.keep
+ ┃ ┣ 📂mailers
+ ┃ ┃ ┗ 📜.keep
+ ┃ ┣ 📂models
+ ┃ ┃ ┗ 📜.keep
+ ┃ ┣ 📂system
+ ┃ ┃ ┗ 📜.keep
+ ┃ ┣ 📜application_system_test_case.rb
+ ┃ ┗ 📜test_helper.rb
+ ┣ 📂vendor
+ ┃ ┗ 📜.keep
+ ┣ 📜.dockerignore
+ ┣ 📜.gitattributes
+ ┣ 📜.gitignore
+ ┣ 📜.node-version
+ ┣ 📜.ruby-version
+ ┣ 📜Dockerfile
+ ┣ 📜Dockerfile.wetty
+ ┣ 📜Gemfile
+ ┣ 📜Gemfile.lock
+ ┣ 📜Procfile.dev
+ ┣ 📜README.md
+ ┣ 📜Rakefile
+ ┣ 📜bd.txt
+ ┣ 📜config.ru
+ ┣ 📜directorio.txt
+ ┣ 📜docker-compose.yml
+ ┣ 📜package.json
+ ┗ 📜start.sh

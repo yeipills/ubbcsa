@@ -1,0 +1,175 @@
+<!-- app/views/laboratorios/show.html.erb -->
+<div class="min-h-screen bg-gray-900">
+  <!-- Navbar -->
+  <%= content_for :navbar do %>
+    <%= render 'shared/navbar' %>
+  <% end %>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center text-sm text-gray-400 mb-6">
+      <ol class="flex items-center space-x-2">
+        <li>
+          <%= link_to "Inicio", root_path, class: "hover:text-white" %>
+        </li>
+        <li class="flex items-center">
+          <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <%= link_to "Laboratorios", laboratorios_path, class: "hover:text-white" %>
+        </li>
+        <li class="flex items-center">
+          <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-white font-medium" aria-current="page"><%= @laboratorio.nombre %></span>
+        </li>
+      </ol>
+    </nav>
+
+    <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 overflow-hidden">
+      <div class="p-6 sm:p-8">
+        <!-- Encabezado -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-6 border-b border-gray-700">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2"><%= @laboratorio.nombre %></h1>
+            <p class="text-gray-400"><%= @laboratorio.descripcion %></p>
+          </div>
+
+          <!-- Nivel de dificultad -->
+          <% difficulty_badge_class = case @laboratorio.nivel_dificultad
+               when 'principiante' then 'bg-green-900 text-green-300'
+               when 'intermedio' then 'bg-yellow-900 text-yellow-300'
+               else 'bg-red-900 text-red-300'
+             end 
+          %>
+          <span class="px-3 py-1 text-sm font-medium rounded-full <%= difficulty_badge_class %>">
+            <%= @laboratorio.nivel_dificultad.capitalize %>
+          </span>
+        </div>
+
+        <!-- Tabs de navegación con Alpine.js -->
+        <div x-data="{ activeTab: 'info' }" class="mb-8">
+          <div class="border-b border-gray-700">
+            <nav class="flex -mb-px space-x-6">
+              <button @click="activeTab = 'info'" 
+                      :class="{ 'border-blue-500 text-blue-500': activeTab === 'info', 'border-transparent text-gray-400 hover:text-gray-300': activeTab !== 'info' }" 
+                      class="py-4 border-b-2 font-medium text-sm">
+                Información
+              </button>
+              <button @click="activeTab = 'objetivos'" 
+                      :class="{ 'border-blue-500 text-blue-500': activeTab === 'objetivos', 'border-transparent text-gray-400 hover:text-gray-300': activeTab !== 'objetivos' }" 
+                      class="py-4 border-b-2 font-medium text-sm">
+                Objetivos
+              </button>
+              <button @click="activeTab = 'requisitos'" 
+                      :class="{ 'border-blue-500 text-blue-500': activeTab === 'requisitos', 'border-transparent text-gray-400 hover:text-gray-300': activeTab !== 'requisitos' }" 
+                      class="py-4 border-b-2 font-medium text-sm">
+                Requisitos
+              </button>
+            </nav>
+          </div>
+
+          <!-- Contenido de las tabs -->
+          <div class="py-6">
+            <!-- Tab Información -->
+            <div x-show="activeTab === 'info'" class="space-y-6">
+              <div>
+                <h2 class="text-lg font-medium text-white mb-3">Detalles</h2>
+                <div class="bg-gray-900 rounded-lg p-4 border border-gray-700">
+                  <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
+                    <div>
+                      <dt class="text-sm font-medium text-gray-400">Tipo</dt>
+                      <dd class="mt-1 text-white"><%= @laboratorio.tipo.capitalize %></dd>
+                    </div>
+                    
+                    <div>
+                      <dt class="text-sm font-medium text-gray-400">Duración estimada</dt>
+                      <dd class="mt-1 text-white"><%= @laboratorio.duracion_estimada %> minutos</dd>
+                    </div>
+                    
+                    <div>
+                      <dt class="text-sm font-medium text-gray-400">Curso asociado</dt>
+                      <dd class="mt-1 text-white">
+                        <%= link_to @laboratorio.curso.nombre, curso_path(@laboratorio.curso), class: "text-blue-400 hover:text-blue-300" %>
+                      </dd>
+                    </div>
+                    
+                    <div>
+                      <dt class="text-sm font-medium text-gray-400">Estado</dt>
+                      <dd class="mt-1">
+                        <span class="px-2 py-1 text-xs font-medium rounded-full 
+                                  <%= @laboratorio.activo? ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300' %>">
+                          <%= @laboratorio.activo? ? 'Activo' : 'Inactivo' %>
+                        </span>
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab Objetivos -->
+            <div x-show="activeTab === 'objetivos'" class="space-y-6">
+              <div>
+                <h2 class="text-lg font-medium text-white mb-3">Objetivos del Laboratorio</h2>
+                <div class="bg-gray-900 rounded-lg p-4 border border-gray-700">
+                  <% if @laboratorio.objetivos.present? %>
+                    <div class="prose prose-invert max-w-none">
+                      <%= simple_format(@laboratorio.objetivos) %>
+                    </div>
+                  <% else %>
+                    <p class="text-gray-400">No hay objetivos definidos para este laboratorio.</p>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab Requisitos -->
+            <div x-show="activeTab === 'requisitos'" class="space-y-6">
+              <div>
+                <h2 class="text-lg font-medium text-white mb-3">Requisitos</h2>
+                <div class="bg-gray-900 rounded-lg p-4 border border-gray-700">
+                  <% if @laboratorio.requisitos.present? %>
+                    <div class="prose prose-invert max-w-none">
+                      <%= simple_format(@laboratorio.requisitos) %>
+                    </div>
+                  <% else %>
+                    <p class="text-gray-400">No hay requisitos específicos para este laboratorio.</p>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón de Acción -->
+        <div class="mt-6 flex justify-center sm:justify-start">
+          <% if @sesion_activa %>
+            <%= link_to sesion_laboratorio_path(@sesion_activa), 
+                class: "inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200" do %>
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Continuar Sesión
+            <% end %>
+          <% else %>
+            <%= button_to sesion_laboratorios_path(laboratorio_id: @laboratorio.id),
+                method: :post,
+                class: "inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200" do %>
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Iniciar Laboratorio
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Alpine.js para las tabs -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js"></script>

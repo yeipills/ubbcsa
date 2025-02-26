@@ -1,0 +1,20 @@
+<div class="bg-gray-800 rounded-lg p-6">
+  <h3 class="text-xl font-bold text-white mb-4">Recursos</h3>
+  
+  <div class="space-y-4">
+    <div class="flex justify-between">
+      <span class="text-gray-400">CPU</span>
+      <span class="text-white font-medium"><%= metricas[:cpu_usage] %>%</span>
+    </div>
+
+    <div class="flex justify-between">
+      <span class="text-gray-400">Memoria</span>
+      <span class="text-white font-medium"><%= metricas[:memory_usage] %>%</span>
+    </div>
+
+    <div class="flex justify-between">
+      <span class="text-gray-400">Red</span>
+      <span class="text-white font-medium"><%= metricas[:network_usage] %> KB/s</span>
+    </div>
+  </div>
+</div>

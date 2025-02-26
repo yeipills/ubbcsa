@@ -1,0 +1,212 @@
+<%= content_for :navbar do %>
+  <%= render 'shared/navbar' %>
+<% end %>
+
+<main role="main" class="min-h-screen bg-gray-900 px-4 py-8">
+  <section class="max-w-7xl mx-auto sm:px-6 lg:px-8 py-4 sm:py-8">
+    <!-- Encabezado y filtros -->
+    <header class="sticky top-0 z-10 bg-gray-900 pb-4 border-b border-gray-800 mb-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-bold text-white">Mis Cursos</h1>
+          <p class="mt-2 text-sm sm:text-base text-gray-400">
+            Gestiona tus cursos y contenidos educativos
+          </p>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </div>
+            <input type="text" placeholder="Buscar cursos..." 
+                   class="block w-full pl-10 pr-3 py-2 border border-gray-700 rounded-md text-gray-300 bg-gray-800 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+          </div>
+          
+          <% if current_usuario.profesor? %>
+            <%= link_to new_curso_path, 
+                class: "inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500" do %>
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              Nuevo Curso
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+      
+      <!-- Filtros -->
+      <div class="flex flex-wrap gap-3">
+        <div class="inline-flex rounded-md shadow-sm">
+          <button type="button" class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-l-md bg-blue-600 text-white">
+            Todos
+          </button>
+          <button type="button" class="inline-flex items-center px-3 py-2 text-sm font-medium bg-gray-800 text-gray-300 hover:bg-gray-700">
+            Activos
+          </button>
+          <button type="button" class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-r-md bg-gray-800 text-gray-300 hover:bg-gray-700">
+            Inactivos
+          </button>
+        </div>
+        
+        <select class="bg-gray-800 text-white rounded-md border border-gray-700 px-3 py-2 text-sm">
+          <option value="">Todos los periodos</option>
+          <option value="2024-1">2024-1</option>
+          <option value="2024-2">2024-2</option>
+        </select>
+        
+        <div class="inline-flex items-center rounded-md shadow-sm ml-auto">
+          <button type="button" class="p-2 bg-gray-800 text-gray-400 rounded-l-md border border-gray-700 hover:bg-gray-700">
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+          <button type="button" class="p-2 bg-gray-700 text-blue-400 rounded-r-md border border-gray-700">
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Sección de estadísticas -->
+    <section aria-label="Estadísticas de Cursos" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
+      <!-- Total Cursos -->
+      <div class="bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-700 hover:border-blue-500 transition-colors duration-200">
+        <div class="flex items-center">
+          <div class="p-3 rounded-full bg-blue-900 bg-opacity-50 text-blue-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-base sm:text-lg font-semibold text-gray-300">Total Cursos</h3>
+            <p class="text-xl sm:text-2xl font-bold text-blue-400"><%= @cursos.count %></p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Cursos Activos -->
+      <div class="bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-700 hover:border-green-500 transition-colors duration-200">
+        <div class="flex items-center">
+          <div class="p-3 rounded-full bg-green-900 bg-opacity-50 text-green-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-base sm:text-lg font-semibold text-gray-300">Cursos Activos</h3>
+            <p class="text-xl sm:text-2xl font-bold text-green-400"><%= @cursos.where(activo: true).count %></p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Total Laboratorios -->
+      <div class="bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-700 hover:border-purple-500 transition-colors duration-200">
+        <div class="flex items-center">
+          <div class="p-3 rounded-full bg-purple-900 bg-opacity-50 text-purple-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-base sm:text-lg font-semibold text-gray-300">Total Laboratorios</h3>
+            <p class="text-xl sm:text-2xl font-bold text-purple-400">
+              <%= @cursos.sum { |curso| curso.laboratorios.count } %>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Lista de cursos -->
+    <section aria-label="Lista de Cursos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+      <% @cursos.each do |curso| %>
+        <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-700 hover:border-indigo-500 transition-all duration-200">
+          <div class="relative">
+            <div class="absolute top-0 inset-x-0 h-1 <%= curso.activo ? 'bg-green-500' : 'bg-red-500' %>"></div>
+            <div class="p-5">
+              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
+                <h2 class="text-lg font-bold text-white"><%= curso.nombre %></h2>
+                <span class="px-2 py-1 text-xs font-medium rounded-full <%= curso.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+                  <%= curso.activo ? 'Activo' : 'Inactivo' %>
+                </span>
+              </div>
+              
+              <p class="text-sm text-gray-400 mb-4 line-clamp-2">
+                <%= truncate(curso.descripcion, length: 100) %>
+              </p>
+              
+              <div class="grid grid-cols-2 gap-y-2 mb-4 text-xs sm:text-sm text-gray-400">
+                <div class="flex items-center">
+                  <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
+                  </svg>
+                  <span class="truncate">Código: <%= curso.codigo %></span>
+                </div>
+                <div class="flex items-center">
+                  <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                  </svg>
+                  <span class="truncate">Labs: <%= curso.laboratorios.count %></span>
+                </div>
+                <div class="flex items-center">
+                  <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                  </svg>
+                  <span class="truncate">Periodo: <%= curso.periodo %></span>
+                </div>
+                <div class="flex items-center">
+                  <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                  </svg>
+                  <span class="truncate">Estudiantes: <%= curso.estudiantes.count %></span>
+                </div>
+              </div>
+              
+              <div class="flex pt-3 border-t border-gray-700">
+                <%= link_to curso_path(curso), 
+                    class: "w-full text-center px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center justify-center" do %>
+                  <span>Ver detalles</span>
+                  <svg class="ml-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                  </svg>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </section>
+    
+    <!-- Paginación -->
+    <div class="mt-8 flex justify-center">
+      <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700">
+          <span class="sr-only">Anterior</span>
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </a>
+        <a href="#" aria-current="page" class="relative inline-flex items-center px-4 py-2 border border-blue-500 bg-blue-600 text-sm font-medium text-white">1</a>
+        <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700">2</a>
+        <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700">3</a>
+        <span class="relative inline-flex items-center px-4 py-2 border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400">...</span>
+        <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700">8</a>
+        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700">
+          <span class="sr-only">Siguiente</span>
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </nav>
+    </div>
+  </section>
+</main>

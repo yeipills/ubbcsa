@@ -1,0 +1,44 @@
+FROM debian:bullseye-slim
+
+# Instalar dependencias y herramientas necesarias
+RUN apt-get update && apt-get install -y \
+    curl \
+    sudo \
+    && curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get install -y \
+    openssh-server \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar Wetty globalmente
+RUN npm install -g wetty
+
+# Configurar usuario kali con permisos sudo y contraseña
+RUN useradd -m -s /bin/bash kali && \
+    echo "kali:kali" | chpasswd && \
+    usermod -aG sudo kali
+
+# Configurar SSH para permitir acceso con usuario y contraseña
+RUN mkdir -p /var/run/sshd && \
+    echo "PermitRootLogin yes" >> /etc/ssh/sshd_config && \
+    echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config && \
+    echo "ChallengeResponseAuthentication no" >> /etc/ssh/sshd_config && \
+    echo "UsePAM yes" >> /etc/ssh/sshd_config
+
+# Permitir a usuarios conectarse con contraseña
+RUN sed -i 's/^#*\(UsePAM\) .*/\1 yes/' /etc/ssh/sshd_config
+
+# Asegurar que el servicio SSH se ejecute correctamente
+RUN mkdir -p /home/kali/.ssh && chmod 700 /home/kali/.ssh
+
+# Script de inicio
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+# Exponer los puertos necesarios
+EXPOSE 22 3001
+
+# Comando de inicio
+CMD ["/start.sh"]

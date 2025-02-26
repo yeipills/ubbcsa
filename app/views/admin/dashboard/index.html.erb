@@ -1,0 +1,68 @@
+<!-- app/views/admin/dashboard/index.html.erb -->
+<div class="min-h-screen bg-gray-100">
+  <!-- Sidebar de Administración -->
+  <%= render 'admin/shared/sidebar' %>
+
+  <!-- Contenido Principal -->
+  <div class="ml-64 p-8">
+    <h1 class="text-3xl font-bold mb-8">Panel de Administración</h1>
+
+    <!-- Tarjetas de Métricas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <%= render 'admin/shared/metric_card', 
+          title: 'Usuarios Totales',
+          value: @total_usuarios,
+          icon: 'fas fa-users',
+          trend: @metricas_sistema.usuario_trend %>
+      
+      <%= render 'admin/shared/metric_card',
+          title: 'Laboratorios',
+          value: @total_laboratorios,
+          icon: 'fas fa-flask',
+          trend: @metricas_sistema.lab_trend %>
+      
+      <%= render 'admin/shared/metric_card',
+          title: 'Sesiones Activas',
+          value: @sesiones_activas,
+          icon: 'fas fa-play-circle',
+          trend: @metricas_sistema.sesion_trend %>
+      
+      <%= render 'admin/shared/metric_card',
+          title: 'Tasa de Finalización',
+          value: number_to_percentage(@metricas_sistema.tasa_finalizacion, precision: 1),
+          icon: 'fas fa-check-circle',
+          trend: @metricas_sistema.finalizacion_trend %>
+    </div>
+
+    <!-- Grid Principal -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Gráfico de Actividad -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Actividad del Sistema</h2>
+          <div class="h-96">
+            <%= render 'admin/shared/system_activity_chart',
+                data: @metricas_sistema.actividad_diaria %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar de Alertas -->
+      <div class="space-y-6">
+        <!-- Alertas Recientes -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Alertas Recientes</h2>
+          <%= render 'admin/shared/alerts_list',
+              alerts: @metricas_sistema.alertas_recientes %>
+        </div>
+
+        <!-- Recursos del Sistema -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-xl font-bold mb-4">Recursos del Sistema</h2>
+          <%= render 'admin/shared/system_resources',
+              resources: @metricas_sistema.recursos_sistema %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

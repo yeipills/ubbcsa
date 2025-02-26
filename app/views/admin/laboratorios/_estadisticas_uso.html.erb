@@ -1,0 +1,34 @@
+
+<!-- app/views/admin/laboratorios/_estadisticas_uso.html.erb -->
+<div class="space-y-4">
+  <div>
+    <div class="flex justify-between mb-1">
+      <span class="text-sm text-gray-600">Tasa de Finalización</span>
+      <span class="text-sm font-medium">
+        <%= number_to_percentage(stats.tasa_finalizacion, precision: 1) %>
+      </span>
+    </div>
+    <div class="h-2 bg-gray-200 rounded">
+      <div class="h-full bg-green-500 rounded"
+           style="width: <%= stats.tasa_finalizacion %>%"></div>
+    </div>
+  </div>
+  
+  <div>
+    <div class="flex justify-between mb-1">
+      <span class="text-sm text-gray-600">Tiempo Promedio</span>
+      <span class="text-sm font-medium">
+        <%= stats.tiempo_promedio %> minutos
+      </span>
+    </div>
+  </div>
+  
+  <div>
+    <div class="flex justify-between mb-1">
+      <span class="text-sm text-gray-600">Sesiones Totales</span>
+      <span class="text-sm font-medium">
+        <%= stats.total_sesiones %>
+      </span>
+    </div>
+  </div>
+</div>

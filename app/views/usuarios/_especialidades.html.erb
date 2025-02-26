@@ -1,0 +1,15 @@
+<!-- app/views/usuarios/_especialidades.html.erb -->
+<div class="space-y-4">
+  <% especialidades.each do |esp| %>
+    <div>
+      <div class="flex justify-between text-sm mb-1">
+        <span><%= esp.nombre %></span>
+        <span><%= number_to_percentage(esp.nivel, precision: 0) %></span>
+      </div>
+      <div class="h-2 bg-gray-200 rounded">
+        <div class="h-full bg-blue-500 rounded" 
+             style="width: <%= esp.nivel %>%"></div>
+      </div>
+    </div>
+  <% end %>
+</div>

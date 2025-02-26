@@ -1,0 +1,79 @@
+<div class="min-h-screen bg-gray-900">
+  <%= content_for :navbar do %>
+    <%= render 'shared/navbar' %>
+  <% end %>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Tarjetas de Métricas -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <%= render 'dashboard/stats_card',
+          title: 'Sesiones Activas',
+          value: @estadisticas[:sesiones_activas],
+          icon_class: 'M13 10V3L4 14h7v7l9-11h-7z',
+          color_class: 'blue' %>
+
+      <%= render 'dashboard/stats_card',
+          title: 'Labs Completados',
+          value: @estadisticas[:laboratorios_completados],
+          icon_class: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+          color_class: 'green' %>
+
+      <%= render 'dashboard/stats_card',
+          title: 'Cursos Inscritos',
+          value: @estadisticas[:cursos_inscritos],
+          icon_class: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
+          color_class: 'purple' %>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2 space-y-8">
+        <!-- Sesiones Activas -->
+        <div class="bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-700">
+          <h2 class="text-xl font-bold text-white mb-4">Sesiones Activas</h2>
+          <% if @laboratorios_activos.any? %>
+            <div class="space-y-4">
+              <% @laboratorios_activos.each do |sesion| %>
+                <div class="bg-gray-900 rounded-lg p-4 hover:bg-gray-700 transition-colors duration-200">
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <h3 class="font-medium text-white"><%= sesion.laboratorio.nombre %></h3>
+                      <p class="text-sm text-gray-400"><%= sesion.laboratorio.curso.nombre %></p>
+                      <p class="text-xs text-gray-500 mt-1">
+                        Iniciada hace <%= time_ago_in_words(sesion.created_at) %>
+                      </p>
+                    </div>
+                    
+                    <%= link_to "Continuar", sesion_laboratorio_path(sesion), 
+                        class: "px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors duration-200" %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="text-center py-6 bg-gray-900 rounded-lg">
+              <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+              <h3 class="mt-2 text-lg font-medium text-gray-300">No hay sesiones activas</h3>
+              <p class="mt-1 text-gray-400">Inicia un laboratorio para comenzar a practicar.</p>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Laboratorios Disponibles -->
+        <%= render 'dashboard/available_labs', 
+            laboratorios_disponibles: @laboratorios_disponibles %>
+      </div>
+
+      <div class="space-y-8">
+        <!-- Panel de Progreso -->
+        <%= render 'dashboard/progress_panel', 
+            laboratorios_completados: @estadisticas[:laboratorios_completados] %>
+
+        <!-- Actividad Reciente -->
+        <%= render 'dashboard/recent_activity', 
+            sesiones_recientes: @sesiones_recientes %>
+      </div>
+    </div>
+  </div>
+</div>
