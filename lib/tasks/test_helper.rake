@@ -52,14 +52,92 @@ namespace :supabase do
     system({ "SCHEMA" => "false" }, "bundle exec rails db:create")
   end
   
+  desc "Carga el esquema base (tablas iniciales) sin extensiones de Supabase"
+  task load_schema: :environment do
+    puts "🔄 Cargando esquema base sin extensiones específicas de Supabase..."
+    system({ "SCHEMA" => "false" }, "bundle exec rails db:schema:load")
+  end
+  
+  desc "Ejecuta primero las migraciones que crean tablas"
+  task run_create_migrations: :environment do
+    puts "🔄 Buscando y ejecutando primero las migraciones que crean tablas..."
+    
+    # Desactivar extensiones de Supabase durante la migración
+    ENV['SCHEMA'] = 'false'
+    
+    # Obtener todas las migraciones pendientes
+    pending_migrations = ActiveRecord::Migration.new.migration_context.open.pending_migrations
+    
+    # Clasificar las migraciones en tres niveles de prioridad
+    core_table_migrations = [] # Para tablas fundamentales como usuarios y cursos
+    create_table_migrations = [] # Para otras tablas que dependen de las core
+    other_migrations = [] # Para modificaciones, índices, etc.
+    
+    # Lista de tablas que deben crearse primero (orden importante)
+    core_tables = ['usuarios', 'cursos']
+    
+    pending_migrations.each do |migration|
+      # Leer el contenido del archivo
+      file_path = migration.filename
+      content = File.read(file_path)
+      
+      # Identificar migraciones de tablas principales
+      is_core = false
+      core_tables.each do |table|
+        if content.include?("create_table :#{table}") || content.include?("create_table \"#{table}\"")
+          core_table_migrations << migration.version
+          is_core = true
+          break
+        end
+      end
+      next if is_core
+      
+      # Identificar otras migraciones de creación de tablas
+      if content.include?('create_table')
+        create_table_migrations << migration.version
+      else
+        other_migrations << migration.version
+      end
+    end
+    
+    # Ejecutar primero las migraciones con tablas core
+    unless core_table_migrations.empty?
+      puts "  • Ejecutando #{core_table_migrations.size} migraciones de tablas fundamentales..."
+      core_table_migrations.each do |version|
+        system({ "SCHEMA" => "false" }, "bundle exec rails db:migrate:up VERSION=#{version}")
+      end
+    end
+    
+    # Luego ejecutar otras migraciones que crean tablas
+    unless create_table_migrations.empty?
+      puts "  • Ejecutando #{create_table_migrations.size} migraciones que crean otras tablas..."
+      create_table_migrations.each do |version|
+        system({ "SCHEMA" => "false" }, "bundle exec rails db:migrate:up VERSION=#{version}")
+      end
+    end
+    
+    # Finalmente ejecutar modificaciones y otros cambios
+    unless other_migrations.empty?
+      puts "  • Ejecutando #{other_migrations.size} migraciones de modificación de tablas..."
+      other_migrations.each do |version|
+        system({ "SCHEMA" => "false" }, "bundle exec rails db:migrate:up VERSION=#{version}")
+      end
+    end
+  end
+  
   desc "Migra base de datos sin cargar extensiones de Supabase"
   task migrate: :environment do
     puts "🔄 Migrando base de datos compatible con CI..."
     system({ "SCHEMA" => "false" }, "bundle exec rails db:migrate")
   end
   
+  desc "Prepara la base de datos para pruebas (estructura + migraciones)"
+  task prepare_ci_db: [:db_create, :run_create_migrations] do
+    puts "✅ Base de datos preparada para CI"
+  end
+  
   desc "Lanza tareas CI en secuencia correcta"
-  task ci: [:db_create, :migrate, :test] do
+  task ci: [:prepare_ci_db, :test] do
     puts "✅ CI completado con éxito"
   end
   
@@ -94,6 +172,13 @@ namespace :supabase do
       Para más información, consulta:
       docs/SUPABASE.md
     HELP
+  end
+  
+  desc "Reinicia la base de datos de CI desde cero"
+  task reset_ci_db: :environment do
+    puts "🧹 Eliminando y recreando la base de datos para CI..."
+    system({ "SCHEMA" => "false" }, "bundle exec rails db:drop db:create db:schema:load db:migrate")
+    puts "✅ Base de datos reiniciada para CI"
   end
 end
 

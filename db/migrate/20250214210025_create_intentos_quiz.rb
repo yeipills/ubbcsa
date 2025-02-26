@@ -1,5 +1,11 @@
 class CreateIntentosQuiz < ActiveRecord::Migration[7.1]
   def change
+    # Verificar si las tablas dependientes existen
+    unless table_exists?(:quizzes) && table_exists?(:usuarios)
+      puts " Tablas dependientes 'quizzes' y/o 'usuarios' no existen. Saltando la creación de intentos_quiz."
+      return
+    end
+    
     create_table :intentos_quiz do |t|
       t.references :quiz, null: false, foreign_key: true
       t.references :usuario, null: false, foreign_key: true

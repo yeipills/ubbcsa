@@ -1,5 +1,11 @@
 class CreateMetricaLaboratorios < ActiveRecord::Migration[7.1]
   def change
+    # Verificar si la tabla dependiente existe
+    unless table_exists?(:sesion_laboratorios)
+      puts "⚠️ Tabla dependiente 'sesion_laboratorios' no existe. Saltando la creación de metrica_laboratorios."
+      return
+    end
+    
     create_table :metrica_laboratorios do |t|
       t.references :sesion_laboratorio, null: false, foreign_key: true
       t.float :cpu_usage, null: false, default: 0

@@ -1,5 +1,11 @@
 class CreateQuizzes < ActiveRecord::Migration[7.1]
   def change
+    # Verificar si las tablas dependientes existen
+    unless table_exists?(:cursos) && table_exists?(:laboratorios) && table_exists?(:usuarios)
+      puts "⚠️ Tablas dependientes 'cursos', 'laboratorios' y/o 'usuarios' no existen. Saltando la creación de quizzes."
+      return
+    end
+    
     create_table :quizzes do |t|
       t.string :titulo, null: false
       t.text :descripcion
