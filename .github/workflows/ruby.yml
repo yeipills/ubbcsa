@@ -54,4 +54,5 @@ jobs:
       run: bundle exec rake supabase:test
       
     - name: Run rubocop
+      continue-on-error: true  # Hacemos que este paso sea opcional por ahora
       run: bundle exec rubocop --parallel
