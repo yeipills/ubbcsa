@@ -76,3 +76,7 @@ yarn-debug.log*
 
 # Ignore docker related files except the ones we need to share
 /docker-compose.override.yml
+
+# Archivos específicos del proyecto a ignorar
+bd.txt
+directorio.txt

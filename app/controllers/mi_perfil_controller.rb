@@ -1,10 +1,9 @@
-# app/controllers/perfil_controller.rb
-class PerfilController < ApplicationController
+# app/controllers/mi_perfil_controller.rb
+class MiPerfilController < ApplicationController
   before_action :authenticate_usuario!
   before_action :set_usuario
 
   def show
-    @usuario = current_usuario
     @sesiones_recientes = @usuario.sesion_laboratorios
                                   .includes(:laboratorio)
                                   .order(created_at: :desc)
@@ -14,17 +13,14 @@ class PerfilController < ApplicationController
       laboratorios_completados: @usuario.laboratorios_completados || 0,
       cursos_inscritos: @usuario.todos_cursos.count || 0
     }
-    @logros = @usuario.logros
   end
 
   def edit
-    @usuario = current_usuario
   end
 
   def update
-    @usuario = current_usuario
     if @usuario.update(perfil_params)
-      redirect_to perfil_path, notice: 'Perfil actualizado exitosamente'
+      redirect_to mi_perfil_path, notice: 'Perfil actualizado exitosamente'
     else
       render :edit
     end
@@ -40,8 +36,7 @@ class PerfilController < ApplicationController
     params.require(:usuario).permit(
       :nombre_completo,
       :nombre_usuario,
-      :email,
-      :avatar
+      :email
     )
   end
 end

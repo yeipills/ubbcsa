@@ -39,19 +39,27 @@
                 <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-blue-500 rounded-full"></span>
               <% end %>
             <% end %>
+            
+            <%= link_to quizzes_path, 
+                class: "text-gray-300 hover:text-white text-sm font-medium transition-colors duration-200 relative #{controller_name == 'quizzes' ? 'text-white' : ''}" do %>
+              Quizzes
+              <% if controller_name == 'quizzes' %>
+                <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-blue-500 rounded-full"></span>
+              <% end %>
+            <% end %>
           </div>
 
           <%# Perfil usuario con hover mejorado %>
-          <div class="flex items-center space-x-3 bg-gray-800 px-4 py-2 rounded-lg border border-transparent hover:border-gray-700 transition-all duration-200">
+          <%= link_to mi_perfil_path, class: "flex items-center space-x-3 bg-gray-800 px-4 py-2 rounded-lg border border-transparent hover:border-gray-700 transition-all duration-200" do %>
             <div class="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
               <span class="text-sm font-medium text-white">
-                <%= current_usuario.email[0].upcase %>
+                <%= current_usuario.nombre_usuario ? current_usuario.nombre_usuario[0].upcase : current_usuario.email[0].upcase %>
               </span>
             </div>
             <span class="text-sm text-gray-300">
-              <%= current_usuario.email %>
+              <%= current_usuario.nombre_usuario || current_usuario.email %>
             </span>
-          </div>
+          <% end %>
 
           <%# Cerrar sesión con efecto hover mejorado %>
           <%= button_to destroy_usuario_session_path, 
@@ -133,19 +141,29 @@
                 Laboratorios
               </div>
             <% end %>
+            
+            <%= link_to quizzes_path, 
+                class: "block py-2 px-3 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm font-medium transition-colors duration-200 #{controller_name == 'quizzes' ? 'text-white bg-gray-800 border-l-2 border-blue-500 pl-4' : ''}" do %>
+              <div class="flex items-center">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Quizzes
+              </div>
+            <% end %>
           </div>
           
-          <!-- Perfil en móvil -->
-          <div class="flex items-center space-x-3 bg-gray-800 px-4 py-3 rounded-lg mb-4 border border-gray-700">
+          <!-- Perfil en móvil como enlace -->
+          <%= link_to mi_perfil_path, class: "flex items-center space-x-3 bg-gray-800 px-4 py-3 rounded-lg mb-4 border border-gray-700" do %>
             <div class="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
               <span class="text-sm font-medium text-white">
-                <%= current_usuario.email[0].upcase %>
+                <%= current_usuario.nombre_usuario ? current_usuario.nombre_usuario[0].upcase : current_usuario.email[0].upcase %>
               </span>
             </div>
             <span class="text-sm text-gray-300 truncate">
-              <%= current_usuario.email %>
+              Mi Perfil
             </span>
-          </div>
+          <% end %>
           
           <!-- Botón de cerrar sesión en móvil -->
           <%= button_to destroy_usuario_session_path, 

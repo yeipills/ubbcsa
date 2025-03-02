@@ -4,17 +4,20 @@ Rails.application.routes.draw do
     sessions: 'usuarios/sessions',
     registrations: 'usuarios/registrations'
   }
-  
+
   # Ruta principal
   root 'home#index'
-  
+
   # Rutas protegidas
   authenticate :usuario do
     get '/dashboard', to: 'dashboard#index', as: :dashboard
-    
+
     # Perfil de usuario
-    resource :perfil, only: [:show, :edit, :update]
-    
+    resource :perfil, only: %i[show edit update]
+    get 'mi_perfil', to: 'mi_perfil#show', as: 'mi_perfil'
+    get 'mi_perfil/edit', to: 'mi_perfil#edit', as: 'edit_mi_perfil'
+    patch 'mi_perfil', to: 'mi_perfil#update'
+
     # Sesiones de laboratorio y consola
     resources :sesion_laboratorios do
       member do
@@ -22,12 +25,12 @@ Rails.application.routes.draw do
         post :pausar
         post :completar
       end
-      
+
       resource :consola, only: [:show] do
         get 'terminal', to: 'wetty#show'
       end
     end
-    
+
     # Cursos y recursos anidados
     resources :cursos do
       member do
@@ -36,20 +39,20 @@ Rails.application.routes.draw do
         get :estudiantes
         get :metricas
       end
-      
+
       # Laboratorios anidados con shallow routing
       resources :laboratorios, shallow: true
-      
+
       # Quizzes anidados con shallow routing
       resources :quizzes, shallow: true do
         resources :preguntas, controller: 'quiz_preguntas', shallow: true do
           resources :opciones, controller: 'quiz_opciones', shallow: true
-          
+
           collection do
             post :reordenar
           end
         end
-        
+
         resources :intentos, controller: 'intentos_quiz', shallow: true do
           member do
             post :iniciar
@@ -58,7 +61,7 @@ Rails.application.routes.draw do
             post :responder
           end
         end
-        
+
         member do
           post :publicar
           post :despublicar
@@ -66,41 +69,41 @@ Rails.application.routes.draw do
         end
       end
     end
-    
+
     # Laboratorios independientes
-    resources :laboratorios, only: [:index, :show] do
+    resources :laboratorios, only: %i[index show] do
       collection do
         get :disponibles
         get :completados
       end
     end
-    
+
     # Quizzes independientes (vista general)
-    resources :quizzes, only: [:index, :show] do
-      resources :intentos, controller: 'intentos_quiz', only: [:create, :show, :update] do
+    resources :quizzes, only: %i[index show] do
+      resources :intentos, controller: 'intentos_quiz', only: %i[create show update] do
         member do
           post :finalizar
           get :resultados
         end
       end
     end
-    
+
     # Reportes
-    resources :reportes, only: [:index, :show] do
+    resources :reportes, only: %i[index show] do
       collection do
         get :descargar
       end
     end
-    
+
     # Panel de administración
     namespace :admin do
       get '/', to: 'dashboard#index'
       resources :usuarios
       resources :cursos
       resources :laboratorios
-      resources :configuracion, only: [:index, :update]
-      resources :monitor, only: [:index, :show]
-      resources :reportes, only: [:index, :show]
+      resources :configuracion, only: %i[index update]
+      resources :monitor, only: %i[index show]
+      resources :reportes, only: %i[index show]
     end
   end
 end

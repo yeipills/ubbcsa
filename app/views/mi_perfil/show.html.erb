@@ -1,0 +1,226 @@
+<!-- app/views/mi_perfil/show.html.erb -->
+<div class="min-h-screen bg-gray-900">
+  <%= content_for :navbar do %>
+    <%= render 'shared/navbar' %>
+  <% end %>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Perfil Header -->
+    <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 mb-6">
+      <div class="p-6">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div class="flex flex-col md:flex-row items-center md:space-x-4 text-center md:text-left">
+            <div class="bg-blue-600 rounded-full p-8 mb-4 md:mb-0 shadow-lg">
+              <span class="text-4xl font-bold text-white">
+                <%= @usuario.nombre_usuario ? @usuario.nombre_usuario[0].upcase : @usuario.email[0].upcase %>
+              </span>
+            </div>
+            <div>
+              <h1 class="text-2xl font-bold text-white"><%= @usuario.nombre_completo %></h1>
+              <p class="text-gray-400"><%= @usuario.email %></p>
+              <p class="mt-2 px-2 py-1 text-sm rounded-full inline-block 
+                      <%= @usuario.rol == 'estudiante' ? 'bg-blue-900 text-blue-300' : 
+                         @usuario.rol == 'profesor' ? 'bg-purple-900 text-purple-300' : 
+                         'bg-red-900 text-red-300' %>">
+                <%= @usuario.rol.capitalize %>
+              </p>
+            </div>
+          </div>
+          
+          <!-- Acciones -->
+          <div class="flex flex-wrap justify-center md:justify-end gap-3">
+            <%= link_to edit_mi_perfil_path, 
+                class: "px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors duration-200 flex items-center" do %>
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              Editar Perfil
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left Column -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Actividad Reciente -->
+        <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700">
+          <div class="p-6">
+            <h2 class="text-xl font-bold text-white mb-4">Actividad Reciente</h2>
+            <% if @sesiones_recientes.any? %>
+              <div class="space-y-4">
+                <% @sesiones_recientes.each do |sesion| %>
+                  <div class="bg-gray-900 rounded-lg p-4 hover:bg-gray-700 transition-colors duration-200">
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <h3 class="font-medium text-white"><%= sesion.laboratorio.nombre %></h3>
+                        <p class="text-sm text-gray-400"><%= sesion.laboratorio.curso.nombre %></p>
+                        <p class="text-xs text-gray-500 mt-1">
+                          <%= time_ago_in_words(sesion.created_at) %> atrás
+                        </p>
+                      </div>
+                      
+                      <span class="px-2 py-1 text-xs rounded-full
+                              <%= sesion.estado == 'completada' ? 'bg-green-900 text-green-300' : 
+                                sesion.estado == 'activa' ? 'bg-blue-900 text-blue-300' : 
+                                'bg-gray-700 text-gray-300' %>">
+                        <%= sesion.estado.capitalize %>
+                      </span>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <div class="text-center py-6 bg-gray-900 rounded-lg">
+                <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <h3 class="mt-2 text-lg font-medium text-gray-300">No hay actividad reciente</h3>
+                <p class="mt-1 text-gray-400">Comienza un laboratorio para registrar tu actividad.</p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700">
+          <div class="p-6">
+            <h2 class="text-xl font-bold text-white mb-4">Estadísticas</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <!-- Sesiones Activas -->
+              <div class="bg-gray-900 rounded-xl p-6">
+                <div class="flex items-center">
+                  <div class="p-3 rounded-full bg-blue-900 text-blue-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                  </div>
+                  <div class="ml-4">
+                    <dt class="text-sm font-medium text-gray-400">
+                      Sesiones Activas
+                    </dt>
+                    <dd class="mt-1 text-2xl font-semibold text-white">
+                      <%= @estadisticas[:sesiones_activas] %>
+                    </dd>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Laboratorios Completados -->
+              <div class="bg-gray-900 rounded-xl p-6">
+                <div class="flex items-center">
+                  <div class="p-3 rounded-full bg-green-900 text-green-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                  </div>
+                  <div class="ml-4">
+                    <dt class="text-sm font-medium text-gray-400">
+                      Labs Completados
+                    </dt>
+                    <dd class="mt-1 text-2xl font-semibold text-white">
+                      <%= @estadisticas[:laboratorios_completados] %>
+                    </dd>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cursos Inscritos -->
+              <div class="bg-gray-900 rounded-xl p-6">
+                <div class="flex items-center">
+                  <div class="p-3 rounded-full bg-purple-900 text-purple-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                  </div>
+                  <div class="ml-4">
+                    <dt class="text-sm font-medium text-gray-400">
+                      Cursos Inscritos
+                    </dt>
+                    <dd class="mt-1 text-2xl font-semibold text-white">
+                      <%= @estadisticas[:cursos_inscritos] %>
+                    </dd>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="space-y-6">
+        <!-- Información Personal -->
+        <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700">
+          <div class="p-6">
+            <h2 class="text-xl font-bold text-white mb-4">Información Personal</h2>
+            <dl class="space-y-4">
+              <div>
+                <dt class="text-sm font-medium text-gray-400">Nombre Completo</dt>
+                <dd class="mt-1 text-white"><%= @usuario.nombre_completo %></dd>
+              </div>
+              
+              <div>
+                <dt class="text-sm font-medium text-gray-400">Nombre de Usuario</dt>
+                <dd class="mt-1 text-white"><%= @usuario.nombre_usuario %></dd>
+              </div>
+              
+              <div>
+                <dt class="text-sm font-medium text-gray-400">Email</dt>
+                <dd class="mt-1 text-white"><%= @usuario.email %></dd>
+              </div>
+              
+              <div>
+                <dt class="text-sm font-medium text-gray-400">Miembro desde</dt>
+                <dd class="mt-1 text-white"><%= l @usuario.created_at.to_date, format: :long %></dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+
+        <!-- Progreso -->
+        <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700">
+          <div class="p-6">
+            <h2 class="text-xl font-bold text-white mb-4">Tu Progreso</h2>
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-gray-400">Laboratorios Completados</span>
+                <span class="text-sm font-medium text-gray-400">
+                  <%= @estadisticas[:laboratorios_completados] %>%
+                </span>
+              </div>
+              <div class="w-full bg-gray-900 rounded-full h-2">
+                <div class="bg-blue-500 h-2 rounded-full" 
+                    style="width: <%= @estadisticas[:laboratorios_completados] %>%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Configuración de Cuenta -->
+        <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700">
+          <div class="p-6">
+            <h2 class="text-xl font-bold text-white mb-4">Configuración de Cuenta</h2>
+            <div class="space-y-4">
+              <%= link_to edit_mi_perfil_path, class: "flex items-center text-gray-300 hover:text-white" do %>
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                Editar perfil
+              <% end %>
+              
+              <%= link_to edit_usuario_registration_path, class: "flex items-center text-gray-300 hover:text-white" do %>
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+                Cambiar contraseña
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
