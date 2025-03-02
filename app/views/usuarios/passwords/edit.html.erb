@@ -1,25 +1,85 @@
-<h2>Change your password</h2>
+<div class="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full mx-auto space-y-8">
+    <!-- Logo Header -->
+    <div class="text-center">
+      <%= link_to root_path, class: "inline-block" do %>
+        <div class="flex items-center justify-center h-12 w-12 rounded-xl mx-auto">
+        </div>
+        <h2 class="mt-4 text-3xl font-extrabold text-white">
+          Cambiar Contraseña
+        </h2>
+      <% end %> 
+      <p class="mt-2 text-sm text-gray-400">
+        Crea una nueva contraseña para tu cuenta
+      </p>
+    </div>
 
-<%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put }) do |f| %>
-  <%= render "usuarios/shared/error_messages", resource: resource %>
-  <%= f.hidden_field :reset_password_token %>
+    <!-- Cambio de Contraseña Form -->
+    <div class="bg-gray-800/30 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50 p-8">
+      <%= form_for(resource, as: resource_name, url: password_path(resource_name), 
+          html: { method: :put, class: "space-y-6" }) do |f| %>
+        <%= render "usuarios/shared/error_messages", resource: resource %>
+        <%= f.hidden_field :reset_password_token %>
 
-  <div class="field">
-    <%= f.label :password, "New password" %><br />
-    <% if @minimum_password_length %>
-      <em>(<%= @minimum_password_length %> characters minimum)</em><br />
-    <% end %>
-    <%= f.password_field :password, autofocus: true, autocomplete: "new-password" %>
+        <!-- Nueva Contraseña Field -->
+        <div>
+          <%= f.label :password, "Nueva contraseña", 
+              class: "block text-sm font-medium text-gray-300 mb-1" %>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <%= f.password_field :password, autocomplete: "new-password",
+                class: "block w-full pl-10 pr-3 py-2.5 border border-gray-600 
+                       rounded-xl shadow-sm placeholder-gray-500
+                       bg-gray-900/50 text-white 
+                       focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                       text-sm",
+                placeholder: "••••••••" %>
+          </div>
+          <% if @minimum_password_length %>
+            <p class="mt-1 text-xs text-gray-400">Mínimo <%= @minimum_password_length %> caracteres</p>
+          <% end %>
+        </div>
+
+        <!-- Confirmar Contraseña Field -->
+        <div>
+          <%= f.label :password_confirmation, "Confirmar contraseña", 
+              class: "block text-sm font-medium text-gray-300 mb-1" %>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <%= f.password_field :password_confirmation, autocomplete: "new-password",
+                class: "block w-full pl-10 pr-3 py-2.5 border border-gray-600 
+                       rounded-xl shadow-sm placeholder-gray-500
+                       bg-gray-900/50 text-white 
+                       focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                       text-sm",
+                placeholder: "••••••••" %>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <%= f.submit "Cambiar mi contraseña",
+            class: "w-full flex justify-center py-2.5 px-4 mt-6
+                   border border-transparent rounded-xl shadow-sm 
+                   text-sm font-medium text-white bg-blue-600 hover:bg-blue-500
+                   focus:outline-none focus:ring-2 focus:ring-offset-2 
+                   focus:ring-offset-gray-800 focus:ring-blue-500
+                   transition duration-200" %>
+      <% end %>
+
+      <!-- Additional Links -->
+      <div class="mt-6 text-center text-sm">
+        <%= render "usuarios/shared/links" %>
+      </div>
+    </div>
   </div>
-
-  <div class="field">
-    <%= f.label :password_confirmation, "Confirm new password" %><br />
-    <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
-  </div>
-
-  <div class="actions">
-    <%= f.submit "Change my password" %>
-  </div>
-<% end %>
-
-<%= render "usuarios/shared/links" %>
+</div>

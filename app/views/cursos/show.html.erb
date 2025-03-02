@@ -1,329 +1,297 @@
-<%= content_for :navbar do %>
-  <%= render 'shared/navbar' %>
-<% end %>
-
-<main role="main" class="container mx-auto px-4 py-8">
-  <!-- Migas de pan -->
-  <nav class="flex items-center text-sm text-gray-400 mb-6" aria-label="Breadcrumb">
-    <ol class="flex items-center space-x-2">
-      <li>
-        <%= link_to "Inicio", root_path, class: "hover:text-white" %>
-      </li>
-      <li class="flex items-center">
-        <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-        </svg>
-        <%= link_to "Cursos", cursos_path, class: "hover:text-white" %>
-      </li>
-      <li class="flex items-center">
-        <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-        </svg>
-        <span class="text-white font-medium" aria-current="page"><%= @curso.nombre %></span>
-      </li>
-    </ol>
-  </nav>
-  
-  <!-- Toast de notificación -->
-  <% if flash.any? %>
-    <div id="notification" class="fixed top-4 right-4 z-50 transition-all duration-300">
-      <div class="<%= flash[:notice] ? 'bg-green-100 border-green-500 text-green-700' : 'bg-red-100 border-red-500 text-red-700' %> border-l-4 p-4 rounded shadow-lg flex items-center">
-        <svg class="h-6 w-6 <%= flash[:notice] ? 'text-green-500' : 'text-red-500' %> mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <% if flash[:notice] %>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-          <% else %>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-          <% end %>
-        </svg>
-        <span><%= flash[:notice] || flash[:alert] %></span>
-        <button onclick="this.parentNode.parentNode.remove()" class="ml-4 text-gray-500 hover:text-gray-700">
-          <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-          </svg>
-        </button>
-      </div>
-    </div>
+<div class="min-h-screen bg-gray-900">
+  <%= content_for :navbar do %>
+    <%= render 'shared/navbar' %>
   <% end %>
-  
-  <article class="bg-gray-800 rounded-lg shadow-md border border-gray-700">
-    <div class="p-6 sm:p-8">      
-      <!-- Encabezado con imagen decorativa -->
-      <header class="relative mb-8 pb-6 border-b border-gray-700">
-        <div class="absolute top-0 right-0 h-24 w-24 opacity-10">
-          <svg fill="currentColor" class="text-blue-500" viewBox="0 0 24 24">
-            <path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-8-2h4v2h-4V4zM20 20H4V8h16v12z"/>
-            <path d="M13 10h-2v3H8v2h3v3h2v-3h3v-2h-3v-3z"/>
+
+  <main role="main" class="container mx-auto px-4 py-8">
+    <!-- Migas de pan -->
+    <nav class="flex items-center text-sm text-gray-400 mb-6" aria-label="Breadcrumb">
+      <ol class="flex items-center space-x-2">
+        <li>
+          <%= link_to "Inicio", root_path, class: "hover:text-white" %>
+        </li>
+        <li class="flex items-center">
+          <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
           </svg>
-        </div>
-        
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h1 class="text-3xl font-bold text-white"><%= @curso.nombre %></h1>
+          <%= link_to "Cursos", cursos_path, class: "hover:text-white" %>
+        </li>
+        <li class="flex items-center">
+          <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-white font-medium" aria-current="page"><%= @curso.nombre %></span>
+        </li>
+      </ol>
+    </nav>
+    
+    <article class="bg-gray-800/90 backdrop-blur-sm rounded-lg shadow-xl border border-gray-700">
+      <div class="p-6 sm:p-8">      
+        <!-- Encabezado con imagen decorativa -->
+        <header class="relative mb-8 pb-6 border-b border-gray-700">
+          <div class="absolute top-0 right-0 h-24 w-24 opacity-10">
+            <svg fill="currentColor" class="text-blue-500" viewBox="0 0 24 24">
+              <path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-8-2h4v2h-4V4zM20 20H4V8h16v12z"/>
+              <path d="M13 10h-2v3H8v2h3v3h2v-3h3v-2h-3v-3z"/>
+            </svg>
+          </div>
           
-          <% if @curso.profesor?(current_usuario) %>
-            <div class="flex flex-wrap gap-2">
-              <%= link_to edit_curso_path(@curso), 
-                  class: "inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500", 
-                  aria: { label: "Editar curso" } do %>
-                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                </svg>
-                Editar
-              <% end %>
-              
-              <%= button_to curso_path(@curso), method: :delete, 
-                  class: "inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500", 
-                  data: { turbo_confirm: "¿Estás seguro que deseas eliminar este curso? Esta acción no se puede deshacer." }, 
-                  aria: { label: "Eliminar curso" } do %>
-                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                </svg>
-                Eliminar
-              <% end %>
-            </div>
-          <% end %>
-        </div>
-        
-        <div class="mt-4 flex flex-wrap items-center gap-4">
-          <div class="inline-flex items-center px-3 py-1 rounded-full bg-gray-700 text-gray-300 text-sm">
-            <svg class="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
-            </svg>
-            <%= @curso.codigo %>
-          </div>
-          <div class="inline-flex items-center px-3 py-1 rounded-full <%= @curso.activo? ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300' %> text-sm">
-            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <%= @curso.activo? ? "Activo" : "Inactivo" %>
-          </div>
-          <div class="inline-flex items-center px-3 py-1 rounded-full bg-gray-700 text-gray-300 text-sm">
-            <svg class="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-            <%= @curso.periodo || "Sin periodo" %>
-          </div>
-        </div>
-      </header>
-      
-      <!-- Pestañas de navegación -->
-      <div x-data="{ activeTab: 'info' }" class="mb-8">
-        <div class="border-b border-gray-700">
-          <nav class="flex -mb-px space-x-6">
-            <button @click="activeTab = 'info'" 
-                    :class="{ 'border-blue-500 text-blue-500': activeTab === 'info', 'border-transparent text-gray-400 hover:text-gray-300': activeTab !== 'info' }" 
-                    class="py-3 border-b-2 font-medium text-sm">
-              Información
-            </button>
-            <button @click="activeTab = 'labs'" 
-                    :class="{ 'border-blue-500 text-blue-500': activeTab === 'labs', 'border-transparent text-gray-400 hover:text-gray-300': activeTab !== 'labs' }" 
-                    class="py-3 border-b-2 font-medium text-sm flex items-center">
-              Laboratorios
-              <span class="ml-1.5 px-2 py-0.5 rounded-full text-xs bg-gray-700"><%= @laboratorios.count %></span>
-            </button>
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h1 class="text-3xl font-bold text-white"><%= @curso.nombre %></h1>
+            
             <% if @curso.profesor?(current_usuario) %>
-              <button @click="activeTab = 'students'" 
-                      :class="{ 'border-blue-500 text-blue-500': activeTab === 'students', 'border-transparent text-gray-400 hover:text-gray-300': activeTab !== 'students' }" 
-                      class="py-3 border-b-2 font-medium text-sm flex items-center">
-                Estudiantes
-                <span class="ml-1.5 px-2 py-0.5 rounded-full text-xs bg-gray-700"><%= @estudiantes.count %></span>
-              </button>
-            <% end %>
-          </nav>
-        </div>
-        
-        <!-- Contenido de la pestaña de información -->
-        <div x-show="activeTab === 'info'" class="py-6">
-          <section class="mb-8">
-            <h2 class="text-xl font-semibold text-white mb-3">Descripción</h2>
-            <div class="bg-gray-900 rounded-lg p-4 border border-gray-700">
-              <p class="text-gray-300 leading-relaxed">
-                <%= @curso.descripcion.presence || "No hay descripción disponible para este curso." %>
-              </p>
-            </div>
-          </section>
-          
-          <section>
-            <h2 class="text-xl font-semibold text-white mb-3">Detalles adicionales</h2>
-            <div class="bg-gray-900 rounded-lg p-4 border border-gray-700">
-              <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
-                <div>
-                  <dt class="text-sm font-medium text-gray-400">Fecha de creación</dt>
-                  <dd class="mt-1 text-gray-300"><%= @curso.created_at.strftime("%d/%m/%Y") %></dd>
-                </div>
-                <div>
-                  <dt class="text-sm font-medium text-gray-400">Última actualización</dt>
-                  <dd class="mt-1 text-gray-300"><%= @curso.updated_at.strftime("%d/%m/%Y") %></dd>
-                </div>
-                <div>
-                  <dt class="text-sm font-medium text-gray-400">Profesor</dt>
-                  <dd class="mt-1 text-gray-300"><%= @curso.profesor&.email || "No asignado" %></dd>                </div>
-                <div>
-                  <dt class="text-sm font-medium text-gray-400">Estudiantes inscritos</dt>
-                  <dd class="mt-1 text-gray-300"><%= @estudiantes.count %></dd>
-                </div>
-              </dl>
-            </div>
-          </section>
-        </div>
-        
-        <!-- Contenido de la pestaña de laboratorios -->
-        <div x-show="activeTab === 'labs'" class="py-6">
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-semibold text-white">Laboratorios</h2>
-            <% if @curso.profesor?(current_usuario) %>
-              <%= link_to new_curso_laboratorio_path(@curso), 
-                  class: "inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500", 
-                  aria: { label: "Añadir nuevo laboratorio" } do %>
-                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                </svg>
-                Añadir Laboratorio
-              <% end %>
+              <div class="flex flex-wrap gap-2">
+                <%= link_to edit_curso_path(@curso), 
+                    class: "inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500", 
+                    aria: { label: "Editar curso" } do %>
+                  <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                  </svg>
+                  Editar
+                <% end %>
+                
+                <%= button_to curso_path(@curso), method: :delete, 
+                    class: "inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500", 
+                    data: { turbo_confirm: "¿Estás seguro que deseas eliminar este curso? Esta acción no se puede deshacer." }, 
+                    aria: { label: "Eliminar curso" } do %>
+                  <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                  Eliminar
+                <% end %>
+              </div>
             <% end %>
           </div>
           
-          <% if @laboratorios.any? %>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <%= safe_join(@laboratorios.map { |lab| render partial: "laboratorio", locals: { laboratorio: lab } }) %>
-            </div>
-          <% else %>
-            <div class="bg-gray-900 rounded-lg p-8 border border-gray-700 text-center">
-              <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          <div class="mt-4 flex flex-wrap items-center gap-4">
+            <div class="inline-flex items-center px-3 py-1 rounded-full bg-gray-700 text-gray-300 text-sm">
+              <svg class="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
               </svg>
-              <h3 class="mt-2 text-lg font-medium text-gray-300">No hay laboratorios</h3>
-              <p class="mt-1 text-sm text-gray-400">Este curso aún no tiene laboratorios asignados.</p>
-              <% if @curso.profesor?(current_usuario) %>
-                <div class="mt-6">
-                  <%= link_to new_curso_laboratorio_path(@curso), 
-                      class: "inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500" do %>
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                    </svg>
-                    Crear primer laboratorio
-                  <% end %>
-                </div>
-              <% end %>
+              <%= @curso.codigo %>
             </div>
-          <% end %>
-        </div>
-        
-        <!-- Contenido de la pestaña de estudiantes -->
-        <% if @curso.profesor?(current_usuario) %>
-          <div x-show="activeTab === 'students'" class="py-6">
-            <div class="flex justify-between items-center mb-6">
-              <h2 class="text-xl font-semibold text-white">Estudiantes</h2>
-              <%= link_to "#", 
-                  class: "inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500" do %>
-                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            <div class="inline-flex items-center px-3 py-1 rounded-full <%= @curso.activo? ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300' %> text-sm">
+              <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <%= @curso.activo? ? "Activo" : "Inactivo" %>
+            </div>
+            <% if @curso.periodo.present? %>
+              <div class="inline-flex items-center px-3 py-1 rounded-full bg-gray-700 text-gray-300 text-sm">
+                <svg class="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
-                Añadir Estudiante
+                <%= @curso.periodo %>
+              </div>
+            <% end %>
+          </div>
+        </header>
+        
+        <!-- Pestañas de navegación con Alpine.js -->
+        <div x-data="{ activeTab: 'info' }" class="mb-8">
+          <div class="border-b border-gray-700">
+            <nav class="flex -mb-px space-x-6">
+              <button @click="activeTab = 'info'" 
+                      :class="{ 'border-blue-500 text-blue-500': activeTab === 'info', 'border-transparent text-gray-400 hover:text-gray-300': activeTab !== 'info' }" 
+                      class="py-3 border-b-2 font-medium text-sm">
+                Información
+              </button>
+              <button @click="activeTab = 'labs'" 
+                      :class="{ 'border-blue-500 text-blue-500': activeTab === 'labs', 'border-transparent text-gray-400 hover:text-gray-300': activeTab !== 'labs' }" 
+                      class="py-3 border-b-2 font-medium text-sm flex items-center">
+                Laboratorios
+                <span class="ml-1.5 px-2 py-0.5 rounded-full text-xs bg-gray-700"><%= @laboratorios.count %></span>
+              </button>
+              <% if @curso.profesor?(current_usuario) %>
+                <button @click="activeTab = 'students'" 
+                        :class="{ 'border-blue-500 text-blue-500': activeTab === 'students', 'border-transparent text-gray-400 hover:text-gray-300': activeTab !== 'students' }" 
+                        class="py-3 border-b-2 font-medium text-sm flex items-center">
+                  Estudiantes
+                  <span class="ml-1.5 px-2 py-0.5 rounded-full text-xs bg-gray-700"><%= @estudiantes.count %></span>
+                </button>
+              <% end %>
+            </nav>
+          </div>
+          
+          <!-- Contenido de la pestaña de información -->
+          <div x-show="activeTab === 'info'" class="py-6">
+            <section class="mb-8">
+              <h2 class="text-xl font-semibold text-white mb-3">Descripción</h2>
+              <div class="bg-gray-900/80 backdrop-blur-sm rounded-lg p-4 border border-gray-700">
+                <p class="text-gray-300 leading-relaxed">
+                  <%= @curso.descripcion.presence || "No hay descripción disponible para este curso." %>
+                </p>
+              </div>
+            </section>
+            
+            <section>
+              <h2 class="text-xl font-semibold text-white mb-3">Detalles adicionales</h2>
+              <div class="bg-gray-900/80 backdrop-blur-sm rounded-lg p-4 border border-gray-700">
+                <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
+                  <div>
+                    <dt class="text-sm font-medium text-gray-400">Fecha de creación</dt>
+                    <dd class="mt-1 text-gray-300"><%= @curso.created_at.strftime("%d/%m/%Y") %></dd>
+                  </div>
+                  <div>
+                    <dt class="text-sm font-medium text-gray-400">Última actualización</dt>
+                    <dd class="mt-1 text-gray-300"><%= @curso.updated_at.strftime("%d/%m/%Y") %></dd>
+                  </div>
+                  <div>
+                    <dt class="text-sm font-medium text-gray-400">Profesor</dt>
+                    <dd class="mt-1 text-gray-300"><%= @curso.profesor&.nombre_completo || "No asignado" %></dd>
+                  </div>
+                  <div>
+                    <dt class="text-sm font-medium text-gray-400">Estudiantes inscritos</dt>
+                    <dd class="mt-1 text-gray-300"><%= @curso.estudiantes&.count || 0 %></dd>
+                  </div>
+                </dl>
+              </div>
+            </section>
+          </div>
+          
+          <!-- Contenido de la pestaña de laboratorios -->
+          <div x-show="activeTab === 'labs'" class="py-6">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-xl font-semibold text-white">Laboratorios</h2>
+              <% if @curso.profesor?(current_usuario) %>
+                <%= link_to new_curso_laboratorio_path(@curso), 
+                    class: "inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500", 
+                    aria: { label: "Añadir nuevo laboratorio" } do %>
+                  <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                  </svg>
+                  Añadir Laboratorio
+                <% end %>
               <% end %>
             </div>
             
-            <% if @estudiantes.any? %>
-              <div class="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden">
-                <div class="overflow-x-auto">
-                  <table class="min-w-full divide-y divide-gray-700">
-                    <thead class="bg-gray-800">
-                      <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                          Nombre
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                          Email
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                          Último acceso
-                        </th>
-                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
-                          Acciones
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody class="bg-gray-900 divide-y divide-gray-800">
-                      <% @estudiantes.each do |estudiante| %>
-                        <tr class="hover:bg-gray-800">
-                          <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="flex items-center">
-                              <div class="flex-shrink-0 h-8 w-8 bg-gray-700 rounded-full flex items-center justify-center text-white">
-                                <%= estudiante.nombre[0].upcase %>
-                              </div>
-                              <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-300">
-                                  <%= estudiante.nombre %>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-300"><%= estudiante.email %></div>
-                          </td>
-                          <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-300"><%= estudiante.last_sign_in_at&.strftime("%d/%m/%Y %H:%M") || "Nunca" %></div>
-                          </td>
-                          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <%= link_to "#", class: "text-indigo-400 hover:text-indigo-300" do %>
-                              Ver detalle
-                            <% end %>
-                          </td>
-                        </tr>
-                      <% end %>
-                    </tbody>
-                  </table>
-                </div>
+            <% if @laboratorios.any? %>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <%= render partial: "laboratorio", collection: @laboratorios %>
               </div>
             <% else %>
-              <div class="bg-gray-900 rounded-lg p-8 border border-gray-700 text-center">
+              <div class="bg-gray-900/80 backdrop-blur-sm rounded-lg p-8 border border-gray-700 text-center">
                 <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                 </svg>
-                <h3 class="mt-2 text-lg font-medium text-gray-300">No hay estudiantes</h3>
-                <p class="mt-1 text-sm text-gray-400">Aún no hay estudiantes inscritos en este curso.</p>
-                <div class="mt-6">
-                  <%= link_to "#", 
-                      class: "inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500" do %>
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                    </svg>
-                    Inscribir estudiantes
-                  <% end %>
-                </div>
+                <h3 class="mt-2 text-lg font-medium text-gray-300">No hay laboratorios</h3>
+                <p class="mt-1 text-sm text-gray-400">Este curso aún no tiene laboratorios asignados.</p>
+                <% if @curso.profesor?(current_usuario) %>
+                  <div class="mt-6">
+                    <%= link_to new_curso_laboratorio_path(@curso), 
+                        class: "inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500" do %>
+                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                      </svg>
+                      Crear primer laboratorio
+                    <% end %>
+                  </div>
+                <% end %>
               </div>
             <% end %>
           </div>
-        <% end %>
+          
+          <!-- Contenido de la pestaña de estudiantes -->
+          <% if @curso.profesor?(current_usuario) %>
+            <div x-show="activeTab === 'students'" class="py-6">
+              <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-semibold text-white">Estudiantes</h2>
+                <%= link_to "#", 
+                    class: "inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500" do %>
+                  <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                  </svg>
+                  Añadir Estudiante
+                <% end %>
+              </div>
+              
+              <% if @estudiantes.any? %>
+                <div class="bg-gray-900/80 backdrop-blur-sm rounded-lg border border-gray-700 overflow-hidden">
+                  <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-700">
+                      <thead class="bg-gray-800">
+                        <tr>
+                          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            Nombre
+                          </th>
+                          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            Email
+                          </th>
+                          <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            Último acceso
+                          </th>
+                          <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
+                            Acciones
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody class="bg-gray-900 divide-y divide-gray-800">
+                        <% @estudiantes.each do |estudiante| %>
+                          <tr class="hover:bg-gray-800">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="flex items-center">
+                                <div class="flex-shrink-0 h-8 w-8 bg-gray-700 rounded-full flex items-center justify-center text-white">
+                                  <%= estudiante.nombre_completo[0].upcase %>
+                                </div>
+                                <div class="ml-4">
+                                  <div class="text-sm font-medium text-gray-300">
+                                    <%= estudiante.nombre_completo %>
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="text-sm text-gray-300"><%= estudiante.email %></div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                              <div class="text-sm text-gray-300"><%= estudiante.last_sign_in_at&.strftime("%d/%m/%Y %H:%M") || "Nunca" %></div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                              <%= link_to "#", class: "text-indigo-400 hover:text-indigo-300" do %>
+                                Ver detalle
+                              <% end %>
+                            </td>
+                          </tr>
+                        <% end %>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              <% else %>
+                <div class="bg-gray-900/80 backdrop-blur-sm rounded-lg p-8 border border-gray-700 text-center">
+                  <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                  </svg>
+                  <h3 class="mt-2 text-lg font-medium text-gray-300">No hay estudiantes</h3>
+                  <p class="mt-1 text-sm text-gray-400">Aún no hay estudiantes inscritos en este curso.</p>
+                  <div class="mt-6">
+                    <%= link_to "#", 
+                        class: "inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500" do %>
+                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                      </svg>
+                      Inscribir estudiantes
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+        
+        <footer class="mt-8 pt-6 border-t border-gray-700 flex justify-center">
+          <%= link_to cursos_path, 
+              class: "inline-flex items-center px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500" do %>
+            <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Volver a cursos
+          <% end %>
+        </footer>
       </div>
-      
-      <footer class="mt-8 pt-6 border-t border-gray-700 flex justify-center">
-        <%= link_to cursos_path, 
-            class: "inline-flex items-center px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500" do %>
-          <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-          </svg>
-          Volver a cursos
-        <% end %>
-      </footer>
-    </div>
-  </article>
-</main>
+    </article>
+  </main>
+</div>
 
 <!-- Script para Alpine.js (Necesario para las pestañas) -->
 <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-<!-- Script para la notificación -->
-<script>
-  // Auto-ocultar la notificación después de 5 segundos
-  document.addEventListener('DOMContentLoaded', function() {
-    const notification = document.getElementById('notification');
-    if (notification) {
-      setTimeout(function() {
-        notification.classList.add('opacity-0');
-        setTimeout(function() { 
-          notification.remove(); 
-        }, 300);
-      }, 5000);
-    }
-  });
-</script>
