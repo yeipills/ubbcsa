@@ -1,35 +1,55 @@
 <!-- app/views/shared/_flash.html.erb -->
 <% flash.each do |type, message| %>
-  <div class="fixed top-4 right-4 z-50 bg-gray-800 text-white px-6 py-4 rounded-lg shadow-lg border-l-4 flash-alert
-    <%= type == 'notice' ? 'border-blue-500' : 'border-red-500' %>">
+  <% 
+    border_color = case type.to_s
+                   when 'notice', 'success'
+                     'border-blue-500'
+                   when 'alert', 'warning'
+                     'border-yellow-500'
+                   when 'error'
+                     'border-red-500'
+                   else
+                     'border-gray-500'
+                   end
     
+    icon_color = case type.to_s
+                 when 'notice', 'success'
+                   'text-blue-500'
+                 when 'alert', 'warning'
+                   'text-yellow-500'
+                 when 'error'
+                   'text-red-500'
+                 else
+                   'text-gray-500'
+                 end
+
+    icon_path = case type.to_s
+                when 'notice', 'success'
+                  'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+                when 'alert', 'warning'
+                  'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
+                when 'error'
+                  'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+                else
+                  'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+                end
+  %>
+  
+  <div class="fixed top-4 right-4 z-50 bg-gray-800 text-white px-6 py-4 rounded-lg shadow-lg border-l-4 flash-alert <%= border_color %>"
+       data-controller="flash">
     <div class="flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <% if type == 'notice' %>
-          <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-        <% else %>
-          <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-        <% end %>
-        
+        <svg class="w-5 h-5 <%= icon_color %>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<%= icon_path %>"/>
+        </svg>
         <p><%= message %></p>
       </div>
 
-      <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-white">
+      <button data-action="flash#close" class="text-gray-400 hover:text-white">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
       </button>
     </div>
   </div>
-
-  <script>
-    setTimeout(function() {
-      var flashAlert = document.querySelector('.flash-alert');
-      if (flashAlert) flashAlert.remove();
-    }, 5000);
-  </script>
 <% end %>

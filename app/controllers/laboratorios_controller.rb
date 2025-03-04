@@ -1,19 +1,19 @@
 # app/controllers/laboratorios_controller.rb
 class LaboratoriosController < ApplicationController
   before_action :authenticate_usuario!
-  before_action :set_laboratorio, only: [:show, :edit, :update, :destroy]
-  before_action :verify_access, only: [:edit, :update, :destroy]
+  before_action :set_laboratorio, only: %i[show edit update destroy]
+  before_action :verify_access, only: %i[edit update destroy]
 
   def index
     @laboratorios = Laboratorio.activos
-      .includes(:curso)
-      .order(created_at: :desc)
+                               .includes(:curso)
+                               .order(created_at: :desc)
   end
 
   def show
     @sesion_activa = current_usuario.sesion_laboratorios
-      .activas
-      .find_by(laboratorio: @laboratorio)
+                                    .activas
+                                    .find_by(laboratorio: @laboratorio)
   end
 
   def new
@@ -24,7 +24,8 @@ class LaboratoriosController < ApplicationController
   def create
     @laboratorio = Laboratorio.new(laboratorio_params)
     if @laboratorio.save
-      redirect_to @laboratorio, notice: 'Laboratorio creado exitosamente.'
+      flash_created('Laboratorio')
+      redirect_to @laboratorio
     else
       render :new
     end
@@ -35,7 +36,8 @@ class LaboratoriosController < ApplicationController
 
   def update
     if @laboratorio.update(laboratorio_params)
-      redirect_to @laboratorio, notice: 'Laboratorio actualizado exitosamente.'
+      flash_updated('Laboratorio')
+      redirect_to @laboratorio
     else
       render :edit
     end
@@ -43,7 +45,8 @@ class LaboratoriosController < ApplicationController
 
   def destroy
     @laboratorio.destroy
-    redirect_to laboratorios_url, notice: 'Laboratorio eliminado exitosamente.'
+    flash_destroyed('Laboratorio')
+    redirect_to laboratorios_url
   end
 
   private
@@ -57,6 +60,6 @@ class LaboratoriosController < ApplicationController
   end
 
   def verify_access
-    verify_role_access(['profesor', 'admin'])
+    verify_role_access(%w[profesor admin])
   end
 end
