@@ -65,6 +65,7 @@ Rails.application.routes.draw do
         member do
           post :publicar
           post :despublicar
+          post :duplicate
           get :estadisticas
         end
       end
@@ -84,6 +85,7 @@ Rails.application.routes.draw do
         member do
           post :finalizar
           get :resultados
+          post :duplicate
         end
       end
     end

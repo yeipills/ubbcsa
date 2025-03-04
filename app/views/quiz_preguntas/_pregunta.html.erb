@@ -1,40 +1,93 @@
-<div class="bg-white p-6 rounded-lg shadow mb-4" id="pregunta_<%= pregunta.id %>">
-  <div class="flex justify-between items-start">
+<div class="bg-gray-900 rounded-lg border border-gray-700 p-4 overflow-hidden" id="pregunta_<%= pregunta.id %>">
+  <div class="flex justify-between">
     <div class="flex-1">
-      <h3 class="text-lg font-medium text-gray-900">
-        <%= pregunta.orden %>. <%= pregunta.contenido %>
-      </h3>
-      <p class="text-sm text-gray-500 mt-1">
-        <%= pregunta.puntaje %> puntos | Tipo: <%= pregunta.tipo.humanize %>
-      </p>
+      <div class="flex items-start">
+        <span class="flex-shrink-0 w-8 h-8 rounded-full bg-blue-900 text-blue-200 flex items-center justify-center text-sm font-bold">
+          <%= pregunta.orden %>
+        </span>
+        <div class="ml-3">
+          <h3 class="text-white font-medium"><%= pregunta.contenido %></h3>
+          <div class="mt-1 flex items-center text-xs text-gray-400">
+            <span class="px-2 py-0.5 rounded-full bg-gray-800 text-gray-300"><%= pregunta.tipo_display %></span>
+            <span class="mx-2">|</span>
+            <span><%= pluralize(pregunta.puntaje, 'punto', 'puntos') %></span>
+            
+            <% if pregunta.imagen.attached? %>
+              <span class="mx-2">|</span>
+              <span class="flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                Imagen
+              </span>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      
+      <% if pregunta.imagen.attached? %>
+        <div class="mt-3 ml-11">
+          <%= image_tag pregunta.imagen, class: "max-h-40 rounded" %>
+        </div>
+      <% end %>
+      
+      <!-- Opciones de respuesta -->
+      <% if pregunta.requiere_opciones? && pregunta.opciones.any? %>
+        <div class="mt-4 ml-11 space-y-2">
+          <% pregunta.opciones.each do |opcion| %>
+            <div class="flex items-center">
+              <% if pregunta.opcion_multiple? %>
+                <div class="h-4 w-4 rounded-full border border-gray-600 mr-3 flex-shrink-0 <%= opcion.es_correcta? ? 'bg-green-600 border-green-600' : '' %>"></div>
+              <% elsif pregunta.verdadero_falso? %>
+                <div class="h-4 w-4 rounded-full border border-gray-600 mr-3 flex-shrink-0 <%= opcion.es_correcta? ? 'bg-green-600 border-green-600' : '' %>"></div>
+              <% end %>
+              <span class="text-gray-300 text-sm"><%= opcion.contenido %></span>
+              
+              <% if opcion.es_correcta? %>
+                <span class="ml-2 px-1.5 py-0.5 rounded text-xs bg-green-900 text-green-300">Correcta</span>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% elsif pregunta.respuesta_corta? %>
+        <div class="mt-4 ml-11">
+          <p class="text-sm text-gray-400">Tipo respuesta corta</p>
+        </div>
+      <% end %>
+      
+      <% if pregunta.retroalimentacion.present? %>
+        <div class="mt-3 ml-11 p-2 bg-gray-800 rounded-lg border border-gray-700">
+          <p class="text-xs text-gray-400">Retroalimentación:</p>
+          <p class="text-sm text-gray-300"><%= pregunta.retroalimentacion %></p>
+        </div>
+      <% end %>
     </div>
     
-    <% if current_usuario.profesor? %>
-      <div class="flex space-x-2">
-        <%= link_to edit_quiz_pregunta_path(pregunta.quiz, pregunta), 
-            class: "text-blue-600 hover:text-blue-800" do %>
-          <i class="fas fa-edit"></i>
+    <div class="ml-4 flex-shrink-0 flex flex-col space-y-2">
+      <%= link_to edit_quiz_pregunta_path(@quiz, pregunta), 
+          class: "p-1.5 rounded-full bg-gray-800 text-gray-400 hover:bg-blue-900 hover:text-blue-200 transition-colors duration-200" do %>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+        </svg>
+      <% end %>
+      
+      <% if pregunta.requiere_opciones? %>
+        <%= link_to new_quiz_pregunta_opcion_path(@quiz, pregunta), 
+            class: "p-1.5 rounded-full bg-gray-800 text-gray-400 hover:bg-green-900 hover:text-green-200 transition-colors duration-200" do %>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+          </svg>
         <% end %>
-        <%= button_to quiz_pregunta_path(pregunta.quiz, pregunta), 
-            method: :delete,
-            class: "text-red-600 hover:text-red-800",
-            data: { confirm: "¿Estás seguro?" } do %>
-          <i class="fas fa-trash"></i>
-        <% end %>
-      </div>
-    <% end %>
-  </div>
-
-  <div class="mt-4 space-y-2">
-    <% pregunta.opciones.each do |opcion| %>
-      <div class="flex items-center space-x-3 p-2 rounded <%= opcion.es_correcta? ? 'bg-green-50' : 'bg-gray-50' %>">
-        <% if pregunta.opcion_multiple? %>
-          <input type="radio" disabled <%= 'checked' if opcion.es_correcta? %>>
-        <% end %>
-        <span class="<%= opcion.es_correcta? ? 'text-green-700' : 'text-gray-700' %>">
-          <%= opcion.contenido %>
-        </span>
-      </div>
-    <% end %>
+      <% end %>
+      
+      <%= button_to quiz_pregunta_path(@quiz, pregunta), 
+          method: :delete, 
+          data: { confirm: "¿Estás seguro? Esta acción eliminará la pregunta y todas sus respuestas." },
+          class: "p-1.5 rounded-full bg-gray-800 text-gray-400 hover:bg-red-900 hover:text-red-200 transition-colors duration-200" do %>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+      <% end %>
+    </div>
   </div>
 </div>

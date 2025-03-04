@@ -1,83 +1,140 @@
-<%= form_with(model: @quiz, local: true, class: "space-y-6") do |f| %>
-  <% if @quiz.errors.any? %>
-    <div class="bg-red-50 p-4 rounded-lg">
-      <div class="text-red-700 font-medium mb-2">
-        <%= pluralize(@quiz.errors.count, "error") %> impidieron guardar este quiz:
-      </div>
-      <ul class="list-disc list-inside text-red-600">
-        <% @quiz.errors.full_messages.each do |message| %>
+<%= form_with(model: quiz, url: quiz.new_record? ? curso_quizzes_path(quiz.curso) : quiz_path(quiz), class: "space-y-6") do |f| %>
+  <% if quiz.errors.any? %>
+    <div class="bg-red-900/50 p-4 rounded-lg border border-red-800/50 mb-6">
+      <h2 class="text-red-300 font-medium mb-2 text-sm">
+        <%= pluralize(quiz.errors.count, "error") %> impidieron guardar este quiz:
+      </h2>
+      <ul class="list-disc list-inside text-red-300 text-sm space-y-1">
+        <% quiz.errors.full_messages.each do |message| %>
           <li><%= message %></li>
         <% end %>
       </ul>
     </div>
   <% end %>
 
-  <div class="grid grid-cols-1 gap-6">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="col-span-1 md:col-span-2">
+      <div class="p-4 bg-gray-900 rounded-lg border border-gray-700">
+        <h3 class="font-medium text-gray-300 mb-4">Información Básica</h3>
+        
+        <div class="space-y-4">
+          <div>
+            <%= f.label :titulo, "Título", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.text_field :titulo, 
+                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
+                placeholder: "Ej: Evaluación sobre Seguridad en Redes" %>
+          </div>
+          
+          <div>
+            <%= f.label :descripcion, "Descripción", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.text_area :descripcion, rows: 3, 
+                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
+                placeholder: "Describe brevemente el contenido del quiz..." %>
+          </div>
+          
+          <div>
+            <%= f.label :instrucciones, "Instrucciones", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.text_area :instrucciones, rows: 4,
+                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
+                placeholder: "Instrucciones detalladas para los estudiantes..." %>
+            <p class="mt-1 text-xs text-gray-500">Puedes usar formato markdown básico.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <div>
-      <%= f.label :titulo, class: "block text-sm font-medium text-gray-700" %>
-      <%= f.text_field :titulo, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
+      <div class="p-4 bg-gray-900 rounded-lg border border-gray-700 h-full">
+        <h3 class="font-medium text-gray-300 mb-4">Configuración</h3>
+        
+        <div class="space-y-4">
+          <div>
+            <%= f.label :tiempo_limite, "Tiempo límite (minutos)", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.number_field :tiempo_limite, min: 1, 
+                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" %>
+          </div>
+          
+          <div>
+            <%= f.label :intentos_permitidos, "Intentos permitidos", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.number_field :intentos_permitidos, min: 1, 
+                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" %>
+          </div>
+          
+          <div>
+            <%= f.label :peso_calificacion, "Peso en calificación (%)", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.number_field :peso_calificacion, min: 0, max: 100, 
+                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" %>
+          </div>
+          
+          <div class="flex items-center">
+            <%= f.check_box :mostrar_resultados_inmediatos, 
+                class: "h-4 w-4 rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800" %>
+            <%= f.label :mostrar_resultados_inmediatos, "Mostrar resultados inmediatamente", 
+                class: "ml-2 block text-sm text-gray-300" %>
+          </div>
+        </div>
+      </div>
     </div>
-
+    
     <div>
-      <%= f.label :descripcion, class: "block text-sm font-medium text-gray-700" %>
-      <%= f.text_area :descripcion, rows: 3, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm" %>
-    </div>
-
-    <div class="grid grid-cols-2 gap-4">
-      <div>
-        <%= f.label :curso_id, class: "block text-sm font-medium text-gray-700" %>
-        <%= f.collection_select :curso_id, @cursos, :id, :nombre, 
-            {}, class: "mt-1 block w-full rounded-md border-gray-300" %>
-      </div>
-
-      <div>
-        <%= f.label :laboratorio_id, class: "block text-sm font-medium text-gray-700" %>
-        <%= f.collection_select :laboratorio_id, 
-            @quiz.curso&.laboratorios || [], :id, :nombre,
-            {}, class: "mt-1 block w-full rounded-md border-gray-300" %>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-2 gap-4">
-      <div>
-        <%= f.label :tiempo_limite, "Tiempo límite (minutos)", 
-            class: "block text-sm font-medium text-gray-700" %>
-        <%= f.number_field :tiempo_limite, min: 1,
-            class: "mt-1 block w-full rounded-md border-gray-300" %>
-      </div>
-
-      <div>
-        <%= f.label :intentos_permitidos, class: "block text-sm font-medium text-gray-700" %>
-        <%= f.number_field :intentos_permitidos, min: 1,
-            class: "mt-1 block w-full rounded-md border-gray-300" %>
+      <div class="p-4 bg-gray-900 rounded-lg border border-gray-700 h-full">
+        <h3 class="font-medium text-gray-300 mb-4">Fechas y Asociaciones</h3>
+        
+        <div class="space-y-4">
+          <div>
+            <%= f.label :fecha_inicio, "Fecha de inicio", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.datetime_field :fecha_inicio,
+                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" %>
+          </div>
+          
+          <div>
+            <%= f.label :fecha_fin, "Fecha de finalización", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.datetime_field :fecha_fin,
+                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" %>
+          </div>
+          
+          <div>
+            <%= f.label :laboratorio_id, "Laboratorio asociado", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.collection_select :laboratorio_id, 
+                @laboratorios || [], 
+                :id, 
+                :nombre, 
+                { include_blank: "Ninguno" },
+                { class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" } %>
+          </div>
+        </div>
       </div>
     </div>
-
-    <div class="grid grid-cols-2 gap-4">
+  </div>
+  
+  <div class="p-4 bg-gray-900 rounded-lg border border-gray-700">
+    <h3 class="font-medium text-gray-300 mb-4">Estado</h3>
+    
+    <div class="space-y-4">
       <div>
-        <%= f.label :fecha_inicio, class: "block text-sm font-medium text-gray-700" %>
-        <%= f.datetime_local_field :fecha_inicio,
-            class: "mt-1 block w-full rounded-md border-gray-300" %>
+        <%= f.select :estado, 
+            options_for_select([
+              ['Borrador', 'borrador'],
+              ['Publicado', 'publicado'],
+              ['Cerrado', 'cerrado']
+            ], quiz.estado),
+            {}, 
+            { class: "block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" } %>
+        <p class="mt-1 text-xs text-gray-500">
+          <strong>Borrador:</strong> Solo visible para ti. 
+          <strong>Publicado:</strong> Visible y disponible para los estudiantes. 
+          <strong>Cerrado:</strong> Visible pero no disponible para nuevos intentos.
+        </p>
       </div>
-
-      <div>
-        <%= f.label :fecha_fin, class: "block text-sm font-medium text-gray-700" %>
-        <%= f.datetime_local_field :fecha_fin,
-            class: "mt-1 block w-full rounded-md border-gray-300" %>
-      </div>
-    </div>
-
-    <div>
-      <%= f.label :estado, class: "block text-sm font-medium text-gray-700" %>
-      <%= f.select :estado, Quiz.estados.keys.map { |estado| 
-          [estado.humanize, estado] 
-        }, {}, class: "mt-1 block w-full rounded-md border-gray-300" %>
     </div>
   </div>
 
   <div class="flex justify-end space-x-3">
-    <%= link_to 'Cancelar', quizzes_path, 
-        class: "px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50" %>
-    <%= f.submit class: "px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" %>
+    <%= link_to "Cancelar", 
+        quiz.new_record? ? curso_path(quiz.curso) : quiz_path(quiz), 
+        class: "px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors duration-200" %>
+    
+    <%= f.submit quiz.new_record? ? "Crear Quiz" : "Actualizar Quiz", 
+        class: "px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors duration-200" %>
   </div>
 <% end %>

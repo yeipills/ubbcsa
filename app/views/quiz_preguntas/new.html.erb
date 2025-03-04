@@ -1,0 +1,41 @@
+<div class="min-h-screen bg-gray-900">
+  <%= content_for :navbar do %>
+    <%= render 'shared/navbar' %>
+  <% end %>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-6">
+      <nav class="flex items-center text-sm text-gray-400">
+        <ol class="flex items-center space-x-2">
+          <li>
+            <%= link_to "Inicio", root_path, class: "hover:text-white" %>
+          </li>
+          <li class="flex items-center">
+            <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+            </svg>
+            <%= link_to "Quizzes", quizzes_path, class: "hover:text-white" %>
+          </li>
+          <li class="flex items-center">
+            <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+            </svg>
+            <%= link_to @quiz.titulo, quiz_path(@quiz), class: "hover:text-white" %>
+          </li>
+          <li class="flex items-center">
+            <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+            </svg>
+            <span class="text-white">Nueva Pregunta</span>
+          </li>
+        </ol>
+      </nav>
+    </div>
+
+    <div class="bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8">
+      <h1 class="text-2xl font-bold text-white mb-6">Nueva Pregunta para "<%= @quiz.titulo %>"</h1>
+      
+      <%= render 'form', quiz: @quiz, pregunta: @pregunta %>
+    </div>
+  </div>
+</div>

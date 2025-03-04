@@ -1,0 +1,87 @@
+<%# app/views/quiz_preguntas/_pregunta_card.html.erb %>
+<div class="bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-700" id="pregunta_<%= pregunta.id %>" data-quiz-preguntas-target="pregunta" data-pregunta-id="<%= pregunta.id %>">
+  <div class="flex justify-between">
+    <div class="flex-1">
+      <div class="flex items-center gap-2">
+        <span class="px-2 py-1 rounded-full text-xs font-medium bg-gray-700 text-gray-300">
+          Pregunta <%= pregunta.orden %>
+        </span>
+        <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-900/50 text-blue-300">
+          <%= pregunta.puntaje %> pts
+        </span>
+        <span class="px-2 py-1 rounded-full text-xs font-medium bg-purple-900/50 text-purple-300">
+          <%= pregunta.tipo.humanize %>
+        </span>
+      </div>
+      
+      <h3 class="text-lg font-medium text-white mt-2 mb-3">
+        <%= pregunta.contenido %>
+      </h3>
+      
+      <% if pregunta.imagen.attached? %>
+        <div class="mt-2 mb-4">
+          <%= image_tag pregunta.imagen.variant(resize_to_limit: [300, 300]), class: "rounded" %>
+        </div>
+      <% end %>
+      
+      <% if pregunta.opciones.any? %>
+        <div class="ml-4 space-y-2 my-3">
+          <% pregunta.opciones.each do |opcion| %>
+            <div class="flex items-center p-2 rounded-md bg-gray-700/50 <%= opcion.es_correcta? ? 'border-l-4 border-green-500' : '' %>">
+              <% if pregunta.opcion_multiple? %>
+                <div class="w-5 h-5 rounded-full border border-gray-500 flex items-center justify-center mr-3">
+                  <% if opcion.es_correcta? %>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                  <% end %>
+                </div>
+              <% end %>
+              <span class="<%= opcion.es_correcta? ? 'text-green-300' : 'text-gray-300' %>">
+                <%= opcion.contenido %>
+              </span>
+            </div>
+          <% end %>
+        </div>
+      <% elsif pregunta.respuesta_corta? && pregunta.respuesta_correcta.present? %>
+        <div class="ml-4 space-y-2 my-3">
+          <div class="p-2 rounded-md bg-gray-700/50 border-l-4 border-blue-500">
+            <span class="text-blue-300">Respuesta esperada: <%= pregunta.respuesta_correcta %></span>
+          </div>
+        </div>
+      <% end %>
+      
+      <% if pregunta.retroalimentacion.present? %>
+        <div class="mt-3 p-3 bg-gray-700/30 rounded-md border-l-2 border-yellow-500">
+          <h4 class="text-sm font-medium text-yellow-300 mb-1">Retroalimentación:</h4>
+          <p class="text-gray-300 text-sm"><%= pregunta.retroalimentacion %></p>
+        </div>
+      <% end %>
+    </div>
+    
+    <div class="flex flex-col space-y-2 ml-4">
+      <%= link_to edit_quiz_pregunta_path(pregunta.quiz, pregunta),
+          class: "p-2 bg-blue-900/30 hover:bg-blue-900/50 text-blue-300 rounded-md transition-colors" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+      <% end %>
+      
+      <%= button_to quiz_pregunta_path(pregunta.quiz, pregunta),
+          method: :delete,
+          form: { data: { turbo_confirm: "¿Estás seguro de eliminar esta pregunta?" } },
+          class: "p-2 bg-red-900/30 hover:bg-red-900/50 text-red-300 rounded-md transition-colors" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+      <% end %>
+      
+      <% if pregunta.opcion_multiple? || pregunta.verdadero_falso? %>
+        <%= link_to new_quiz_pregunta_opcion_path(pregunta.quiz, pregunta),
+            class: "p-2 bg-green-900/30 hover:bg-green-900/50 text-green-300 rounded-md transition-colors" do %>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>

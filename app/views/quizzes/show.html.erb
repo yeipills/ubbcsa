@@ -1,10 +1,30 @@
 <div class="min-h-screen bg-gray-900">
-  <% content_for :navbar do %>
+  <%= content_for :navbar do %>
     <%= render 'shared/navbar' %>
   <% end %>
 
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-    
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center text-sm text-gray-400 mb-6">
+      <ol class="flex items-center space-x-2">
+        <li>
+          <%= link_to "Inicio", root_path, class: "hover:text-white" %>
+        </li>
+        <li class="flex items-center">
+          <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <%= link_to "Quizzes", quizzes_path, class: "hover:text-white" %>
+        </li>
+        <li class="flex items-center">
+          <svg class="h-5 w-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <span class="text-white"><%= @quiz.titulo %></span>
+        </li>
+      </ol>
+    </nav>
+
     <div class="bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
@@ -16,7 +36,7 @@
         </span>
       </div>
 
-      <!-- 🔹 Grid de Detalles -->
+      <!-- Grid de Detalles -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
         <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
           <h3 class="font-medium text-gray-300">Detalles</h3>
@@ -31,11 +51,17 @@
             </div>
             <div class="flex justify-between">
               <dt class="text-gray-400">Disponible desde:</dt>
-              <dd class="text-white"><%= l @quiz.fecha_inicio, format: :short %></dd>
-            </div>
+              <dd class="text-white"><%= @quiz.fecha_inicio.present? ? l(@quiz.fecha_inicio, format: :short) : 'No definida' %></dd>            </div>
             <div class="flex justify-between">
               <dt class="text-gray-400">Hasta:</dt>
-              <dd class="text-white"><%= l @quiz.fecha_fin, format: :short %></dd>
+              <dd class="text-white"><%= @quiz.fecha_fin.present? ? l(@quiz.fecha_fin, format: :short) : 'No definida' %></dd>            </div>
+            <div class="flex justify-between">
+              <dt class="text-gray-400">Preguntas:</dt>
+              <dd class="text-white"><%= @preguntas.count %></dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-gray-400">Curso:</dt>
+              <dd class="text-white"><%= @quiz.curso.nombre %></dd>
             </div>
           </dl>
         </div>
@@ -49,50 +75,266 @@
                 <dd class="text-white"><%= @quiz.intentos.count %></dd>
               </div>
               <div class="flex justify-between">
-                <dt class="text-gray-400">Promedio de puntaje:</dt>
-                <dd class="text-white"><%= number_to_percentage(@quiz.intentos.average(:puntaje_total), precision: 1) %></dd>
+                <dt class="text-gray-400">Completados:</dt>
+                <dd class="text-white"><%= @quiz.intentos.completado.count %></dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-gray-400">Promedio:</dt>
+                <dd class="text-white"><%= number_to_percentage(@quiz.puntaje_promedio, precision: 1) || 'N/A' %></dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-gray-400">Tiempo promedio:</dt>
+                <dd class="text-white"><%= formato_tiempo(@quiz.tiempo_promedio_segundos) || 'N/A' %></dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-gray-400">Tasa de aprobación:</dt>
+                <dd class="text-white"><%= number_to_percentage(@quiz.tasa_aprobacion, precision: 1) || 'N/A' %></dd>
               </div>
             </dl>
+          </div>
+        <% else %>
+          <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
+            <h3 class="font-medium text-gray-300">Mis Intentos</h3>
+            <% if @intentos_anteriores.any? %>
+              <div class="mt-2 space-y-2">
+                <% @intentos_anteriores.each do |intento| %>
+                  <div class="flex justify-between items-center py-2 border-b border-gray-700 last:border-0">
+                    <div>
+                      <span class="text-gray-300">Intento #<%= intento.numero_intento %></span>
+                      <span class="block text-xs text-gray-500"><%= l intento.finalizado_en, format: :short %></span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                      <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-900 text-blue-300">
+                        <%= number_to_percentage(intento.puntaje_total, precision: 1) %>
+                      </span>
+                      <%= link_to resultados_quiz_intento_path(@quiz, intento), 
+                          class: "text-blue-500 hover:text-blue-400 text-sm font-medium" do %>
+                        Ver Resultados
+                      <% end %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <p class="text-gray-400 mt-2">Aún no has realizado ningún intento.</p>
+            <% end %>
+            
+            <% if @quiz.disponible_para?(current_usuario) %>
+              <% if @intento&.persisted? && @intento.en_progreso? %>
+                <div class="mt-4 flex justify-center">
+                  <%= link_to quiz_intento_path(@quiz, @intento), 
+                      class: "w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 text-center" do %>
+                    Continuar Intento
+                  <% end %>
+                </div>
+              <% else %>
+                <div class="mt-4 flex justify-center">
+                  <%= button_to quiz_intentos_path(@quiz), 
+                      method: :post,
+                      class: "w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200 text-center" do %>
+                    Iniciar Nuevo Intento
+                  <% end %>
+                </div>
+              <% end %>
+            <% elsif Time.current < @quiz.fecha_inicio %>
+              <div class="mt-4 px-4 py-3 bg-yellow-900/50 border border-yellow-800 rounded-lg text-yellow-300 text-sm">
+                <p>Este quiz estará disponible a partir del <%= l @quiz.fecha_inicio, format: :long %></p>
+              </div>
+            <% elsif Time.current > @quiz.fecha_fin %>
+              <div class="mt-4 px-4 py-3 bg-red-900/50 border border-red-800 rounded-lg text-red-300 text-sm">
+                <p>Este quiz ya no está disponible. Finalizó el <%= l @quiz.fecha_fin, format: :long %></p>
+              </div>
+            <% elsif !@quiz.intentos_disponibles_para?(current_usuario) %>
+              <div class="mt-4 px-4 py-3 bg-red-900/50 border border-red-800 rounded-lg text-red-300 text-sm">
+                <p>Ya has utilizado todos los intentos permitidos para este quiz.</p>
+              </div>
+            <% end %>
           </div>
         <% end %>
       </div>
 
       <% if current_usuario.profesor? %>
-        <!-- 🔹 Preguntas -->
+        <!-- Preguntas del Quiz (Solo visible para profesores) -->
         <div class="mb-8">
           <div class="flex justify-between items-center mb-4">
-            <h2 class="text-lg font-medium text-white">Preguntas</h2>
-            <%= link_to 'Agregar Pregunta', new_quiz_pregunta_path(@quiz), 
-                class: "text-blue-400 hover:text-blue-300 text-sm font-medium" %>
+            <h2 class="text-xl font-bold text-white">Preguntas</h2>
+            <%= link_to new_quiz_pregunta_path(@quiz), 
+                class: "inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors duration-200" do %>
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              Añadir Pregunta
+            <% end %>
           </div>
-          <div class="space-y-4">
-            <%= render partial: 'quiz_preguntas/pregunta', collection: @preguntas %>
-          </div>
-        </div>
 
-        <!-- 🔹 Botones de Acciones -->
-        <div class="flex justify-end space-x-4">
-          <%= link_to 'Editar Quiz', edit_quiz_path(@quiz), 
-              class: "bg-gray-700 text-gray-300 px-4 py-2 rounded-md hover:bg-gray-600 hover:scale-105 transition duration-200" %>
-          <%= button_to 'Eliminar Quiz', quiz_path(@quiz), 
-              method: :delete, 
-              class: "bg-red-700 text-white px-4 py-2 rounded-md hover:bg-red-600 hover:scale-105 transition duration-200",
-              data: { confirm: '¿Estás seguro?' } %>
-        </div>
-
-      <% else %>
-        <!-- 🔹 Iniciar o Continuar Quiz -->
-        <% if @quiz.publicado? %>
-          <% if @intento.new_record? %>
-            <%= button_to 'Iniciar Quiz', quiz_intentos_path(@quiz), 
-                class: "w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition duration-200 hover:scale-105" %>
+          <% if @preguntas.any? %>
+            <div class="space-y-4" data-controller="quiz-preguntas">
+              <% @preguntas.each do |pregunta| %>
+                <%= render 'quiz_preguntas/pregunta_card', pregunta: pregunta %>
+              <% end %>
+            </div>
           <% else %>
-            <%= link_to 'Continuar Quiz', quiz_intento_path(@quiz, @intento), 
-                class: "w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium transition duration-200 text-center hover:scale-105" %>
+            <div class="bg-gray-900 p-8 rounded-lg border border-gray-700 text-center">
+              <svg class="mx-auto h-16 w-16 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              <h3 class="mt-4 text-xl font-bold text-white">No hay preguntas</h3>
+              <p class="mt-2 text-gray-400">Este quiz aún no tiene preguntas.</p>
+              
+              <%= link_to new_quiz_pregunta_path(@quiz), 
+                  class: "mt-6 inline-flex items-center px-5 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200" do %>
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Crear Primera Pregunta
+              <% end %>
+            </div>
           <% end %>
+        </div>
+
+        <!-- Acciones de Profesor -->
+        <div class="flex flex-wrap justify-end gap-3 pt-6 border-t border-gray-700">
+          <%= link_to edit_quiz_path(@quiz), 
+              class: "px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors duration-200" do %>
+            <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+            Editar Quiz
+          <% end %>
+          
+          <%= link_to duplicate_quiz_path(@quiz), 
+              method: :post,
+              class: "px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors duration-200" do %>
+            <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            Duplicar
+          <% end %>
+          
+          <% if @quiz.borrador? %>
+            <%= link_to publicar_quiz_path(@quiz), 
+                method: :post,
+                class: "px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors duration-200" do %>
+              <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Publicar
+            <% end %>
+          <% elsif @quiz.publicado? %>
+            <%= link_to despublicar_quiz_path(@quiz), 
+                method: :post,
+                class: "px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg text-sm font-medium transition-colors duration-200" do %>
+              <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+              Despublicar
+            <% end %>
+          <% end %>
+          
+          <%= link_to estadisticas_quiz_path(@quiz), 
+              class: "px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm font-medium transition-colors duration-200" do %>
+            <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            Ver Estadísticas
+          <% end %>
+          
+          <%= button_to quiz_path(@quiz), 
+              method: :delete,
+              data: { confirm: "¿Estás seguro? Esta acción no se puede deshacer." },
+              class: "px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors duration-200" do %>
+            <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+            Eliminar
+          <% end %>
+        </div>
+      <% else %>
+        <!-- Instrucciones para Estudiantes -->
+        <% if @quiz.instrucciones.present? %>
+          <div class="bg-gray-900 p-4 rounded-lg border border-gray-700 mb-6">
+            <h3 class="font-medium text-gray-300 mb-2">Instrucciones</h3>
+            <div class="text-gray-400 prose prose-sm prose-invert max-w-none">
+              <%= @quiz.instrucciones %>
+            </div>
+          </div>
+        <% end %>
+        
+        <!-- Resumen de Intentos -->
+        <% if @intentos_anteriores.any? && @quiz.intentos_permitidos > 1 %>
+          <div class="bg-gray-900 p-4 rounded-lg border border-gray-700 mb-6">
+            <h3 class="font-medium text-gray-300 mb-2">Resumen de Intentos</h3>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-700">
+                <thead>
+                  <tr>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Intento
+                    </th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Fecha
+                    </th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Tiempo
+                    </th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Puntaje
+                    </th>
+                    <th class="px-4 py-2 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-800">
+                  <% @intentos_anteriores.each do |intento| %>
+                    <tr>
+                      <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                        #<%= intento.numero_intento %>
+                      </td>
+                      <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                        <%= l intento.finalizado_en, format: :short %>
+                      </td>
+                      <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                        <%= formato_tiempo(intento.duracion_segundos) %>
+                      </td>
+                      <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
+                        <%= number_to_percentage(intento.puntaje_total, precision: 1) %>
+                      </td>
+                      <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+                        <%= link_to resultados_quiz_intento_path(@quiz, intento), 
+                            class: "text-blue-500 hover:text-blue-400" do %>
+                          Ver Resultados
+                        <% end %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        <% end %>
+        
+        <!-- Mejor Puntaje -->
+        <% if mejor_intento = @quiz.mejor_intento_para(current_usuario) %>
+          <div class="bg-gray-900 p-4 rounded-lg border border-gray-700 mb-6 text-center">
+            <h3 class="font-medium text-gray-300 mb-2">Mejor Resultado</h3>
+            <div class="text-4xl font-bold text-blue-400 mb-2">
+              <%= number_to_percentage(mejor_intento.puntaje_total, precision: 1) %>
+            </div>
+            <p class="text-gray-400 text-sm">
+              Obtenido el <%= l mejor_intento.finalizado_en, format: :long %>
+            </p>
+            
+            <%= link_to resultados_quiz_intento_path(@quiz, mejor_intento), 
+                class: "mt-4 inline-flex items-center text-blue-500 hover:text-blue-400 text-sm font-medium" do %>
+              <span>Ver Detalles</span>
+              <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            <% end %>
+          </div>
         <% end %>
       <% end %>
     </div>
-
   </div>
 </div>

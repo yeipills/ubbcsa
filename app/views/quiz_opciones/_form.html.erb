@@ -1,25 +1,110 @@
 <%= form_with(model: [@pregunta, @opcion], local: true, class: "space-y-6") do |f| %>
-  <div class="space-y-4">
-    <div>
-      <%= f.label :contenido, class: "block text-sm font-medium text-gray-700" %>
-      <%= f.text_field :contenido, class: "mt-1 block w-full rounded-md border-gray-300" %>
+  <% if @opcion.errors.any? %>
+    <div class="bg-red-900/50 p-4 rounded-lg border border-red-800/50 mb-6">
+      <h2 class="text-red-300 font-medium mb-2 text-sm">
+        <%= pluralize(@opcion.errors.count, "error") %> impidieron guardar esta opción:
+      </h2>
+      <ul class="list-disc list-inside text-red-300 text-sm space-y-1">
+        <% @opcion.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
     </div>
+  <% end %>
 
-    <div class="flex items-center">
-      <%= f.label :es_correcta, class: "ml-2 block text-sm text-gray-700" %>
-      <%= f.check_box :es_correcta, class: "h-4 w-4 text-blue-600 rounded border-gray-300" %>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="md:col-span-2">
+      <div class="p-4 bg-gray-900 rounded-lg border border-gray-700">
+        <h3 class="font-medium text-gray-300 mb-4">Contenido de la Opción</h3>
+        
+        <div class="space-y-4">
+          <div>
+            <%= f.label :contenido, "Texto de la opción", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.text_area :contenido, rows: 2, 
+                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
+                placeholder: "Texto de la opción de respuesta..." %>
+          </div>
+          
+          <div>
+            <%= f.label :imagen, "Imagen (opcional)", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.file_field :imagen, 
+                class: "mt-1 block w-full text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700",
+                accept: "image/*" %>
+          </div>
+          
+          <% if @opcion.imagen.attached? %>
+            <div class="mt-2">
+              <p class="text-gray-300 text-sm">Imagen actual:</p>
+              <%= image_tag @opcion.imagen, class: "mt-1 max-h-40 rounded" %>
+              
+              <div class="mt-2">
+                <label class="inline-flex items-center text-sm text-gray-300">
+                  <%= check_box_tag :remove_imagen, 1, false, 
+                      class: "rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800" %>
+                  <span class="ml-2">Eliminar imagen</span>
+                </label>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
     </div>
-
+    
     <div>
-      <%= f.label :orden, class: "block text-sm font-medium text-gray-700" %>
-      <%= f.number_field :orden, min: 1, 
-          class: "mt-1 block w-full rounded-md border-gray-300" %>
+      <div class="p-4 bg-gray-900 rounded-lg border border-gray-700 h-full">
+        <h3 class="font-medium text-gray-300 mb-4">Configuración</h3>
+        
+        <div class="space-y-4">
+          <div>
+            <div class="flex items-center">
+              <%= f.check_box :es_correcta, 
+                  class: "h-4 w-4 rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800" %>
+              <%= f.label :es_correcta, "Esta es la opción correcta", 
+                  class: "ml-2 block text-sm text-gray-300" %>
+            </div>
+            
+            <% if @pregunta.verdadero_falso? %>
+              <p class="mt-1 text-sm text-yellow-500">
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                En preguntas de Verdadero/Falso, solo una opción puede ser correcta.
+              </p>
+            <% end %>
+          </div>
+          
+          <div>
+            <%= f.label :orden, "Orden de aparición", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.number_field :orden, min: 1, 
+                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" %>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div>
+      <div class="p-4 bg-gray-900 rounded-lg border border-gray-700 h-full">
+        <h3 class="font-medium text-gray-300 mb-4">Información Adicional</h3>
+        
+        <div class="space-y-4">
+          <div>
+            <%= f.label :retroalimentacion, "Retroalimentación específica", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.text_area :retroalimentacion, rows: 3, 
+                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
+                placeholder: "Retroalimentación para mostrar si eligen esta opción..." %>
+            <p class="mt-1 text-xs text-gray-500">Esta retroalimentación se mostrará cuando el estudiante seleccione esta opción específica.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="flex justify-end space-x-3">
-    <%= link_to 'Cancelar', quiz_pregunta_path(@pregunta), 
-        class: "px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50" %>
-    <%= f.submit class: "px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" %>
+    <%= link_to "Cancelar", 
+        quiz_pregunta_path(@pregunta.quiz, @pregunta), 
+        class: "px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors duration-200" %>
+    
+    <%= f.submit @opcion.new_record? ? "Crear Opción" : "Actualizar Opción", 
+        class: "px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors duration-200" %>
   </div>
 <% end %>
