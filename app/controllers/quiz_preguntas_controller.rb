@@ -21,6 +21,7 @@ class QuizPreguntasController < ApplicationController
 
     if @pregunta.save
       @pregunta.imagen.purge if params[:quiz_pregunta][:remove_imagen] == '1' && @pregunta.imagen.attached?
+
       redirect_to quiz_path(@quiz), notice: 'Pregunta creada exitosamente.'
     else
       render :new, status: :unprocessable_entity
@@ -42,6 +43,27 @@ class QuizPreguntasController < ApplicationController
   def destroy
     @pregunta.destroy
     redirect_to quiz_path(@quiz), notice: 'Pregunta eliminada exitosamente.'
+  end
+
+  def reordenar
+    @quiz = Quiz.find(params[:quiz_id])
+
+    # Verificar permisos
+    unless current_usuario.profesor? && @quiz.curso.profesor_id == current_usuario.id
+      return render json: { error: 'No autorizado' }, status: :unauthorized
+    end
+
+    # Actualizar orden
+    ActiveRecord::Base.transaction do
+      params[:orden].each do |id, posicion|
+        QuizPregunta.where(id: id).update_all(orden: posicion)
+      end
+    end
+
+    # Responder con éxito
+    render json: { status: 'success' }
+  rescue StandardError => e
+    render json: { error: e.message }, status: :unprocessable_entity
   end
 
   private

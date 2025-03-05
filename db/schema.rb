@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_03_04_194107) do
+ActiveRecord::Schema[7.1].define(version: 2025_03_05_211556) do
   create_schema "auth"
   create_schema "extensions"
   create_schema "graphql"
@@ -113,6 +113,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_04_194107) do
     t.text "objetivos"
     t.text "requisitos"
     t.boolean "activo", default: true
+    t.datetime "fecha"
     t.index ["curso_id"], name: "index_laboratorios_on_curso_id"
   end
 
@@ -150,6 +151,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_04_194107) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "retroalimentacion"
+    t.string "respuesta_correcta"
     t.index ["quiz_id", "orden"], name: "index_quiz_preguntas_on_quiz_id_and_orden"
     t.index ["quiz_id"], name: "index_quiz_preguntas_on_quiz_id"
   end

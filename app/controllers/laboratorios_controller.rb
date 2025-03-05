@@ -56,7 +56,18 @@ class LaboratoriosController < ApplicationController
   end
 
   def laboratorio_params
-    params.require(:laboratorio).permit(:nombre, :descripcion, :estado, :curso_id)
+    params.require(:laboratorio).permit(
+      :nombre,
+      :descripcion,
+      :curso_id,
+      :tipo,
+      :duracion_estimada,
+      :nivel_dificultad,
+      :objetivos,
+      :requisitos,
+      :activo,
+      :fecha
+    )
   end
 
   def verify_access
