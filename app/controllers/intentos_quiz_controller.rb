@@ -141,21 +141,12 @@ class IntentosQuizController < ApplicationController
 
   # Finaliza un intento y calcula resultados
   def finalizar
-    # No finalizar si ya estaba completado
-    return redirect_to resultados_quiz_intento_path(@quiz, @intento) if @intento.completado?
+    ActiveRecord::Base.transaction do
+      @intento.update!(estado: :completado, finalizado_en: Time.current)
+      calcular_resultados
+    end
 
-    # Marcar como completado y guardar tiempo de finalización
-    @intento.update(
-      estado: :completado,
-      finalizado_en: Time.current
-    )
-
-    # Calcular resultados (puntaje y respuestas correctas)
-    calcular_resultados
-
-    # Registrar evento de finalización
     registrar_evento_intento('finalizar', @intento)
-
     redirect_to resultados_quiz_intento_path(@quiz, @intento)
   end
 
@@ -323,6 +314,30 @@ class IntentosQuizController < ApplicationController
       @respuestas_problematicas[pregunta] = tasa_error if tasa_error > 50 # Solo mostrar las más problemáticas
     end
     @respuestas_problematicas = @respuestas_problematicas.sort_by { |_, v| -v }.take(3)
+  end
+
+  def registrar_evento
+    @intento = IntentoQuiz.find(params[:id])
+
+    # Verificar permisos
+    return head :unauthorized unless @intento.usuario_id == current_usuario.id
+
+    # Registrar el evento
+    evento = {
+      tipo: params[:tipo],
+      datos: params[:datos],
+      timestamp: Time.current,
+      intento_id: @intento.id,
+      usuario_id: current_usuario.id
+    }
+
+    # Guardar en la base de datos o logs
+    Rails.logger.info("EVENTO QUIZ: #{evento.to_json}")
+
+    # Si tienes un modelo EventoQuiz, podrías guardarlo así:
+    # EventoQuiz.create(evento)
+
+    head :ok
   end
 
   def registrar_evento_intento(accion, intento)

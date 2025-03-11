@@ -59,6 +59,7 @@ Rails.application.routes.draw do
             post :finalizar
             get :resultados
             post :responder
+            post :registrar_evento  # Nueva ruta para registrar eventos de seguridad
           end
         end
 
@@ -67,6 +68,7 @@ Rails.application.routes.draw do
           post :despublicar
           post :duplicate
           get :estadisticas
+          get :exportar_resultados  # Nueva ruta para exportar resultados
         end
       end
     end
@@ -85,8 +87,12 @@ Rails.application.routes.draw do
         member do
           post :finalizar
           get :resultados
-          post :duplicate
+          post :registrar_evento # También aquí para mantener coherencia
         end
+      end
+
+      member do
+        get :exportar_resultados, format: %i[csv pdf] # Con formatos específicos
       end
     end
 

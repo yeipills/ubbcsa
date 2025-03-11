@@ -127,7 +127,10 @@ class QuizzesController < ApplicationController
   end
 
   def estadisticas
-    @intentos = @quiz.intentos.includes(:usuario).completado
+    @intentos = @quiz.intentos
+                     .includes(:usuario, respuestas: { pregunta: :opciones })
+                     .where(estado: :completado)
+                     .order(created_at: :desc)
     @puntaje_promedio = @intentos.average(:puntaje_total)
     @tiempo_promedio = @intentos.average('EXTRACT(EPOCH FROM (finalizado_en - iniciado_en))').to_i
 
@@ -141,7 +144,31 @@ class QuizzesController < ApplicationController
                                     .limit(5)
   end
 
+  def exportar_resultados
+    @quiz = Quiz.find(params[:id])
+    @intentos = @quiz.intentos.completado.includes(:usuario, :respuestas)
+    formato = params[:formato] || 'csv'
+
+    respond_to do |format|
+      format.csv { enviar_csv(@quiz) }
+      format.pdf { generar_pdf(@quiz) }
+    end
+  end
+
   private
+
+  def enviar_csv(quiz)
+    filename = "quiz_#{quiz.id}_resultados_#{Date.today.strftime('%Y%m%d')}.csv"
+    send_data generar_csv(quiz), filename: filename, type: 'text/csv'
+  end
+
+  def generar_csv(quiz)
+    # Implementación de generación de CSV
+  end
+
+  def generar_pdf(quiz)
+    # Implementación con Prawn u otra gema PDF
+  end
 
   def set_curso
     @curso = Curso.find(params[:curso_id]) if params[:curso_id]

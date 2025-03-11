@@ -23,6 +23,10 @@ export default class extends Controller {
     // Registrar evento para finalización automática
     this.handleFormSubmit = this.handleFormSubmit.bind(this)
     document.addEventListener("submit", this.handleFormSubmit)
+    
+    // Agregar detección de cambio de foco
+    this.visibilityHandler = this.handleVisibilityChange.bind(this)
+    document.addEventListener("visibilitychange", this.visibilityHandler)
   }
 
   startTimer() {
@@ -175,6 +179,56 @@ export default class extends Controller {
       sessionStorage.setItem('quiz_remaining_time', this.remaining)
     }
   }
+  
+  // Nuevo método para detectar cambio de foco
+  handleVisibilityChange(e) {
+    if (document.hidden) {
+      // Registrar evento de cambio de foco
+      this.registrarEvento('cambio_foco', { 
+        timestamp: new Date().toISOString(),
+        tiempo_restante: this.remaining 
+      })
+      
+      // Opcional: Mostrar advertencia al volver
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          this.showNotification('Advertencia', 'Se ha detectado que abandonaste la ventana del quiz. Esta acción ha quedado registrada.')
+        }
+      }, { once: true })
+    }
+  }
+  
+  // Método para registrar eventos de seguridad
+  registrarEvento(tipo, datos) {
+    // Extraer IDs del elemento o de data attributes
+    const intentoId = this.element.dataset.intentoId
+    const quizId = this.element.dataset.quizId
+    
+    if (!intentoId || !quizId) {
+      console.error('No se pudo determinar el ID del intento o quiz')
+      return
+    }
+    
+    fetch(`/quizzes/${quizId}/intentos/${intentoId}/registrar_evento`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({
+        tipo: tipo,
+        datos: datos
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        console.error('Error al registrar evento de seguridad')
+      }
+    })
+    .catch(error => {
+      console.error('Error de conexión al registrar evento:', error)
+    })
+  }
 
   disconnect() {
     if (this.timer) {
@@ -186,5 +240,6 @@ export default class extends Controller {
     }
     
     document.removeEventListener("submit", this.handleFormSubmit)
+    document.removeEventListener("visibilitychange", this.visibilityHandler)
   }
 }
