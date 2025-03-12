@@ -1,0 +1,190 @@
+<div class="min-h-screen bg-gray-900">
+  <%= content_for :navbar do %>
+    <%= render 'shared/navbar' %>
+  <% end %>
+  
+<div class="bg-gray-900 min-h-screen pb-16">
+  <!-- Encabezado -->
+  <div class="bg-gray-800 py-6 px-4 sm:px-6 lg:px-8 shadow-md border-b border-gray-700">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Notificaciones</h1>
+        <p class="mt-1 text-gray-400">
+          Gestiona tus alertas y mensajes
+        </p>
+      </div>
+      
+      <!-- Acciones -->
+      <div class="mt-4 md:mt-0 flex flex-wrap gap-2">
+        <%= link_to marcar_todas_como_leidas_notificaciones_path, method: :post, class: "bg-gray-700 text-gray-200 px-4 py-2 rounded flex items-center hover:bg-gray-600" do %>
+          <i class="fas fa-check-double mr-2"></i>
+          Marcar todas como leídas
+        <% end %>
+        
+        <%= link_to eliminar_todas_notificaciones_path, method: :delete, data: { confirm: "¿Estás seguro? Se eliminarán todas las notificaciones leídas." }, class: "bg-gray-700 text-gray-200 px-4 py-2 rounded flex items-center hover:bg-gray-600" do %>
+          <i class="fas fa-trash mr-2"></i>
+          Limpiar leídas
+        <% end %>
+        
+        <%= link_to preferencias_notificaciones_path, class: "bg-gray-700 text-gray-200 px-4 py-2 rounded flex items-center hover:bg-gray-600" do %>
+          <i class="fas fa-cog mr-2"></i>
+          Preferencias
+        <% end %>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Contenido principal -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Filtros -->
+    <div class="bg-gray-800 rounded-lg shadow p-4 mb-6 border border-gray-700">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Filtro por estado -->
+          <div>
+            <%= link_to notificaciones_path, class: "px-3 py-1 rounded #{params[:no_leidas] ? 'bg-gray-700 text-gray-200' : 'bg-blue-600 text-white'}" do %>
+              Todas
+            <% end %>
+            
+            <%= link_to notificaciones_path(no_leidas: true), class: "px-3 py-1 rounded #{params[:no_leidas] ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-200'}" do %>
+              No leídas (<%= @total_no_leidas %>)
+            <% end %>
+          </div>
+          
+          <!-- Filtro por tipo -->
+          <div class="ml-4">
+            <span class="text-gray-400 mr-2">Tipo:</span>
+            <%= link_to "Todas", notificaciones_path(no_leidas: params[:no_leidas]), class: "px-2 py-1 rounded #{params[:tipo].blank? ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-200'}" %>
+            
+            <% @tipos_disponibles.each do |tipo, count| %>
+              <%= link_to notificaciones_path(tipo: tipo, no_leidas: params[:no_leidas]), class: "px-2 py-1 rounded #{params[:tipo] == tipo ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-200'}" do %>
+                <%= tipo.humanize %> (<%= count %>)
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+        
+        <!-- Contador -->
+        <div class="text-gray-400">
+          <%= pluralize(@notificaciones.count, 'notificación', 'notificaciones') %> <%= params[:no_leidas] ? 'no leídas' : 'en total' %>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Lista de notificaciones -->
+    <div class="bg-gray-800 rounded-lg shadow border border-gray-700 overflow-hidden">
+      <% if @notificaciones.any? %>
+        <div class="divide-y divide-gray-700">
+          <% @notificaciones.each do |notificacion| %>
+            <div class="flex items-start p-4 <%= notificacion.leida ? 'bg-gray-800' : 'bg-gray-750' %>">
+              <!-- Icono según tipo -->
+              <div class="flex-shrink-0 mt-1">
+                <% case notificacion.tipo %>
+                <% when 'sistema' %>
+                  <div class="rounded-full p-2 bg-gray-700 text-gray-300">
+                    <i class="fas fa-server"></i>
+                  </div>
+                <% when 'laboratorio' %>
+                  <div class="rounded-full p-2 bg-blue-100 text-blue-800">
+                    <i class="fas fa-flask"></i>
+                  </div>
+                <% when 'curso' %>
+                  <div class="rounded-full p-2 bg-green-100 text-green-800">
+                    <i class="fas fa-book"></i>
+                  </div>
+                <% when 'quiz' %>
+                  <div class="rounded-full p-2 bg-yellow-100 text-yellow-800">
+                    <i class="fas fa-question-circle"></i>
+                  </div>
+                <% when 'logro' %>
+                  <div class="rounded-full p-2 bg-purple-100 text-purple-800">
+                    <i class="fas fa-trophy"></i>
+                  </div>
+                <% when 'ejercicio' %>
+                  <div class="rounded-full p-2 bg-indigo-100 text-indigo-800">
+                    <i class="fas fa-tasks"></i>
+                  </div>
+                <% when 'mensaje' %>
+                  <div class="rounded-full p-2 bg-teal-100 text-teal-800">
+                    <i class="fas fa-envelope"></i>
+                  </div>
+                <% when 'alerta_seguridad' %>
+                  <div class="rounded-full p-2 bg-red-100 text-red-800">
+                    <i class="fas fa-exclamation-triangle"></i>
+                  </div>
+                <% end %>
+              </div>
+              
+              <!-- Contenido -->
+              <div class="ml-4 flex-1">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <h3 class="text-md font-medium <%= notificacion.leida ? 'text-gray-300' : 'text-white' %>">
+                      <%= notificacion.titulo %>
+                    </h3>
+                    <div class="mt-1 text-sm text-gray-400">
+                      <%= notificacion.contenido %>
+                    </div>
+                    <div class="mt-2 flex items-center text-xs text-gray-500">
+                      <span><%= notificacion.tiempo_transcurrido %></span>
+                      
+                      <% if notificacion.notificable %>
+                        <span class="mx-2">&middot;</span>
+                        <span>
+                          <%= link_to polymorphic_path(notificacion.notificable), class: "text-blue-400 hover:underline" do %>
+                            Ver <%= notificacion.notificable.class.name.downcase %>
+                          <% end %>
+                        </span>
+                      <% end %>
+                      
+                      <% if notificacion.actor %>
+                        <span class="mx-2">&middot;</span>
+                        <span>
+                          De: <%= notificacion.actor.nombre_completo %>
+                        </span>
+                      <% end %>
+                    </div>
+                  </div>
+                  
+                  <!-- Acciones -->
+                  <div class="flex space-x-2">
+                    <% if notificacion.leida %>
+                      <%= link_to marcar_como_no_leida_notificacion_path(notificacion), method: :post, class: "text-gray-400 hover:text-blue-400" do %>
+                        <i class="fas fa-eye-slash" title="Marcar como no leída"></i>
+                      <% end %>
+                    <% else %>
+                      <%= link_to marcar_como_leida_notificacion_path(notificacion), method: :post, class: "text-gray-400 hover:text-blue-400" do %>
+                        <i class="fas fa-check" title="Marcar como leída"></i>
+                      <% end %>
+                    <% end %>
+                    
+                    <%= link_to eliminar_notificacion_path(notificacion), method: :delete, data: { confirm: "¿Eliminar esta notificación?" }, class: "text-gray-400 hover:text-red-400" do %>
+                      <i class="fas fa-trash" title="Eliminar"></i>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        
+        <!-- Paginación -->
+        <div class="bg-gray-800 px-4 py-3 flex items-center justify-between border-t border-gray-700">
+          <div class="flex-1 flex justify-between flex-col sm:flex-row">
+            <%= will_paginate @notificaciones, class: "pagination", inner_window: 1, outer_window: 1, renderer: WillPaginate::ActionView::LinkRenderer, previous_label: "← Anterior", next_label: "Siguiente →" %>
+          </div>
+        </div>
+      <% else %>
+        <div class="py-12 text-center">
+          <div class="mx-auto w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center mb-4">
+            <i class="fas fa-bell-slash text-2xl text-gray-400"></i>
+          </div>
+          <h3 class="text-lg font-medium text-white">No hay notificaciones</h3>
+          <p class="mt-2 text-gray-400">
+            <%= params[:no_leidas] ? 'No tienes notificaciones sin leer' : 'No tienes notificaciones' %>
+          </p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

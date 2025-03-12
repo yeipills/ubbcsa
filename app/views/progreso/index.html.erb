@@ -1,0 +1,420 @@
+<div class="min-h-screen bg-gray-900">
+  <%= content_for :navbar do %>
+    <%= render 'shared/navbar' %>
+  <% end %>
+<div class="bg-gray-900 min-h-screen pb-16" data-controller="progreso-charts" data-progreso-charts-periodo-value="<%= @periodo %>" data-progreso-charts-curso-id-value="<%= @curso_id %>">
+  <!-- Encabezado -->
+  <div class="bg-gray-800 py-6 px-4 sm:px-6 lg:px-8 shadow-md border-b border-gray-700">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Dashboard de Progreso</h1>
+        <p class="mt-1 text-gray-400">
+          <%= current_usuario.estudiante? ? "Tu progreso en la plataforma" : "Progreso general de tus cursos" %>
+        </p>
+      </div>
+      
+      <!-- Filtros -->
+      <div class="mt-4 md:mt-0 flex flex-wrap gap-2">
+        <!-- Filtro de período -->
+        <div class="dropdown relative">
+          <button class="btn btn-secondary dropdown-toggle bg-gray-700 text-gray-200 px-4 py-2 rounded flex items-center" type="button" id="dropdownPeriod" data-bs-toggle="dropdown" aria-expanded="false">
+            <%= { 'week' => 'Esta semana', 'month' => 'Este mes', 'year' => 'Este año' }[@periodo] %>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <ul class="dropdown-menu absolute hidden z-10 bg-gray-700 rounded py-1 mt-1 min-w-[10rem] shadow-lg" aria-labelledby="dropdownPeriod">
+            <li><a href="#" class="block px-4 py-2 text-gray-200 hover:bg-gray-600" data-action="progreso-charts#changePeriod" data-periodo="week">Esta semana</a></li>
+            <li><a href="#" class="block px-4 py-2 text-gray-200 hover:bg-gray-600" data-action="progreso-charts#changePeriod" data-periodo="month">Este mes</a></li>
+            <li><a href="#" class="block px-4 py-2 text-gray-200 hover:bg-gray-600" data-action="progreso-charts#changePeriod" data-periodo="year">Este año</a></li>
+          </ul>
+        </div>
+        
+        <% if current_usuario.profesor? && (current_usuario.cursos_como_profesor.count > 0) %>
+          <!-- Filtro de curso -->
+          <div class="dropdown relative">
+            <button class="btn btn-secondary dropdown-toggle bg-gray-700 text-gray-200 px-4 py-2 rounded flex items-center" type="button" id="dropdownCourse" data-bs-toggle="dropdown" aria-expanded="false">
+              <%= @curso ? @curso.nombre : 'Todos los cursos' %>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            <ul class="dropdown-menu absolute hidden z-10 bg-gray-700 rounded py-1 mt-1 min-w-[10rem] shadow-lg" aria-labelledby="dropdownCourse">
+              <li><a href="#" class="block px-4 py-2 text-gray-200 hover:bg-gray-600" data-action="progreso-charts#changeCourse" data-curso-id="">Todos los cursos</a></li>
+              <% current_usuario.cursos_como_profesor.each do |curso| %>
+                <li><a href="#" class="block px-4 py-2 text-gray-200 hover:bg-gray-600" data-action="progreso-charts#changeCourse" data-curso-id="<%= curso.id %>"><%= curso.nombre %></a></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+        
+        <!-- Exportar PDF -->
+        <%= link_to progreso_exportar_pdf_path(format: :pdf, periodo: @periodo, curso_id: @curso_id), class: "bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center", target: "_blank" do %>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Exportar PDF
+        <% end %>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Contenido principal -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Tarjetas de estadísticas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <% if current_usuario.estudiante? %>
+        <!-- Estadísticas para estudiantes -->
+        <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
+          <div class="flex items-center">
+            <div class="p-3 rounded-full bg-blue-500 bg-opacity-10">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="ml-4">
+              <h2 class="text-gray-400 text-sm font-medium">Laboratorios Completados</h2>
+              <p class="text-2xl font-semibold text-white"><%= @dashboard_data[:estadisticas][:sesiones_completadas] %></p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
+          <div class="flex items-center">
+            <div class="p-3 rounded-full bg-green-500 bg-opacity-10">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="ml-4">
+              <h2 class="text-gray-400 text-sm font-medium">Tiempo Total</h2>
+              <p class="text-2xl font-semibold text-white"><%= @dashboard_data[:estadisticas][:tiempo_total] %></p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
+          <div class="flex items-center">
+            <div class="p-3 rounded-full bg-yellow-500 bg-opacity-10">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <div class="ml-4">
+              <h2 class="text-gray-400 text-sm font-medium">Sesiones Activas</h2>
+              <p class="text-2xl font-semibold text-white"><%= @dashboard_data[:estadisticas][:sesiones_activas] %></p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
+          <div class="flex items-center">
+            <div class="p-3 rounded-full bg-purple-500 bg-opacity-10">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+            </div>
+            <div class="ml-4">
+              <h2 class="text-gray-400 text-sm font-medium">Cursos Inscritos</h2>
+              <p class="text-2xl font-semibold text-white"><%= current_usuario.cursos.count %></p>
+            </div>
+          </div>
+        </div>
+      <% else %>
+        <!-- Estadísticas para profesores -->
+        <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
+          <div class="flex items-center">
+            <div class="p-3 rounded-full bg-blue-500 bg-opacity-10">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            </div>
+            <div class="ml-4">
+              <h2 class="text-gray-400 text-sm font-medium">Total Estudiantes</h2>
+              <p class="text-2xl font-semibold text-white"><%= @dashboard_data[:estadisticas_estudiantes][:total_estudiantes] %></p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
+          <div class="flex items-center">
+            <div class="p-3 rounded-full bg-green-500 bg-opacity-10">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+              </svg>
+            </div>
+            <div class="ml-4">
+              <h2 class="text-gray-400 text-sm font-medium">Estudiantes Activos</h2>
+              <p class="text-2xl font-semibold text-white"><%= @dashboard_data[:estadisticas_estudiantes][:estudiantes_activos] %></p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
+          <div class="flex items-center">
+            <div class="p-3 rounded-full bg-yellow-500 bg-opacity-10">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+            <div class="ml-4">
+              <h2 class="text-gray-400 text-sm font-medium">Promedio Completados</h2>
+              <p class="text-2xl font-semibold text-white"><%= @dashboard_data[:estadisticas_estudiantes][:promedio_completados].round(1) %></p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
+          <div class="flex items-center">
+            <div class="p-3 rounded-full bg-purple-500 bg-opacity-10">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </div>
+            <div class="ml-4">
+              <h2 class="text-gray-400 text-sm font-medium">Nuevos Estudiantes</h2>
+              <p class="text-2xl font-semibold text-white"><%= @dashboard_data[:estadisticas_estudiantes][:nuevos_estudiantes] %></p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    
+    <!-- Gráficos de actividad y progreso -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      <!-- Gráfico de actividad -->
+      <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
+        <h2 class="text-lg font-semibold text-white mb-4">Actividad Reciente</h2>
+        <div class="h-64">
+          <canvas data-progreso-charts-target="activityChart"></canvas>
+        </div>
+      </div>
+      
+      <% if current_usuario.estudiante? %>
+        <!-- Gráfico de distribución de habilidades (para estudiantes) -->
+        <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
+          <h2 class="text-lg font-semibold text-white mb-4">Distribución de Habilidades</h2>
+          <div class="h-64">
+            <canvas data-progreso-charts-target="skillsChart"></canvas>
+          </div>
+        </div>
+      <% else %>
+        <!-- Gráfico de progreso por curso (para profesores) -->
+        <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
+          <h2 class="text-lg font-semibold text-white mb-4">Progreso Promedio por Curso</h2>
+          <div class="h-64">
+            <canvas data-progreso-charts-target="courseProgressChart"></canvas>
+          </div>
+        </div>
+      <% end %>
+    </div>
+    
+    <!-- Tercera fila de gráficos -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+      <!-- Gráfico de distribución por dificultad -->
+      <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
+        <h2 class="text-lg font-semibold text-white mb-4">Laboratorios por Dificultad</h2>
+        <div class="h-64">
+          <canvas data-progreso-charts-target="difficultyChart"></canvas>
+        </div>
+      </div>
+      
+      <% if current_usuario.estudiante? %>
+        <!-- Gráfico de progreso por curso (para estudiantes) -->
+        <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
+          <h2 class="text-lg font-semibold text-white mb-4">Progreso por Curso</h2>
+          <div class="h-64">
+            <canvas data-progreso-charts-target="progressChart"></canvas>
+          </div>
+        </div>
+      <% else %>
+        <!-- Listado de estudiantes destacados (para profesores) -->
+        <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
+          <h2 class="text-lg font-semibold text-white mb-4">Estudiantes Destacados</h2>
+          
+          <% if @dashboard_data[:estudiantes_destacados].any? %>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-700">
+                <thead>
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Estudiante</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Completados</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-700">
+                  <% @dashboard_data[:estudiantes_destacados].each do |estudiante| %>
+                    <tr>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                          <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-700 flex items-center justify-center">
+                            <span class="text-gray-300"><%= estudiante.nombre_completo.first.upcase %></span>
+                          </div>
+                          <div class="ml-4">
+                            <div class="text-sm font-medium text-white"><%= estudiante.nombre_completo %></div>
+                            <div class="text-sm text-gray-400"><%= estudiante.email %></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-white"><%= estudiante.completados_count %> laboratorios</div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <%= link_to "Ver Progreso", progreso_estudiante_path(estudiante), class: "text-blue-500 hover:text-blue-400" %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <div class="text-center text-gray-400 py-8">
+              <p>No hay datos de estudiantes disponibles</p>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    
+    <!-- Sección final: Última actividad o laboratorios populares -->
+    <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
+      <% if current_usuario.estudiante? %>
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-semibold text-white">Actividad Reciente</h2>
+        </div>
+        
+        <% if @dashboard_data[:actividad_reciente].any? %>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-700">
+              <thead>
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Laboratorio</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Estado</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Fecha</th>
+                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-700">
+                <% @dashboard_data[:actividad_reciente].each do |sesion| %>
+                  <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-700 flex items-center justify-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-300" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" />
+                          </svg>
+                        </div>
+                        <div class="ml-4">
+                          <div class="text-sm font-medium text-white"><%= sesion.laboratorio.nombre %></div>
+                          <div class="text-sm text-gray-400"><%= sesion.laboratorio.curso.nombre %></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        <%= sesion.completada? ? 'bg-green-100 text-green-800' : 
+                           sesion.activa? ? 'bg-blue-100 text-blue-800' : 
+                           'bg-gray-100 text-gray-800' %>">
+                        <%= sesion.estado.capitalize %>
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                      <%= l sesion.created_at, format: :short %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <% if sesion.activa? %>
+                        <%= link_to "Continuar", sesion_laboratorio_path(sesion), class: "text-blue-500 hover:text-blue-400" %>
+                      <% else %>
+                        <%= link_to "Ver Detalles", detalles_laboratorio_path(sesion.laboratorio), class: "text-blue-500 hover:text-blue-400" %>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <div class="text-center text-gray-400 py-8">
+            <p>No hay actividad reciente</p>
+          </div>
+        <% end %>
+      <% else %>
+        <!-- Para profesores: Laboratorios más populares -->
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-semibold text-white">Laboratorios Más Populares</h2>
+        </div>
+        
+        <% if @dashboard_data[:laboratorios_populares].any? %>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-700">
+              <thead>
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Laboratorio</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Curso</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Intentos</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Dificultad</th>
+                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">Acciones</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-700">
+                <% @dashboard_data[:laboratorios_populares].each do |lab| %>
+                  <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm font-medium text-white"><%= lab.nombre %></div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm text-gray-400"><%= lab.curso.nombre %></div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm text-white"><%= lab.intentos_count %></div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        <%= lab.nivel_dificultad == 'principiante' ? 'bg-green-100 text-green-800' : 
+                           lab.nivel_dificultad == 'intermedio' ? 'bg-yellow-100 text-yellow-800' : 
+                           'bg-red-100 text-red-800' %>">
+                        <%= lab.nivel_dificultad.capitalize %>
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <%= link_to "Ver Detalles", laboratorio_path(lab), class: "text-blue-500 hover:text-blue-400" %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <div class="text-center text-gray-400 py-8">
+            <p>No hay datos de laboratorios disponibles</p>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Script para dropdown -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+    
+    dropdownToggles.forEach(toggle => {
+      toggle.addEventListener('click', function(e) {
+        e.preventDefault();
+        const dropdown = this.nextElementSibling;
+        dropdown.classList.toggle('hidden');
+      });
+    });
+    
+    // Cerrar dropdowns cuando se hace clic fuera
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+          menu.classList.add('hidden');
+        });
+      }
+    });
+  });
+</script>

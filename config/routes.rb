@@ -29,6 +29,13 @@ Rails.application.routes.draw do
       resource :consola, only: [:show] do
         get 'terminal', to: 'wetty#show'
       end
+
+      # NUEVO: Ejercicios dentro de una sesión
+      resources :ejercicios, only: [:show] do
+        member do
+          post :verificar
+        end
+      end
     end
 
     # Cursos y recursos anidados
@@ -79,6 +86,9 @@ Rails.application.routes.draw do
         get :disponibles
         get :completados
       end
+
+      # NUEVO: Ejercicios asociados a un laboratorio
+      resources :ejercicios
     end
 
     # Quizzes independientes (vista general)
@@ -100,6 +110,31 @@ Rails.application.routes.draw do
     resources :reportes, only: %i[index show] do
       collection do
         get :descargar
+      end
+    end
+
+    # NUEVO: Rutas para Progreso Dashboard
+    get '/progreso', to: 'progreso#index', as: 'progreso'
+    get '/progreso/chart_data', to: 'progreso#chart_data', as: 'progreso_chart_data'
+    get '/progreso/detalles_laboratorio/:id', to: 'progreso#detalles_laboratorio', as: 'detalles_laboratorio'
+    get '/progreso/detalles_curso/:id', to: 'progreso#detalles_curso', as: 'detalles_curso'
+    get '/progreso/estudiante/:id', to: 'progreso#estudiante', as: 'progreso_estudiante'
+    get '/progreso/exportar_pdf', to: 'progreso#exportar_pdf', as: 'progreso_exportar_pdf'
+
+    # NUEVO: Sistema de notificaciones
+    resources :notificaciones, only: %i[index show] do
+      collection do
+        get :no_leidas
+        post :marcar_todas_como_leidas
+        delete :eliminar_todas
+        get :preferencias
+        post :preferencias
+      end
+
+      member do
+        post :marcar_como_leida
+        post :marcar_como_no_leida
+        delete :eliminar, as: :eliminar
       end
     end
 

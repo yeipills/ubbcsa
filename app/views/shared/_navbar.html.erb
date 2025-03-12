@@ -47,30 +47,89 @@
                 <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-blue-500 rounded-full"></span>
               <% end %>
             <% end %>
+            
+            <%= link_to progreso_path, 
+                class: "text-gray-300 hover:text-white text-sm font-medium transition-colors duration-200 relative #{controller_name == 'progreso' ? 'text-white' : ''}" do %>
+              Progreso
+              <% if controller_name == 'progreso' %>
+                <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-blue-500 rounded-full"></span>
+              <% end %>
+            <% end %>
           </div>
 
-          <%# Perfil usuario con hover mejorado %>
-          <%= link_to mi_perfil_path, class: "flex items-center space-x-3 bg-gray-800 px-4 py-2 rounded-lg border border-transparent hover:border-gray-700 transition-all duration-200" do %>
-            <div class="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
-              <span class="text-sm font-medium text-white">
-                <%= current_usuario.nombre_usuario ? current_usuario.nombre_usuario[0].upcase : current_usuario.email[0].upcase %>
-              </span>
+          <%# Notificaciones y perfil de usuario %>
+          <div class="flex items-center space-x-4">
+            <%# Componente de notificaciones %>
+            <div class="relative" data-controller="notifications">
+                <button type="button" class="flex items-center justify-center h-8 w-8 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all duration-200 focus:outline-none">
+                  <span class="sr-only">Ver notificaciones</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                </button>
+              <div 
+                class="origin-top-right absolute right-0 mt-2 w-80 rounded-lg shadow-lg py-1 bg-gray-800 border border-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none z-50 hidden"
+                data-notifications-target="dropdown"
+                role="menu" 
+                aria-orientation="vertical" 
+                aria-labelledby="notificaciones-menu"
+              >
+                <div class="px-4 py-2 text-sm text-gray-300 border-b border-gray-700 flex justify-between items-center">
+                  <h3 class="font-medium">Notificaciones</h3>
+                  <a href="<%= notificaciones_path %>" class="text-blue-400 hover:text-blue-300 text-xs">Ver todas</a>
+                </div>
+                
+                <div data-notifications-target="content" class="max-h-96 overflow-y-auto">
+                  <% if usuario_signed_in? && current_usuario.notificaciones.recientes.exists? %>
+                    <% current_usuario.notificaciones.recientes.limit(5).each do |notificacion| %>
+                      <%= render 'notificaciones/notificacion', notificacion: notificacion %>
+                    <% end %>
+                  <% else %>
+                    <div class="px-4 py-3 text-sm text-gray-500">
+                      No tienes notificaciones recientes.
+                    </div>
+                  <% end %>
+                </div>
+                
+                <div class="border-t border-gray-700 px-4 py-2 text-xs flex justify-between">
+                  <% if usuario_signed_in? && current_usuario.notificaciones.no_leidas.exists? %>
+                    <button 
+                      class="text-blue-400 hover:text-blue-300"
+                      data-action="click->notifications#markAllAsRead"
+                    >
+                      Marcar todas como leídas
+                    </button>
+                  <% else %>
+                    <span class="text-gray-500">No hay notificaciones pendientes</span>
+                  <% end %>
+                  <a href="<%= preferencias_notificaciones_path %>" class="text-blue-400 hover:text-blue-300">Preferencias</a>
+                </div>
+              </div>
             </div>
-            <span class="text-sm text-gray-300">
-              <%= current_usuario.nombre_usuario || current_usuario.email %>
-            </span>
-          <% end %>
 
-          <%# Cerrar sesión con efecto hover mejorado %>
-          <%= button_to destroy_usuario_session_path, 
-              method: :delete,
-              class: "px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 shadow-sm hover:shadow transition-all duration-200 flex items-center",
-              data: { turbo: false } do %>
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            Cerrar sesión
-          <% end %>
+            <%# Perfil usuario con hover mejorado %>
+            <%= link_to mi_perfil_path, class: "flex items-center space-x-3 bg-gray-800 px-4 py-2 rounded-lg border border-transparent hover:border-gray-700 transition-all duration-200" do %>
+              <div class="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
+                <span class="text-sm font-medium text-white">
+                  <%= current_usuario.nombre_usuario ? current_usuario.nombre_usuario[0].upcase : current_usuario.email[0].upcase %>
+                </span>
+              </div>
+              <span class="text-sm text-gray-300">
+                <%= current_usuario.nombre_usuario || current_usuario.email %>
+              </span>
+            <% end %>
+
+            <%# Cerrar sesión con efecto hover mejorado %>
+            <%= button_to destroy_usuario_session_path, 
+                method: :delete,
+                class: "px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 shadow-sm hover:shadow transition-all duration-200 flex items-center",
+                data: { turbo: false } do %>
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Cerrar sesión
+            <% end %>
+          </div>
 
         <% else %>
           <%# Links de autenticación mejorados %>
@@ -149,6 +208,31 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
                 Quizzes
+              </div>
+            <% end %>
+            
+            <%= link_to progreso_path, 
+                class: "block py-2 px-3 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm font-medium transition-colors duration-200 #{controller_name == 'progreso' ? 'text-white bg-gray-800 border-l-2 border-blue-500 pl-4' : ''}" do %>
+              <div class="flex items-center">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Progreso
+              </div>
+            <% end %>
+            
+            <%= link_to notificaciones_path, 
+                class: "block py-2 px-3 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm font-medium transition-colors duration-200 #{controller_name == 'notificaciones' ? 'text-white bg-gray-800 border-l-2 border-blue-500 pl-4' : ''}" do %>
+              <div class="flex items-center">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                Notificaciones
+                <% if usuario_signed_in? && current_usuario.notificaciones.no_leidas.count > 0 %>
+                  <span class="ml-auto bg-red-500 text-white text-xs font-bold rounded-full px-2">
+                    <%= current_usuario.notificaciones.no_leidas.count %>
+                  </span>
+                <% end %>
               </div>
             <% end %>
           </div>

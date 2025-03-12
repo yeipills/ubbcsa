@@ -12,8 +12,25 @@ class SesionLaboratorio < ApplicationRecord
   scope :completadas, -> { where(estado: 'completada') }
   scope :recientes, -> { order(created_at: :desc) }
 
+  # Métodos de consulta para verificar estado
   def activa?
     estado == 'activa'
+  end
+
+  def completada?
+    estado == 'completada'
+  end
+
+  def pausada?
+    estado == 'pausada'
+  end
+
+  def abandonada?
+    estado == 'abandonada'
+  end
+
+  def iniciando?
+    estado == 'iniciando'
   end
 
   def actividad_reciente

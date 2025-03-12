@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_03_05_211556) do
+ActiveRecord::Schema[7.1].define(version: 2025_03_11_045848) do
   create_schema "auth"
   create_schema "extensions"
   create_schema "graphql"
@@ -84,6 +84,38 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_05_211556) do
     t.index ["codigo"], name: "index_cursos_on_codigo", unique: true
   end
 
+  create_table "ejercicio_completados", force: :cascade do |t|
+    t.bigint "ejercicio_id", null: false
+    t.bigint "sesion_laboratorio_id", null: false
+    t.bigint "usuario_id", null: false
+    t.datetime "completado_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ejercicio_id", "sesion_laboratorio_id", "usuario_id"], name: "index_ejercicio_completados_unique", unique: true
+    t.index ["ejercicio_id"], name: "index_ejercicio_completados_on_ejercicio_id"
+    t.index ["sesion_laboratorio_id"], name: "index_ejercicio_completados_on_sesion_laboratorio_id"
+    t.index ["usuario_id"], name: "index_ejercicio_completados_on_usuario_id"
+  end
+
+  create_table "ejercicios", force: :cascade do |t|
+    t.bigint "laboratorio_id", null: false
+    t.string "titulo", null: false
+    t.text "descripcion"
+    t.string "tipo", null: false
+    t.string "nivel_dificultad", default: "intermedio"
+    t.jsonb "parametros", default: {}, null: false
+    t.boolean "activo", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "puntos", default: 10
+    t.boolean "obligatorio", default: true
+    t.integer "orden"
+    t.text "pista"
+    t.index ["laboratorio_id", "titulo"], name: "index_ejercicios_on_laboratorio_id_and_titulo", unique: true
+    t.index ["laboratorio_id"], name: "index_ejercicios_on_laboratorio_id"
+    t.index ["tipo"], name: "index_ejercicios_on_tipo"
+  end
+
   create_table "intentos_quiz", force: :cascade do |t|
     t.bigint "quiz_id", null: false
     t.bigint "usuario_id", null: false
@@ -117,6 +149,20 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_05_211556) do
     t.index ["curso_id"], name: "index_laboratorios_on_curso_id"
   end
 
+  create_table "logros", force: :cascade do |t|
+    t.bigint "usuario_id", null: false
+    t.string "tipo", null: false
+    t.string "titulo", null: false
+    t.text "descripcion"
+    t.jsonb "metadatos", default: {}
+    t.datetime "otorgado_en", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.boolean "visible", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["usuario_id", "tipo", "titulo"], name: "index_logros_on_usuario_id_and_tipo_and_titulo", unique: true
+    t.index ["usuario_id"], name: "index_logros_on_usuario_id"
+  end
+
   create_table "metrica_laboratorios", force: :cascade do |t|
     t.bigint "sesion_laboratorio_id", null: false
     t.float "cpu_usage", default: 0.0, null: false
@@ -127,6 +173,46 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_05_211556) do
     t.datetime "updated_at", null: false
     t.index ["sesion_laboratorio_id", "timestamp"], name: "idx_on_sesion_laboratorio_id_timestamp_6cb3ff3dda"
     t.index ["sesion_laboratorio_id"], name: "index_metrica_laboratorios_on_sesion_laboratorio_id"
+  end
+
+  create_table "notificaciones", force: :cascade do |t|
+    t.bigint "usuario_id", null: false
+    t.bigint "actor_id"
+    t.string "notificable_type"
+    t.bigint "notificable_id"
+    t.integer "tipo", default: 0, null: false
+    t.integer "nivel", default: 0, null: false
+    t.string "titulo", null: false
+    t.text "contenido", null: false
+    t.boolean "leida", default: false
+    t.datetime "leida_en"
+    t.jsonb "datos_adicionales", default: {}
+    t.boolean "mostrar_web", default: true
+    t.boolean "mostrar_email", default: false
+    t.boolean "mostrar_movil", default: true
+    t.string "accion_url"
+    t.string "icono"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_id"], name: "index_notificaciones_on_actor_id"
+    t.index ["notificable_type", "notificable_id"], name: "index_notificaciones_on_notificable"
+    t.index ["notificable_type", "notificable_id"], name: "index_notificaciones_on_notificable_type_and_notificable_id"
+    t.index ["usuario_id", "leida"], name: "index_notificaciones_on_usuario_id_and_leida"
+    t.index ["usuario_id"], name: "index_notificaciones_on_usuario_id"
+  end
+
+  create_table "preferencias_notificaciones", id: :serial, force: :cascade do |t|
+    t.integer "usuario_id", null: false
+    t.boolean "email_habilitado", default: true
+    t.boolean "web_habilitado", default: true
+    t.boolean "movil_habilitado", default: true
+    t.jsonb "configuracion_tipos", default: {}
+    t.boolean "resumen_diario", default: false
+    t.boolean "resumen_semanal", default: true
+    t.string "hora_resumen", default: "08:00"
+    t.datetime "created_at", precision: nil, default: -> { "now()" }, null: false
+    t.datetime "updated_at", precision: nil, default: -> { "now()" }, null: false
+    t.index ["usuario_id"], name: "index_preferencias_notificaciones_on_usuario_id", unique: true
   end
 
   create_table "quiz_opciones", force: :cascade do |t|
@@ -203,6 +289,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_05_211556) do
     t.text "notas"
     t.json "resultados"
     t.integer "puntuacion"
+    t.string "container_id"
+    t.boolean "backup_enabled", default: false
+    t.datetime "last_backup_at"
+    t.jsonb "resource_usage"
+    t.string "container_status"
+    t.boolean "completado", default: false
+    t.index ["container_id"], name: "index_sesion_laboratorios_on_container_id"
     t.index ["laboratorio_id", "usuario_id"], name: "index_sesion_laboratorios_on_laboratorio_id_and_usuario_id"
   end
 
@@ -226,10 +319,18 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_05_211556) do
   add_foreign_key "curso_estudiantes", "cursos"
   add_foreign_key "curso_estudiantes", "usuarios"
   add_foreign_key "cursos", "usuarios", column: "profesor_id"
+  add_foreign_key "ejercicio_completados", "ejercicios"
+  add_foreign_key "ejercicio_completados", "sesion_laboratorios"
+  add_foreign_key "ejercicio_completados", "usuarios"
+  add_foreign_key "ejercicios", "laboratorios"
   add_foreign_key "intentos_quiz", "quizzes"
   add_foreign_key "intentos_quiz", "usuarios"
   add_foreign_key "laboratorios", "cursos"
+  add_foreign_key "logros", "usuarios"
   add_foreign_key "metrica_laboratorios", "sesion_laboratorios"
+  add_foreign_key "notificaciones", "usuarios"
+  add_foreign_key "notificaciones", "usuarios", column: "actor_id"
+  add_foreign_key "preferencias_notificaciones", "usuarios", name: "fk_rails_usuario"
   add_foreign_key "quiz_opciones", "quiz_preguntas", column: "pregunta_id"
   add_foreign_key "quiz_preguntas", "quizzes"
   add_foreign_key "quizzes", "cursos"

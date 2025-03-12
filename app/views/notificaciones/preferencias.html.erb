@@ -1,0 +1,314 @@
+<!-- app/views/notificaciones/preferencias.html.erb -->
+<div class="bg-gray-900 min-h-screen pb-16">
+  <!-- Encabezado -->
+  <div class="bg-gray-800 py-6 px-4 sm:px-6 lg:px-8 shadow-md border-b border-gray-700">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Preferencias de Notificaciones</h1>
+        <p class="mt-1 text-gray-400">
+          Personaliza cómo quieres recibir tus notificaciones
+        </p>
+      </div>
+      
+      <!-- Acciones -->
+      <div class="mt-4 md:mt-0 flex flex-wrap gap-2">
+        <%= link_to notificaciones_path, class: "bg-gray-700 text-gray-200 px-4 py-2 rounded flex items-center hover:bg-gray-600" do %>
+          <i class="fas fa-arrow-left mr-2"></i>
+          Volver a notificaciones
+        <% end %>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Contenido principal -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <%= form_with url: preferencias_notificaciones_path, method: :post, local: true, class: "space-y-8" do |form| %>
+      <!-- Configuración general -->
+      <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
+        <h2 class="text-lg font-medium text-white mb-4">Canales de notificación</h2>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <!-- Web -->
+          <div class="bg-gray-750 p-4 rounded-lg border border-gray-700">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="p-2 rounded-full bg-blue-100 text-blue-800">
+                  <i class="fas fa-globe"></i>
+                </div>
+                <h3 class="ml-3 text-white font-medium">Notificaciones Web</h3>
+              </div>
+              <label class="switch">
+                <%= check_box_tag 'web_habilitado', '1', @preferencias.web_habilitado, class: "switch-input" %>
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+            <p class="mt-2 text-sm text-gray-400">
+              Recibe notificaciones mientras usas la plataforma
+            </p>
+          </div>
+          
+          <!-- Email -->
+          <div class="bg-gray-750 p-4 rounded-lg border border-gray-700">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="p-2 rounded-full bg-green-100 text-green-800">
+                  <i class="fas fa-envelope"></i>
+                </div>
+                <h3 class="ml-3 text-white font-medium">Notificaciones Email</h3>
+              </div>
+              <label class="switch">
+                <%= check_box_tag 'email_habilitado', '1', @preferencias.email_habilitado, class: "switch-input" %>
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+            <p class="mt-2 text-sm text-gray-400">
+              Recibe emails para notificaciones importantes
+            </p>
+          </div>
+          
+          <!-- Móvil -->
+          <div class="bg-gray-750 p-4 rounded-lg border border-gray-700">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="p-2 rounded-full bg-purple-100 text-purple-800">
+                  <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3 class="ml-3 text-white font-medium">Notificaciones Móvil</h3>
+              </div>
+              <label class="switch">
+                <%= check_box_tag 'movil_habilitado', '1', @preferencias.movil_habilitado, class: "switch-input" %>
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+            <p class="mt-2 text-sm text-gray-400">
+              Recibe notificaciones push en tu dispositivo
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Resúmenes -->
+      <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
+        <h2 class="text-lg font-medium text-white mb-4">Resúmenes periódicos</h2>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <!-- Resumen diario -->
+          <div class="flex items-center justify-between p-4 bg-gray-750 rounded-lg border border-gray-700">
+            <div>
+              <h3 class="text-white font-medium">Resumen diario</h3>
+              <p class="mt-1 text-sm text-gray-400">
+                Recibe un email diario con todas tus notificaciones
+              </p>
+            </div>
+            <label class="switch">
+              <%= check_box_tag 'resumen_diario', '1', @preferencias.resumen_diario, class: "switch-input" %>
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+          
+          <!-- Resumen semanal -->
+          <div class="flex items-center justify-between p-4 bg-gray-750 rounded-lg border border-gray-700">
+            <div>
+              <h3 class="text-white font-medium">Resumen semanal</h3>
+              <p class="mt-1 text-sm text-gray-400">
+                Recibe un email semanal con un resumen de actividad
+              </p>
+            </div>
+            <label class="switch">
+              <%= check_box_tag 'resumen_semanal', '1', @preferencias.resumen_semanal, class: "switch-input" %>
+              <span class="switch-slider"></span>
+            </label>
+          </div>
+        </div>
+        
+        <!-- Hora del resumen -->
+        <div class="mt-4">
+          <label class="block text-sm font-medium text-gray-400">Hora para recibir resúmenes</label>
+          <div class="mt-1">
+            <%= time_field_tag 'hora_resumen', @preferencias.hora_resumen, class: "bg-gray-700 border border-gray-600 rounded-md text-white px-3 py-2 w-32" %>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Configuración por tipo de notificación -->
+      <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
+        <h2 class="text-lg font-medium text-white mb-4">Configuración por tipo de notificación</h2>
+        
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-700">
+            <thead>
+              <tr>
+                <th class="px-6 py-3 bg-gray-750 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Tipo de notificación</th>
+                <th class="px-6 py-3 bg-gray-750 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">Web</th>
+                <th class="px-6 py-3 bg-gray-750 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">Email</th>
+                <th class="px-6 py-3 bg-gray-750 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">Móvil</th>
+              </tr>
+            </thead>
+            <tbody class="bg-gray-750 divide-y divide-gray-700">
+              <% PreferenciasNotificacion::TIPOS_NOTIFICACIONES.each do |tipo| %>
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center
+                          <% case tipo %>
+                          <% when 'sistema' %>
+                            bg-gray-700 text-gray-300
+                          <% when 'laboratorio' %>
+                            bg-blue-100 text-blue-800
+                          <% when 'curso' %>
+                            bg-green-100 text-green-800
+                          <% when 'quiz' %>
+                            bg-yellow-100 text-yellow-800
+                          <% when 'logro' %>
+                            bg-purple-100 text-purple-800
+                          <% when 'ejercicio' %>
+                            bg-indigo-100 text-indigo-800
+                          <% when 'mensaje' %>
+                            bg-teal-100 text-teal-800
+                          <% when 'alerta_seguridad' %>
+                            bg-red-100 text-red-800
+                          <% end %>
+                        ">
+                        <i class="fas 
+                          <% case tipo %>
+                          <% when 'sistema' %>
+                            fa-server
+                          <% when 'laboratorio' %>
+                            fa-flask
+                          <% when 'curso' %>
+                            fa-book
+                          <% when 'quiz' %>
+                            fa-question-circle
+                          <% when 'logro' %>
+                            fa-trophy
+                          <% when 'ejercicio' %>
+                            fa-tasks
+                          <% when 'mensaje' %>
+                            fa-envelope
+                          <% when 'alerta_seguridad' %>
+                            fa-exclamation-triangle
+                          <% end %>
+                        "></i>
+                      </div>
+                      <div class="ml-4">
+                        <div class="text-sm font-medium text-white"><%= tipo.humanize %></div>
+                        <div class="text-sm text-gray-400">
+                          <% case tipo %>
+                          <% when 'sistema' %>
+                            Alertas y avisos del sistema
+                          <% when 'laboratorio' %>
+                            Actividad en laboratorios
+                          <% when 'curso' %>
+                            Eventos y avisos de cursos
+                          <% when 'quiz' %>
+                            Evaluaciones y resultados
+                          <% when 'logro' %>
+                            Reconocimientos conseguidos
+                          <% when 'ejercicio' %>
+                            Objetivos y ejercicios
+                          <% when 'mensaje' %>
+                            Mensajes de usuarios
+                          <% when 'alerta_seguridad' %>
+                            Alertas de seguridad
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-center">
+                    <%= check_box_tag "#{tipo}_web", '1', @preferencias.configuracion_tipos.dig(tipo, 'web'), class: "form-checkbox h-5 w-5 text-blue-600 rounded border-gray-500 bg-gray-700" %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-center">
+                    <%= check_box_tag "#{tipo}_email", '1', @preferencias.configuracion_tipos.dig(tipo, 'email'), class: "form-checkbox h-5 w-5 text-green-600 rounded border-gray-500 bg-gray-700" %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-center">
+                    <%= check_box_tag "#{tipo}_movil", '1', @preferencias.configuracion_tipos.dig(tipo, 'movil'), class: "form-checkbox h-5 w-5 text-purple-600 rounded border-gray-500 bg-gray-700" %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- Botones -->
+      <div class="flex justify-end space-x-3">
+        <%= link_to "Cancelar", notificaciones_path, class: "px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600" %>
+        <%= form.submit "Guardar Preferencias", class: "px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500" %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+  /* Estilos para los toggle switches */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+  }
+  
+  .switch-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #4B5563;
+    transition: .4s;
+    border-radius: 34px;
+  }
+  
+  .switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  
+  .switch-input:checked + .switch-slider {
+    background-color: #3B82F6;
+  }
+  
+  .switch-input:checked + .switch-slider:before {
+    transform: translateX(26px);
+  }
+  
+  /* Estilos para paginación */
+  .pagination {
+    @apply flex justify-center mt-4;
+  }
+  
+  .pagination a, .pagination span {
+    @apply inline-flex items-center px-3 py-1 mx-1 rounded-md;
+  }
+  
+  .pagination a {
+    @apply bg-gray-700 text-gray-200 hover:bg-gray-600;
+  }
+  
+  .pagination span.current {
+    @apply bg-blue-600 text-white;
+  }
+  
+  .pagination .previous_page, .pagination .next_page {
+    @apply px-3;
+  }
+  
+  .pagination .disabled {
+    @apply bg-gray-800 text-gray-500 cursor-not-allowed;
+  }
+</style>

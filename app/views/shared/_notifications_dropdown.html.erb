@@ -1,0 +1,48 @@
+<!-- app/views/shared/_notifications_dropdown.html.erb -->
+<div data-controller="notificaciones" data-notificaciones-usuario-id-value="<%= current_usuario.id %>" class="relative">
+  <!-- Botón de notificaciones -->
+  <button data-notificaciones-target="toggleButton" data-action="notificaciones#toggle" class="relative p-1 rounded-full text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+    <span class="sr-only">Ver notificaciones</span>
+    <i class="fas fa-bell"></i>
+    
+    <!-- Contador -->
+    <span data-notificaciones-target="contador" class="absolute top-0 right-0 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs <%= current_usuario.notificaciones.no_leidas.count == 0 ? 'hidden' : '' %>">
+      <%= current_usuario.notificaciones.no_leidas.count %>
+    </span>
+  </button>
+  
+  <!-- Dropdown -->
+  <div data-notificaciones-target="dropdown" class="hidden origin-top-right absolute right-0 mt-2 w-96 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 divide-y divide-gray-700 z-50">
+    <div class="p-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-white font-medium">Notificaciones</h3>
+        <div class="flex space-x-2">
+          <button data-action="notificaciones#marcarTodasLeidas" class="text-sm text-gray-400 hover:text-white">
+            Marcar todas como leídas
+          </button>
+          <button data-action="notificaciones#toggleSound" data-sound-toggle class="text-gray-400 hover:text-white">
+            <i class="fas fa-volume-up"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="max-h-80 overflow-y-auto overscroll-contain">
+      <div data-notificaciones-target="lista" class="divide-y divide-gray-700">
+        <!-- Las notificaciones se cargarán aquí -->
+        <div class="py-4 px-4 text-center text-gray-400">
+          Cargando notificaciones...
+        </div>
+      </div>
+    </div>
+    
+    <div class="p-2">
+      <%= link_to notificaciones_path, class: "block w-full text-center p-2 rounded-md bg-gray-700 text-white hover:bg-gray-600" do %>
+        Ver todas las notificaciones
+      <% end %>
+    </div>
+  </div>
+  
+  <!-- Contenedor para notificaciones toast -->
+  <div data-notificaciones-target="toast" class="toast-container"></div>
+</div>

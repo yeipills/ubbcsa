@@ -1,0 +1,22 @@
+<%# app/views/layouts/pdf.pdf.erb %>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title><%= yield(:title).presence || 'Documento PDF' %></title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      color: #333;
+      line-height: 1.5;
+      margin: 0;
+      padding: 0;
+    }
+    
+    /* Estilos adicionales se incluirán en las plantillas específicas */
+  </style>
+</head>
+<body>
+  <%= yield %>
+</body>
+</html>

@@ -9,10 +9,13 @@
   <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
   <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
   <%= javascript_importmap_tags %>
+  <% if usuario_signed_in? %>
+    <meta name="usuario-id" content="<%= current_usuario.id %>">
+  <% end %>
 </head>
-<body class="h-full antialiased">
+<body class="h-full antialiased" <%= 'data-usuario-id="' + current_usuario.id.to_s + '"' if usuario_signed_in? %>>
   <% unless controller_name == 'home' ||
-    (controller_name == 'sessions' || controller_name == 'registrations') && controller.devise_controller? %>
+   (controller_name == 'sessions' || controller_name == 'registrations') && controller.devise_controller? %>
     <%= render "shared/navbar" %>
   <% end %>
   
@@ -25,7 +28,7 @@
   <main>
     <%= yield %>
   </main>
-
+  
   <%# Script para manejar las notificaciones %>
   <script>
     document.addEventListener('turbo:load', () => {
@@ -34,7 +37,7 @@
         notification.classList.add('animate-fade-out');
         setTimeout(() => notification.remove(), 300);
       }
-
+      
       // Manejador de click para los botones de cerrar
       document.querySelectorAll('.flash-message button').forEach(button => {
         button.addEventListener('click', () => {
@@ -42,7 +45,7 @@
           closeNotification(notification);
         });
       });
-
+      
       // Auto-cerrar notificaciones después de 5 segundos
       document.querySelectorAll('.flash-message').forEach(notification => {
         setTimeout(() => {

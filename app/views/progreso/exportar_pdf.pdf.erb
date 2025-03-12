@@ -1,0 +1,203 @@
+<%# app/views/progreso/exportar_pdf.pdf.erb %>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Progreso - <%= current_usuario.nombre_usuario %></title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      color: #333;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1, h2, h3 {
+      color: #2c3e50;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 10px;
+    }
+    .section {
+      margin-bottom: 30px;
+    }
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin: 20px 0;
+    }
+    .stat-box {
+      width: 45%;
+      padding: 15px;
+      margin-bottom: 15px;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .stat-title {
+      font-weight: bold;
+      color: #7f8c8d;
+      margin-bottom: 5px;
+    }
+    .stat-value {
+      font-size: 22px;
+      font-weight: bold;
+      color: #2980b9;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+    }
+    .progress-bar {
+      background-color: #ecf0f1;
+      height: 15px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      background-color: #3498db;
+      height: 100%;
+    }
+    .footer {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 12px;
+      color: #7f8c8d;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Reporte de Progreso</h1>
+      <p>Usuario: <%= current_usuario.nombre_completo %> (<%= current_usuario.nombre_usuario %>)</p>
+      <p>Fecha de generación: <%= Time.current.strftime("%d/%m/%Y %H:%M") %></p>
+    </div>
+
+    <div class="section">
+      <h2>Estadísticas Generales</h2>
+      <div class="stats">
+        <div class="stat-box">
+          <div class="stat-title">Total de Sesiones</div>
+          <div class="stat-value"><%= @dashboard_data[:estadisticas][:total_sesiones] %></div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-title">Sesiones Completadas</div>
+          <div class="stat-value"><%= @dashboard_data[:estadisticas][:sesiones_completadas] %></div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-title">Tiempo Total</div>
+          <div class="stat-value"><%= @dashboard_data[:estadisticas][:tiempo_total] %></div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-title">Tiempo Promedio</div>
+          <div class="stat-value"><%= @dashboard_data[:estadisticas][:promedio_completado] %></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Progreso por Curso</h2>
+      <% if @dashboard_data[:cursos].present? %>
+        <table>
+          <thead>
+            <tr>
+              <th>Curso</th>
+              <th>Completados</th>
+              <th>Total</th>
+              <th>Progreso</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @dashboard_data[:cursos].each do |curso_data| %>
+              <tr>
+                <td><%= curso_data[:curso].nombre %></td>
+                <td><%= curso_data[:completados] %></td>
+                <td><%= curso_data[:total] %></td>
+                <td>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width: <%= curso_data[:porcentaje] %>%;"></div>
+                  </div>
+                  <%= curso_data[:porcentaje] %>%
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p>No hay información de cursos disponible.</p>
+      <% end %>
+    </div>
+
+    <div class="section">
+      <h2>Tiempo Dedicado por Tipo de Laboratorio</h2>
+      <% if @dashboard_data[:tiempo_dedicado].present? %>
+        <table>
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Tiempo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @dashboard_data[:tiempo_dedicado].each do |tipo, tiempo| %>
+              <tr>
+                <td><%= tipo %></td>
+                <td><%= tiempo %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p>No hay información de tiempo dedicado disponible.</p>
+      <% end %>
+    </div>
+
+    <div class="section">
+      <h2>Próximos Laboratorios</h2>
+      <% if @dashboard_data[:proximos_labs].present? %>
+        <table>
+          <thead>
+            <tr>
+              <th>Laboratorio</th>
+              <th>Curso</th>
+              <th>Dificultad</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @dashboard_data[:proximos_labs].each do |lab| %>
+              <tr>
+                <td><%= lab.nombre %></td>
+                <td><%= lab.curso.nombre %></td>
+                <td><%= lab.nivel_dificultad %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p>No hay próximos laboratorios disponibles.</p>
+      <% end %>
+    </div>
+
+    <div class="footer">
+      <p>Este reporte fue generado automáticamente por UBB-CSA.</p>
+    </div>
+  </div>
+</body>
+</html>

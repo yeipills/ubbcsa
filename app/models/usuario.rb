@@ -8,11 +8,14 @@ class Usuario < ApplicationRecord
   has_many :cursos_como_profesor, class_name: 'Curso', foreign_key: 'profesor_id'
   has_many :curso_estudiantes
   has_many :cursos, through: :curso_estudiantes, source: :curso
+  has_many :notificaciones, class_name: 'Notificacion', dependent: :destroy
+  has_one :preferencias_notificacion, class_name: 'PreferenciasNotificacion', dependent: :destroy
+  has_many :logros, dependent: :destroy
 
   # Validaciones
   validates :nombre_usuario, presence: true, uniqueness: true
   validates :nombre_completo, presence: true
-  validates :rol, presence: true, inclusion: { in: ['estudiante', 'profesor', 'admin'] }
+  validates :rol, presence: true, inclusion: { in: %w[estudiante profesor admin] }
 
   # Callback para asignar rol por defecto
   before_validation :asignar_rol_por_defecto, on: :create
