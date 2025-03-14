@@ -66,8 +66,9 @@
           </div>
         </div>
         
-        <div style="height: 70vh;" data-controller="terminal">
-          <%= render 'shared/terminal' %>
+        <div style="height: 70vh;" class="w-full terminal-wrapper">
+          <!-- Terminal integrada -->
+          <%= render 'shared/terminal', sesion: @sesion %>
         </div>
       </div>
 
@@ -88,8 +89,64 @@
                 data: { confirm: '¿Estás seguro?' } do %>
               <span>Reiniciar Terminal</span>
             <% end %>
+            
+            <% if @sesion.laboratorio.tipo.in?(['atacante', 'defensor', 'pentesting', 'redes', 'ctf_ofensivo', 'red_corporativa']) %>
+              <button 
+                onclick="deployTarget()"
+                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                Desplegar Máquina Objetivo
+              </button>
+            <% end %>
           </div>
         </div>
+        
+        <% if @sesion.laboratorio.tipo.in?(['atacante', 'defensor', 'pentesting', 'redes', 'ctf_ofensivo', 'red_corporativa']) %>
+          <!-- Máquinas Objetivo -->
+          <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <h2 class="text-lg font-bold text-white mb-4">Máquinas Objetivo</h2>
+            
+            <% if @sesion.resource_usage.is_a?(Hash) && @sesion.resource_usage['targets'].is_a?(Hash) && @sesion.resource_usage['targets'].any? %>
+              <div class="space-y-3">
+                <% @sesion.resource_usage['targets'].each do |name, info| %>
+                  <div class="bg-gray-700 rounded-lg p-3">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <h3 class="font-medium text-white"><%= name.titleize %></h3>
+                        <p class="text-xs text-gray-400"><%= info['description'] %></p>
+                      </div>
+                      <div>
+                        <span class="px-2 py-1 text-xs rounded-full 
+                          <%= info['status'] == 'running' ? 'bg-green-900 text-green-300' : 
+                             info['status'] == 'paused' ? 'bg-yellow-900 text-yellow-300' : 
+                             'bg-red-900 text-red-300' %>">
+                          <%= info['status'] || 'desconocido' %>
+                        </span>
+                      </div>
+                    </div>
+                    <div class="mt-2 flex space-x-2">
+                      <button onclick="connectToTarget('<%= name %>')" class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded">
+                        Conectar
+                      </button>
+                      <button onclick="scanTarget('<%= name %>', '<%= info['ip_address'] %>')" class="text-xs bg-purple-600 hover:bg-purple-700 text-white px-2 py-1 rounded">
+                        Escanear
+                      </button>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <p class="text-gray-400 text-sm">No hay máquinas objetivo desplegadas.</p>
+              <button 
+                onclick="deployTarget()"
+                class="mt-3 w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition duration-200 text-sm">
+                Desplegar Máquina
+              </button>
+            <% end %>
+          </div>
+          
+          <!-- Scripts y modales para targets -->
+          <%= render 'targets_panel' %>
+        <% end %>
 
         <!-- Actividad Reciente -->
         <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">

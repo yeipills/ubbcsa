@@ -6,6 +6,7 @@
 <html>
 <head>
   <title>Terminal - <%= @sesion.laboratorio.nombre %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     html, body {
       margin: 0;
@@ -19,9 +20,103 @@
       height: 100%;
       border: none;
     }
+    .terminal-header {
+      background: #2a2e37;
+      color: white;
+      padding: 8px 12px;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .terminal-title {
+      font-size: 14px;
+    }
+    .terminal-info {
+      font-size: 12px;
+      color: #a0aec0;
+    }
+    .terminal-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .terminal-content {
+      flex: 1;
+    }
   </style>
 </head>
 <body>
-  <iframe src="<%= @wetty_url %>" allowfullscreen></iframe>
+  <div class="terminal-container">
+    <div class="terminal-header">
+      <div class="terminal-title">
+        <%= @sesion.laboratorio.nombre %> (<%= @sesion.laboratorio.tipo %>)
+      </div>
+      <div class="terminal-info">
+        Usuario: <%= current_usuario.email %> | Contenedor: <%= @sesion.container_id || 'No disponible' %>
+      </div>
+    </div>
+    <div class="terminal-content">
+      <iframe src="<%= @wetty_url %>" allowfullscreen data-controller="terminal" data-terminal-target="terminal" id="terminal-frame"></iframe>
+    </div>
+    <div id="error-message" style="display:none; color:red; padding:20px; text-align:center; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(0,0,0,0.8); border-radius:5px; z-index:100;">
+      Error de conexión con la terminal. <button id="retry-button" style="background:#3182ce; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">Reintentar</button>
+    </div>
+  </div>
+
+  <script>
+    // Referencia al iframe y mensajes de error
+    const iframe = document.getElementById('terminal-frame');
+    const errorMessage = document.getElementById('error-message');
+    const retryButton = document.getElementById('retry-button');
+    const wettyUrl = '<%= @wetty_url %>';
+    let attempts = 0;
+    
+    // Función para verificar la conexión
+    function checkConnection() {
+      try {
+        // Intentar acceder al contenido del iframe para verificar si está cargado
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        
+        // Si podemos acceder al contenido, ocultar mensaje de error
+        errorMessage.style.display = 'none';
+        attempts = 0;
+      } catch (e) {
+        // Error de acceso al contenido (posiblemente error CORS o no cargado)
+        attempts++;
+        console.error(`Error verificando conexión (intento ${attempts}):`, e);
+        
+        // Después de 3 intentos fallidos, mostrar mensaje de error
+        if (attempts >= 3) {
+          errorMessage.style.display = 'block';
+        }
+        
+        // Si estamos en el primer intento fallido, intentar reconectar
+        if (attempts === 1) {
+          console.log('Intentando reconectar terminal...');
+          iframe.src = wettyUrl;
+        }
+      }
+    }
+    
+    // Verificar conexión inicialmente después de 5 segundos
+    setTimeout(checkConnection, 5000);
+    
+    // Verificar conexión periódicamente
+    const checkConnectionInterval = setInterval(checkConnection, 30000);
+    
+    // Manejar clic en botón de reintento
+    retryButton.addEventListener('click', function() {
+      console.log('Reintentando conexión a terminal...');
+      attempts = 0;
+      errorMessage.style.display = 'none';
+      iframe.src = wettyUrl;
+    });
+    
+    // Limpiar intervalo al descargar la página
+    window.addEventListener('beforeunload', function() {
+      clearInterval(checkConnectionInterval);
+    });
+  </script>
 </body>
 </html>

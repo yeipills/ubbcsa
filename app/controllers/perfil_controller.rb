@@ -4,7 +4,7 @@ class PerfilController < ApplicationController
   before_action :set_usuario
 
   def show
-    @usuario = current_usuario
+    @usuario = params[:id] ? Usuario.find(params[:id]) : current_usuario
     @sesiones_recientes = @usuario.sesion_laboratorios
                                   .includes(:laboratorio)
                                   .order(created_at: :desc)
@@ -33,7 +33,7 @@ class PerfilController < ApplicationController
   private
 
   def set_usuario
-    @usuario = current_usuario
+    @usuario = params[:id] ? Usuario.find(params[:id]) : current_usuario
   end
 
   def perfil_params

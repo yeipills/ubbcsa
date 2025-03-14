@@ -9,20 +9,74 @@ services:
       - "3000:3000"
     volumes:
       - .:/app
+      - ./storage:/app/storage
     depends_on:
       - wetty
+    environment:
+      - RAILS_ENV=development
+      - WETTY_HOST=wetty
+      - WETTY_PORT=3001
+    networks:
+      - default
+      - lab-network
 
   wetty:
-      build:
-        context: .
-        dockerfile: Dockerfile.wetty
-      ports:
-        - "3001:3001"
-      volumes:
-        - ./start.sh:/start.sh
-      environment:
-        - SSH_AUTH=password
+    build:
+      context: .
+      dockerfile: Dockerfile.wetty
+    ports:
+      - "3001:3001"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wetty.rule=Host(`localhost`) && PathPrefix(`/wetty`)"
+      - "traefik.http.services.wetty.loadbalancer.server.port=3001"
+    volumes:
+      - ./start.sh:/start.sh
+      - ./labs:/labs
+      - ./storage/lab_data:/home/kali/lab_data
+    environment:
+      - SSH_AUTH=password
+      - RAILS_HOST=web
+      - RAILS_PORT=3000
+      - NODE_ENV=development
+    networks:
+      - default
+      - lab-network
+    cap_add:
+      - NET_ADMIN  # Para permitir configuración de red
+
+  lab-network:
+    image: alpine:latest
+    command: sh -c "tail -f /dev/null"
+    networks:
+      - lab-network
+    cap_add:
+      - NET_ADMIN
+      
+  # Servicio para escenarios de defensa/ataque
+  target-host:
+    build:
+      context: .
+      dockerfile: Dockerfile.wetty
+    networks:
+      - default
+      - lab-network
+    volumes:
+      - ./labs:/labs
+    environment:
+      - SCENARIO_TYPE=target
+      - NODE_ENV=development
+      - RAILS_HOST=web
+      - RAILS_PORT=3000
+    cap_add:
+      - NET_ADMIN
 
 networks:
   default:
     driver: bridge
+  lab-network:
+    driver: bridge
+    internal: true  # Red aislada para laboratorios
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

@@ -74,5 +74,13 @@ Rails.application.configure do
   # Raise error when a before_action's only/except options reference missing actions
   config.action_controller.raise_on_missing_callback_actions = true
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+  
+  # Permitir conexiones desde los contenedores de Docker
+  config.hosts << "web"
+  config.hosts << "web:3000"
+  config.hosts << "wetty"
+  config.hosts << "wetty:3001"
+  config.hosts << "target-host"
+  config.hosts << /.*\.localhost$/
 
 end

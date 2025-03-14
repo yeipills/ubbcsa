@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_03_11_045848) do
+ActiveRecord::Schema[7.1].define(version: 2025_03_13_200736) do
   create_schema "auth"
   create_schema "extensions"
   create_schema "graphql"
@@ -171,6 +171,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_11_045848) do
     t.datetime "timestamp", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "laboratorio_id", null: false
+    t.index ["laboratorio_id"], name: "index_metrica_laboratorios_on_laboratorio_id"
     t.index ["sesion_laboratorio_id", "timestamp"], name: "idx_on_sesion_laboratorio_id_timestamp_6cb3ff3dda"
     t.index ["sesion_laboratorio_id"], name: "index_metrica_laboratorios_on_sesion_laboratorio_id"
   end
@@ -327,6 +329,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_11_045848) do
   add_foreign_key "intentos_quiz", "usuarios"
   add_foreign_key "laboratorios", "cursos"
   add_foreign_key "logros", "usuarios"
+  add_foreign_key "metrica_laboratorios", "laboratorios"
   add_foreign_key "metrica_laboratorios", "sesion_laboratorios"
   add_foreign_key "notificaciones", "usuarios"
   add_foreign_key "notificaciones", "usuarios", column: "actor_id"

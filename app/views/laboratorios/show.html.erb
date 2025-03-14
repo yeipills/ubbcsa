@@ -107,6 +107,27 @@
                   </dl>
                 </div>
               </div>
+              
+              <% if @laboratorio.soporta_objetivos? %>
+              <div>
+                <h2 class="text-lg font-medium text-white mb-3">Máquinas Objetivo</h2>
+                <div class="bg-gray-900 rounded-lg p-4 border border-gray-700">
+                  <p class="text-gray-400 mb-4">
+                    Este laboratorio puede utilizar máquinas objetivo para practicar escenarios de 
+                    <span class="font-medium text-white"><%= @laboratorio.tipo == 'defensor' ? 'defensa' : 'ataque' %></span>.
+                  </p>
+                  
+                  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    <% @laboratorio.objetivos_disponibles.each do |objetivo| %>
+                      <div class="bg-gray-800 border border-gray-700 rounded-lg p-3">
+                        <div class="font-medium text-white mb-1"><%= objetivo.titleize %></div>
+                        <div class="text-xs text-gray-400">Disponible para sesiones activas</div>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+              <% end %>
             </div>
 
             <!-- Tab Objetivos -->

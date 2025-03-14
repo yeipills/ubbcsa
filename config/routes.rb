@@ -8,12 +8,27 @@ Rails.application.routes.draw do
   # Ruta principal
   root 'home#index'
 
+  # API para terminal y Wetty
+  namespace :api do
+    post '/validate_wetty_token', to: 'terminal#validate_token'
+    get '/terminal/metrics', to: 'terminal#metrics'
+    post '/terminal/command', to: 'terminal#command'
+    # Nuevos endpoints para máquinas objetivo
+    post '/terminal/execute_on_target', to: 'terminal#execute_on_target'
+    post '/terminal/deploy_target', to: 'terminal#deploy_target'
+    post '/terminal/restart_target', to: 'terminal#restart_target'
+    get '/terminal/list_targets', to: 'terminal#list_targets'
+    # Asegurar que la validación de token sea accesible sin autenticación con ambos métodos
+    post '/terminal/validate_token', to: 'terminal#validate_token'
+    get '/terminal/validate_token', to: 'terminal#validate_token'
+  end
+
   # Rutas protegidas
   authenticate :usuario do
     get '/dashboard', to: 'dashboard#index', as: :dashboard
 
     # Perfil de usuario
-    resource :perfil, only: %i[show edit update]
+    resources :perfil, only: %i[show edit update]
     get 'mi_perfil', to: 'mi_perfil#show', as: 'mi_perfil'
     get 'mi_perfil/edit', to: 'mi_perfil#edit', as: 'edit_mi_perfil'
     patch 'mi_perfil', to: 'mi_perfil#update'
@@ -45,6 +60,18 @@ Rails.application.routes.draw do
         delete :desinscribir_estudiante
         get :estudiantes
         get :metricas
+      end
+      
+      collection do
+        get :buscar
+      end
+      
+      # Gestión de estudiantes
+      resources :estudiantes, controller: 'cursos/estudiantes', only: [] do
+        collection do
+          post :add
+          delete :remove
+        end
       end
 
       # Laboratorios anidados con shallow routing

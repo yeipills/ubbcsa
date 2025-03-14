@@ -15,15 +15,15 @@
         </div>
         
         <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <div class="relative">
+          <%= form_with url: cursos_path, method: :get, class: "relative", data: { turbo_frame: "cursos_list", controller: "search" } do |f| %>
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
               </svg>
             </div>
-            <input type="text" placeholder="Buscar cursos..." 
-                   class="block w-full pl-10 pr-3 py-2 border border-gray-700 rounded-md text-gray-300 bg-gray-800 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-          </div>
+            <%= f.text_field :q, placeholder: "Buscar cursos...", class: "block w-full pl-10 pr-3 py-2 border border-gray-700 rounded-md text-gray-300 bg-gray-800 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", 
+                           data: { action: "input->search#submit" } %>
+          <% end %>
           
           <% if current_usuario.profesor? %>
             <%= link_to new_curso_path, 
@@ -39,36 +39,34 @@
       
       <!-- Filtros -->
       <div class="flex flex-wrap gap-3">
-        <div class="inline-flex rounded-md shadow-sm">
-          <button type="button" class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-l-md bg-blue-600 text-white">
+        <%= form_with url: cursos_path, method: :get, class: "inline-flex rounded-md shadow-sm", data: { turbo_frame: "cursos_list" } do |f| %>
+          <%= f.hidden_field :estado_filter, value: "todos", id: "estado_todos" %>
+          <%= f.button type: "submit", class: "inline-flex items-center px-3 py-2 text-sm font-medium rounded-l-md #{params[:estado_filter] != 'activos' && params[:estado_filter] != 'inactivos' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}" do %>
             Todos
-          </button>
-          <button type="button" class="inline-flex items-center px-3 py-2 text-sm font-medium bg-gray-800 text-gray-300 hover:bg-gray-700">
+          <% end %>
+        <% end %>
+        
+        <%= form_with url: cursos_path, method: :get, class: "inline-flex", data: { turbo_frame: "cursos_list" } do |f| %>
+          <%= f.hidden_field :estado_filter, value: "activos", id: "estado_activos" %>
+          <%= f.button type: "submit", class: "inline-flex items-center px-3 py-2 text-sm font-medium #{params[:estado_filter] == 'activos' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}" do %>
             Activos
-          </button>
-          <button type="button" class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-r-md bg-gray-800 text-gray-300 hover:bg-gray-700">
+          <% end %>
+        <% end %>
+        
+        <%= form_with url: cursos_path, method: :get, class: "inline-flex", data: { turbo_frame: "cursos_list" } do |f| %>
+          <%= f.hidden_field :estado_filter, value: "inactivos", id: "estado_inactivos" %>
+          <%= f.button type: "submit", class: "inline-flex items-center px-3 py-2 text-sm font-medium rounded-r-md #{params[:estado_filter] == 'inactivos' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}" do %>
             Inactivos
-          </button>
-        </div>
+          <% end %>
+        <% end %>
         
-        <select class="bg-gray-800 text-white rounded-md border border-gray-700 px-3 py-2 text-sm">
-          <option value="">Todos los periodos</option>
-          <option value="2024-1">2024-1</option>
-          <option value="2024-2">2024-2</option>
-        </select>
+        <%= form_with url: cursos_path, method: :get, data: { turbo_frame: "cursos_list" } do |f| %>
+          <%= f.select :periodo_filter, 
+                     options_for_select([["Todos los periodos", ""], ["2024-1", "2024-1"], ["2024-2", "2024-2"]], params[:periodo_filter]), 
+                     {}, 
+                     { onchange: "this.form.submit()", class: "bg-gray-800 text-white rounded-md border border-gray-700 px-3 py-2 text-sm" } %>
+        <% end %>
         
-        <div class="inline-flex items-center rounded-md shadow-sm ml-auto">
-          <button type="button" class="p-2 bg-gray-800 text-gray-400 rounded-l-md border border-gray-700 hover:bg-gray-700">
-            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
-            </svg>
-          </button>
-          <button type="button" class="p-2 bg-gray-700 text-blue-400 rounded-r-md border border-gray-700">
-            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-            </svg>
-          </button>
-        </div>
       </div>
     </header>
     
@@ -123,47 +121,47 @@
     </section>
     
     <!-- Lista de cursos -->
-    <section aria-label="Lista de Cursos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+    <section aria-label="Lista de Cursos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
       <% @cursos.each do |curso| %>
-        <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-700 hover:border-indigo-500 transition-all duration-200">
+        <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-700 hover:border-indigo-500 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-900/10 group">
           <div class="relative">
-            <div class="absolute top-0 inset-x-0 h-1 <%= curso.activo ? 'bg-green-500' : 'bg-red-500' %>"></div>
-            <div class="p-5">
-              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
-                <h2 class="text-lg font-bold text-white"><%= curso.nombre %></h2>
-                <span class="px-2 py-1 text-xs font-medium rounded-full <%= curso.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
+            <div class="absolute top-0 inset-x-0 h-1.5 <%= curso.activo ? 'bg-green-500' : 'bg-red-500' %>"></div>
+            <div class="p-6">
+              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+                <h2 class="text-lg font-bold text-white group-hover:text-indigo-300 transition-colors duration-300"><%= curso.nombre %></h2>
+                <span class="px-2.5 py-1 text-xs font-medium rounded-full <%= curso.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
                   <%= curso.activo ? 'Activo' : 'Inactivo' %>
                 </span>
               </div>
               
-              <p class="text-sm text-gray-400 mb-4 line-clamp-2">
-                <%= truncate(curso.descripcion, length: 100) %>
+              <p class="text-sm text-gray-400 mb-5 line-clamp-2">
+                <%= truncate(curso.descripcion, length: 100) || "Sin descripción" %>
               </p>
               
-              <div class="grid grid-cols-2 gap-y-2 mb-4 text-xs sm:text-sm text-gray-400">
+              <div class="grid grid-cols-2 gap-x-4 gap-y-3 mb-5 text-xs sm:text-sm text-gray-400">
                 <div class="flex items-center">
-                  <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                       d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
                   </svg>
-                  <span class="truncate">Código: <%= curso.codigo %></span>
+                  <span class="truncate">Código: <%= curso.codigo || "N/D" %></span>
                 </div>
                 <div class="flex items-center">
-                  <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                       d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                   </svg>
                   <span class="truncate">Labs: <%= curso.laboratorios.count %></span>
                 </div>
                 <div class="flex items-center">
-                  <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                       d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                   </svg>
-                  <span class="truncate">Periodo: <%= curso.periodo %></span>
+                  <span class="truncate">Periodo: <%= curso.periodo || "N/D" %></span>
                 </div>
                 <div class="flex items-center">
-                  <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                       d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                   </svg>
@@ -171,11 +169,11 @@
                 </div>
               </div>
               
-              <div class="flex pt-3 border-t border-gray-700">
+              <div class="flex pt-4 border-t border-gray-700">
                 <%= link_to curso_path(curso), 
-                    class: "w-full text-center px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center justify-center" do %>
+                    class: "w-full text-center px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center justify-center shadow-md" do %>
                   <span>Ver detalles</span>
-                  <svg class="ml-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                   </svg>
                 <% end %>
@@ -186,27 +184,59 @@
       <% end %>
     </section>
     
-    <!-- Paginación -->
-    <div class="mt-8 flex justify-center">
-      <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700">
-          <span class="sr-only">Anterior</span>
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-          </svg>
-        </a>
-        <a href="#" aria-current="page" class="relative inline-flex items-center px-4 py-2 border border-blue-500 bg-blue-600 text-sm font-medium text-white">1</a>
-        <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700">2</a>
-        <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700">3</a>
-        <span class="relative inline-flex items-center px-4 py-2 border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400">...</span>
-        <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700">8</a>
-        <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700">
-          <span class="sr-only">Siguiente</span>
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-          </svg>
-        </a>
-      </nav>
-    </div>
+    <!-- Paginación (a implementar con Kaminari o will_paginate) -->
+    <% if @cursos.length > 0 %>
+      <div class="mt-8 flex justify-center">
+        <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+          <% if params[:page].to_i > 1 %>
+            <%= link_to cursos_path(page: [params[:page].to_i - 1, 1].max, q: params[:q], estado_filter: params[:estado_filter], periodo_filter: params[:periodo_filter]), 
+                class: "relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700" do %>
+              <span class="sr-only">Anterior</span>
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+            <% end %>
+          <% else %>
+            <span class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-500 cursor-not-allowed">
+              <span class="sr-only">Anterior</span>
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+            </span>
+          <% end %>
+          
+          <% current_page = params[:page].to_i > 0 ? params[:page].to_i : 1 %>
+          <% total_pages = [(@total_count.to_f / 10).ceil, 1].max %>
+          
+          <% (1..total_pages).each do |page| %>
+            <% if page == current_page %>
+              <span aria-current="page" class="relative inline-flex items-center px-4 py-2 border border-blue-500 bg-blue-600 text-sm font-medium text-white">
+                <%= page %>
+              </span>
+            <% else %>
+              <%= link_to page.to_s, cursos_path(page: page, q: params[:q], estado_filter: params[:estado_filter], periodo_filter: params[:periodo_filter]), 
+                  class: "relative inline-flex items-center px-4 py-2 border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700" %>
+            <% end %>
+          <% end %>
+          
+          <% if current_page < total_pages %>
+            <%= link_to cursos_path(page: current_page + 1, q: params[:q], estado_filter: params[:estado_filter], periodo_filter: params[:periodo_filter]), 
+                class: "relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-400 hover:bg-gray-700" do %>
+              <span class="sr-only">Siguiente</span>
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            <% end %>
+          <% else %>
+            <span class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-700 bg-gray-800 text-sm font-medium text-gray-500 cursor-not-allowed">
+              <span class="sr-only">Siguiente</span>
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </span>
+          <% end %>
+        </nav>
+      </div>
+    <% end %>
   </section>
 </main>

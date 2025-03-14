@@ -20,8 +20,8 @@
     <div>
       <%= f.label :tipo, class: "block text-sm font-medium text-gray-300" %>
       <%= f.select :tipo, 
-          ['pentesting', 'forense', 'redes'], 
-          {}, 
+          options_for_select(Laboratorio::TIPOS, f.object.tipo), 
+          { include_blank: "Seleccione tipo" }, 
           class: "mt-1 block w-full rounded-md border border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
     </div>
 

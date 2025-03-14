@@ -1,13 +1,14 @@
-# app/controllers/consolas_controller.rb
-class ConsolasController < ApplicationController
+# app/controllers/consola_controller.rb
+class ConsolaController < ApplicationController
   before_action :authenticate_usuario!
   before_action :set_sesion_laboratorio
   before_action :verify_access
   
   def show
-    @metricas = @sesion_laboratorio.metricas_actuales
-    @ejercicios = @sesion_laboratorio.laboratorio.ejercicios_activos
-    @terminal_url = generate_terminal_url
+    @sesion = @sesion_laboratorio
+    @metricas = obtener_metricas
+    @ejercicios = @sesion_laboratorio.laboratorio&.ejercicios || []
+    @historial_comandos = obtener_historial_comandos
   end
 
   private
@@ -22,8 +23,23 @@ class ConsolasController < ApplicationController
     end
   end
 
-  def generate_terminal_url
-    port = Rails.env.development? ? 3001 : 443
-    "http://localhost:#{port}/wetty/#{@sesion_laboratorio.id}"
+  def obtener_metricas
+    return {} unless @sesion_laboratorio&.container_id
+    
+    # Intentar obtener métricas actuales
+    begin
+      DockerLabService.get_metrics(@sesion_laboratorio)
+    rescue => e
+      Rails.logger.error("Error obteniendo métricas: #{e.message}")
+      {}
+    end
+  end
+  
+  def obtener_historial_comandos
+    # Obtener últimos 20 comandos ejecutados
+    LogTerminal.where(
+      sesion_laboratorio: @sesion_laboratorio,
+      tipo: ['comando', 'resultado', 'error']
+    ).order(created_at: :desc).limit(20)
   end
 end

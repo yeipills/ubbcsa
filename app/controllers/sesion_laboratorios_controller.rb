@@ -9,6 +9,9 @@ class SesionLaboratoriosController < ApplicationController
     @sesion = current_usuario.sesion_laboratorios.find(params[:id])
     @metricas = MetricsService.new(@sesion).collect_metrics
     @actividad_reciente = @sesion.actividad_reciente
+    
+    # Ya no necesitamos configurar @wetty_url porque ahora
+    # se maneja directamente en el partial _terminal.html.erb
 
     # 🔹 Agregar estadisticas si no está definido
     @estadisticas = {

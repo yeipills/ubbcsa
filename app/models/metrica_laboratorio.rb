@@ -16,8 +16,10 @@ class MetricaLaboratorio < ApplicationRecord
     MetricsChannel.broadcast_to(
       sesion_laboratorio,
       {
-        type: tipo,
-        valor: valor,
+        type: 'metric',
+        cpu: cpu_usage,
+        memory: memory_usage,
+        network: network_usage,
         timestamp: created_at
       }
     )

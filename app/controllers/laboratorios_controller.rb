@@ -22,7 +22,10 @@ class LaboratoriosController < ApplicationController
   end
 
   def create
+    @curso = Curso.find(params[:curso_id])
     @laboratorio = Laboratorio.new(laboratorio_params)
+    @laboratorio.curso_id = params[:curso_id]
+    
     if @laboratorio.save
       flash_created('Laboratorio')
       redirect_to @laboratorio
