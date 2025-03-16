@@ -3,15 +3,13 @@ FROM debian:bullseye-slim
 # Etiquetas para la imagen
 LABEL maintainer="UBB CSA Team"
 LABEL version="2.0"
-LABEL description="Wetty Terminal Server for UBB Cybersecurity Labs"
+LABEL description="TTYD Terminal Server for UBB Cybersecurity Labs"
 
 # Configuración del entorno
 ENV DEBIAN_FRONTEND=noninteractive
-ENV NODE_VERSION=20.x
-ENV WETTY_PORT=3000
+ENV TTYD_PORT=3000
 ENV RAILS_HOST=web
 ENV RAILS_PORT=3001
-ENV NODE_ENV=development
 ENV TZ=America/Santiago
 
 # Instalar dependencias básicas
@@ -43,7 +41,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     g++ \
     build-essential \
     pkg-config \
-    libncurses5-dev \
+    libwebsockets-dev \
+    libjson-c-dev \
+    libssl-dev \
+    cmake \
     && rm -rf /var/lib/apt/lists/*
 
 # Configurar locale y zona horaria
@@ -52,15 +53,17 @@ ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en 
 ENV LC_ALL=en_US.UTF-8
 
-# Configurar Node.js según requerimientos de WeTTY (node >=18)
-RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION} | bash - \
-    && apt-get update && apt-get install -y nodejs \
-    # Instalar dependencias requeridas por WeTTY
-    && apt-get install -y make python3 build-essential \
-    # Instalar WeTTY globalmente
-    && npm install -g wetty@latest \
-    && npm cache clean --force \
-    && rm -rf /var/lib/apt/lists/*
+# Descargar e instalar ttyd desde el repositorio oficial
+RUN cd /tmp && \
+    git clone --depth=1 https://github.com/tsl0922/ttyd.git && \
+    cd ttyd && \
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    make && \
+    make install && \
+    cd / && \
+    rm -rf /tmp/ttyd
 
 # Configurar usuario por defecto
 RUN useradd -m -s /bin/bash kali && \
@@ -71,7 +74,7 @@ RUN useradd -m -s /bin/bash kali && \
     chmod 0440 /etc/sudoers.d/kali
 
 # Configurar scripts para usuarios dinámicos
-RUN mkdir -p /usr/local/bin /etc/wetty/scripts
+RUN mkdir -p /usr/local/bin /etc/ttyd/scripts
 COPY ./labs/create_dynamic_user.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/create_dynamic_user.sh
 
@@ -84,14 +87,8 @@ RUN mkdir -p /var/run/sshd && \
     sed -i 's/^#*\(UsePAM\) .*/\1 yes/' /etc/ssh/sshd_config
 
 # Configurar directorio para datos de laboratorios
-RUN mkdir -p /home/kali/lab_data /home/kali/logs /etc/wetty/labs \
+RUN mkdir -p /home/kali/lab_data /home/kali/logs /etc/ttyd/labs \
     && chown -R kali:kali /home/kali/lab_data /home/kali/logs
-
-# Generar certificados autofirmados para HTTPS
-RUN mkdir -p /etc/ssl/private /etc/ssl/certs && \
-    openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
-    -keyout /etc/ssl/private/wetty.key -out /etc/ssl/certs/wetty.crt \
-    -subj "/C=CL/ST=BioBio/L=Concepcion/O=UBB/CN=wetty.ubb.cl"
 
 # Mensaje de bienvenida personalizado
 RUN echo " _    _ ______ ____     _____ _______ _____            _____  " > /etc/motd && \
@@ -113,17 +110,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Script de inicio principal
-COPY start.sh /start.sh
+COPY ./labs/ttyd-start-fixed.sh /start.sh
 RUN chmod +x /start.sh
 
 # Configurar healthcheck script
-COPY ./labs/wetty-healthcheck.sh /usr/local/bin/wetty-healthcheck.sh
-RUN chmod +x /usr/local/bin/wetty-healthcheck.sh
+COPY ./labs/ttyd-healthcheck.sh /usr/local/bin/ttyd-healthcheck.sh
+RUN chmod +x /usr/local/bin/ttyd-healthcheck.sh
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD /usr/local/bin/wetty-healthcheck.sh
+    CMD /usr/local/bin/ttyd-healthcheck.sh
 
 # Exponer puertos
-EXPOSE 22 ${WETTY_PORT}
+EXPOSE 22 ${TTYD_PORT}
 
 # Ejecutar script de inicio
 CMD ["/start.sh"]

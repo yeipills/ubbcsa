@@ -19,29 +19,30 @@
     
     <% if sesion.activa? %>
       <% 
-        # Generar el URL de Wetty con el token correspondiente
-        host = ENV['WETTY_HOST'] || request.host
-        port = ENV['WETTY_PORT'] || (Rails.env.development? ? 3001 : 443)
-        protocol = Rails.env.development? ? 'http' : 'https'
+        # Generar el URL de ttyd con el token correspondiente
+        protocol = request.ssl? ? "https" : "http"
+        host = Rails.env.development? ? request.host : (ENV['TTYD_HOST'] || request.host)
+        port = Rails.env.development? ? "3000" : (ENV['TTYD_PORT'] || request.port.to_s)
         
         # Generar token único para esta sesión
-        token = SecureRandom.urlsafe_base64(32)
+        session_token = "#{sesion.usuario.email.split('@').first.gsub(/[^a-zA-Z0-9]/, '')}-#{sesion.id}-#{Time.now.to_i}"
         username = sesion.usuario.email.split('@').first.gsub(/[^a-zA-Z0-9]/, '')
         container_id = sesion.container_id || 'no-container'
         
         # Almacenar token en caché
-        Rails.cache.write("wetty_token:#{token}", {
-          usuario_id: sesion.usuario.id,
-          sesion_id: sesion.id,
-          container_id: container_id
-        }, expires_in: 30.minutes)
+        Rails.cache.write("ttyd_token:#{session_token}", {
+          username: username,
+          session_id: sesion.id
+        }, expires_in: 1.hour)
         
-        wetty_url = "#{protocol}://#{host}:#{port}/wetty/?token=#{token}&container_id=#{container_id}&username=#{username}"
+        # Asegurar que la URL es correcta
+        ttyd_url = "#{protocol}://#{host}:#{port}/?token=#{session_token}&container_id=#{container_id}&username=#{username}"
+        Rails.logger.info("Terminal URL generada: #{ttyd_url}")
       %>
       
-      <!-- Wetty Terminal Embed --> 
+      <!-- ttyd Terminal Embed --> 
       <iframe 
-        src="<%= wetty_url %>"
+        src="<%= ttyd_url %>"
         class="w-full h-full border-0" 
         data-terminal-target="terminal"
         allow="fullscreen" 
@@ -51,7 +52,7 @@
       
       <!-- Fallback Link -->
       <div class="absolute bottom-2 right-2 p-2 bg-blue-600 text-white text-xs rounded">
-        <a href="<%= wetty_url %>" target="_blank" class="flex items-center">
+        <a href="<%= ttyd_url %>" target="_blank" class="flex items-center">
           <span>Abrir en nueva ventana</span>
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />

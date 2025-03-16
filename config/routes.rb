@@ -8,9 +8,10 @@ Rails.application.routes.draw do
   # Ruta principal
   root 'home#index'
 
-  # API para terminal y Wetty
+  # API para terminal y ttyd
   namespace :api do
-    post '/validate_wetty_token', to: 'terminal#validate_token'
+    post '/validate_ttyd_token', to: 'terminal#validate_token'
+    get '/terminal/ping', to: 'terminal#ping'
     get '/terminal/metrics', to: 'terminal#metrics'
     post '/terminal/command', to: 'terminal#command'
     # Nuevos endpoints para máquinas objetivo
@@ -42,7 +43,7 @@ Rails.application.routes.draw do
       end
 
       resource :consola, only: [:show] do
-        get 'terminal', to: 'wetty#show'
+        get 'terminal', to: 'ttyd#show', as: 'terminal'
       end
 
       # NUEVO: Ejercicios dentro de una sesión

@@ -4,8 +4,59 @@
 
 import { application } from "./application"
 
+import ActivityChartController from "./activity_chart_controller"
+application.register("activity-chart", ActivityChartController)
+
+import AlertController from "./alert_controller"
+application.register("alert", AlertController)
+
+import DropdownController from "./dropdown_controller"
+application.register("dropdown", DropdownController)
+
+import FlashController from "./flash_controller"
+application.register("flash", FlashController)
+
 import HelloController from "./hello_controller"
 application.register("hello", HelloController)
 
-import NotificationsController from "./notifications_controller"
-application.register("notifications", NotificationsController)
+import MetricsController from "./metrics_controller"
+application.register("metrics", MetricsController)
+
+import NotificacionesController from "./notificaciones_controller"
+application.register("notificaciones", NotificacionesController)
+
+import PreguntaFormController from "./pregunta_form_controller"
+application.register("pregunta-form", PreguntaFormController)
+
+import ProgresoChartsController from "./progreso_charts_controller"
+application.register("progreso-charts", ProgresoChartsController)
+
+import QuizChartController from "./quiz_chart_controller"
+application.register("quiz-chart", QuizChartController)
+
+import QuizController from "./quiz_controller"
+application.register("quiz", QuizController)
+
+import QuizFormController from "./quiz_form_controller"
+application.register("quiz-form", QuizFormController)
+
+import QuizPreguntasController from "./quiz_preguntas_controller"
+application.register("quiz-preguntas", QuizPreguntasController)
+
+import QuizResponseController from "./quiz_response_controller"
+application.register("quiz-response", QuizResponseController)
+
+import QuizTimerController from "./quiz_timer_controller"
+application.register("quiz-timer", QuizTimerController)
+
+import TerminalController from "./terminal_controller"
+application.register("terminal", TerminalController)
+
+import ThemeController from "./theme_controller"
+application.register("theme", ThemeController)
+
+import WettyController from "./wetty_controller"
+application.register("wetty", WettyController)
+
+import TTYDController from "./ttyd_controller"
+application.register("ttyd", TTYDController)

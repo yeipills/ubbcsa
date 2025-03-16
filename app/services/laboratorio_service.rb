@@ -39,7 +39,7 @@ class LaboratorioService
           container_id = "lab-#{sesion.id}-#{Time.now.to_i}"
           sesion.update(container_id: container_id)
           
-          sistema = `docker exec ubbcsa-wetty-1 /home/kali/labs/init.sh #{tipo}`
+          sistema = `docker exec ubbcsa-ttyd-1 /home/kali/labs/init.sh #{tipo}`
           
           if sistema
             sesion.update(estado: 'activa')
@@ -84,7 +84,7 @@ class LaboratorioService
           # Fallback a comando antiguo si DockerLabService no está disponible
           Rails.logger.info("DockerLabService no disponible, usando método antiguo")
           
-          sistema = `docker exec ubbcsa-wetty-1 rm -rf /home/kali/labs/workspace/*`
+          sistema = `docker exec ubbcsa-ttyd-1 rm -rf /home/kali/labs/workspace/*`
           
           if sistema
             return true
@@ -128,7 +128,7 @@ class LaboratorioService
           Rails.logger.info("DockerLabService no disponible, usando método antiguo")
           
           tipo = sesion.laboratorio.tipo
-          sistema = `docker exec ubbcsa-wetty-1 /home/kali/labs/reset.sh #{tipo}`
+          sistema = `docker exec ubbcsa-ttyd-1 /home/kali/labs/reset.sh #{tipo}`
           
           if sistema
             return true

@@ -1,49 +1,63 @@
 version: '3.8'
 
 services:
-  web:
+  ttyd:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.ttyd
     ports:
       - "3000:3000"
-    volumes:
-      - .:/app
-      - ./storage:/app/storage
-    depends_on:
-      - wetty
-    environment:
-      - RAILS_ENV=development
-      - WETTY_HOST=wetty
-      - WETTY_PORT=3001
-    networks:
-      - default
-      - lab-network
-
-  wetty:
-    build:
-      context: .
-      dockerfile: Dockerfile.wetty
-    ports:
-      - "3001:3001"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.wetty.rule=Host(`localhost`) && PathPrefix(`/wetty`)"
-      - "traefik.http.services.wetty.loadbalancer.server.port=3001"
+      - "traefik.http.routers.ttyd.rule=Host(`localhost`)"
+      - "traefik.http.services.ttyd.loadbalancer.server.port=3000"
     volumes:
-      - ./start.sh:/start.sh
       - ./labs:/labs
       - ./storage/lab_data:/home/kali/lab_data
+      - ttyd-sessions:/tmp/sessions
     environment:
-      - SSH_AUTH=password
       - RAILS_HOST=web
-      - RAILS_PORT=3000
-      - NODE_ENV=development
+      - RAILS_PORT=3001
+      - TTYD_PORT=3000
+      - TERM=xterm-256color
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/ttyd-healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    restart: unless-stopped
     networks:
       - default
       - lab-network
     cap_add:
       - NET_ADMIN  # Para permitir configuración de red
+    security_opt:
+      - apparmor:unconfined  # Permitir operaciones que requieren escalado de privilegios
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - .:/app
+      - ./storage:/app/storage
+    depends_on:
+      - ttyd
+    environment:
+      - RAILS_ENV=development
+      - TTYD_HOST=ttyd
+      - TTYD_PORT=3000
+      - PORT=3001
+    networks:
+      - default
+      - lab-network
+    cap_add:
+      - NET_ADMIN  # Para permitir configuración de red
+    security_opt:
+      - apparmor:unconfined  # Permitir operaciones que requieren escalado de privilegios
 
   lab-network:
     image: alpine:latest
@@ -57,7 +71,7 @@ services:
   target-host:
     build:
       context: .
-      dockerfile: Dockerfile.wetty
+      dockerfile: Dockerfile.ttyd
     networks:
       - default
       - lab-network
@@ -65,11 +79,15 @@ services:
       - ./labs:/labs
     environment:
       - SCENARIO_TYPE=target
-      - NODE_ENV=development
       - RAILS_HOST=web
-      - RAILS_PORT=3000
+      - RAILS_PORT=3001
+      - TTYD_PORT=3000
+      - TARGET_USER=target  # Usuario específico para la máquina objetivo
     cap_add:
       - NET_ADMIN
+    # Puerto diferente para evitar conflictos con el ttyd principal
+    ports:
+      - "3030:3000"
 
 networks:
   default:
@@ -80,3 +98,6 @@ networks:
     ipam:
       config:
         - subnet: 172.20.0.0/16
+
+volumes:
+  ttyd-sessions:  # Volumen persistente para sesiones tmux

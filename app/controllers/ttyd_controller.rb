@@ -1,4 +1,4 @@
-class WettyController < ApplicationController
+class TTYDController < ApplicationController
   # Este controlador maneja la integración con ttyd
   before_action :authenticate_usuario!
   before_action :set_sesion
@@ -6,8 +6,10 @@ class WettyController < ApplicationController
   before_action :verify_container_status
   
   def show
-    # Redirigir todas las solicitudes al controlador TTYDController
-    redirect_to terminal_consola_path(sesion_laboratorio_id: @sesion.id)
+    @ttyd_url = generate_ttyd_url
+    @token = generate_session_token
+    @lab_config = get_lab_config
+    render layout: false
   end
 
   private
