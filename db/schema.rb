@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_03_13_200736) do
+ActiveRecord::Schema[7.1].define(version: 2025_03_17_052205) do
   create_schema "auth"
   create_schema "extensions"
   create_schema "graphql"
@@ -127,6 +127,11 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_13_200736) do
     t.integer "numero_intento"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "has_result", default: false
+    t.jsonb "detalles_resultado", default: {}
+    t.decimal "puntaje_obtenido", precision: 8, scale: 2
+    t.decimal "puntaje_maximo", precision: 8, scale: 2
+    t.index ["has_result"], name: "index_intentos_quiz_on_has_result"
     t.index ["quiz_id", "usuario_id", "numero_intento"], name: "idx_on_quiz_id_usuario_id_numero_intento_87beb3aa17", unique: true
     t.index ["quiz_id"], name: "index_intentos_quiz_on_quiz_id"
     t.index ["usuario_id"], name: "index_intentos_quiz_on_usuario_id"
@@ -225,6 +230,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_13_200736) do
     t.boolean "activa", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "par_relacionado", default: {}, null: false
+    t.boolean "es_termino", default: false, null: false
     t.index ["pregunta_id", "orden"], name: "index_quiz_opciones_on_pregunta_id_and_orden"
     t.index ["pregunta_id"], name: "index_quiz_opciones_on_pregunta_id"
   end
@@ -244,6 +251,26 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_13_200736) do
     t.index ["quiz_id"], name: "index_quiz_preguntas_on_quiz_id"
   end
 
+  create_table "quiz_results", force: :cascade do |t|
+    t.bigint "quiz_id", null: false
+    t.bigint "usuario_id", null: false
+    t.bigint "intento_quiz_id", null: false
+    t.decimal "puntaje_total", precision: 5, scale: 2, null: false
+    t.integer "total_preguntas", null: false
+    t.integer "respuestas_correctas", null: false
+    t.integer "tiempo_segundos"
+    t.jsonb "preguntas_correctas", default: []
+    t.jsonb "preguntas_incorrectas", default: []
+    t.boolean "aprobado", default: false
+    t.integer "posicion_ranking"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["intento_quiz_id"], name: "index_quiz_results_on_intento_quiz_id"
+    t.index ["quiz_id", "usuario_id", "intento_quiz_id"], name: "index_quiz_results_on_unique_attempt", unique: true
+    t.index ["quiz_id"], name: "index_quiz_results_on_quiz_id"
+    t.index ["usuario_id"], name: "index_quiz_results_on_usuario_id"
+  end
+
   create_table "quizzes", force: :cascade do |t|
     t.string "titulo", null: false
     t.text "descripcion"
@@ -258,6 +285,15 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_13_200736) do
     t.datetime "fecha_fin"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "codigo_acceso", comment: "Código único para acceso al quiz"
+    t.datetime "fecha_publicacion", comment: "Fecha cuando el quiz fue publicado"
+    t.boolean "mostrar_resultados_inmediatos", default: false, comment: "Indica si los resultados se muestran inmediatamente después de finalizar"
+    t.boolean "aleatorizar_preguntas", default: false, comment: "Indica si las preguntas se muestran en orden aleatorio"
+    t.boolean "aleatorizar_opciones", default: false, comment: "Indica si las opciones de las preguntas se muestran en orden aleatorio"
+    t.decimal "peso_calificacion", precision: 5, scale: 2, default: "100.0", comment: "Peso porcentual del quiz en la calificación"
+    t.text "instrucciones", comment: "Instrucciones detalladas para los estudiantes"
+    t.boolean "has_results_cache", default: false
+    t.index ["codigo_acceso"], name: "index_quizzes_on_codigo_acceso", unique: true
     t.index ["curso_id", "laboratorio_id", "titulo"], name: "index_quizzes_on_curso_id_and_laboratorio_id_and_titulo", unique: true
     t.index ["curso_id"], name: "index_quizzes_on_curso_id"
     t.index ["laboratorio_id"], name: "index_quizzes_on_laboratorio_id"
@@ -274,6 +310,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_13_200736) do
     t.datetime "respondido_en"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "datos_json", default: {}, null: false
     t.index ["intento_quiz_id", "pregunta_id"], name: "index_respuestas_quiz_on_intento_quiz_id_and_pregunta_id", unique: true
     t.index ["intento_quiz_id"], name: "index_respuestas_quiz_on_intento_quiz_id"
     t.index ["opcion_id"], name: "index_respuestas_quiz_on_opcion_id"
@@ -299,6 +336,14 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_13_200736) do
     t.boolean "completado", default: false
     t.index ["container_id"], name: "index_sesion_laboratorios_on_container_id"
     t.index ["laboratorio_id", "usuario_id"], name: "index_sesion_laboratorios_on_laboratorio_id_and_usuario_id"
+  end
+
+  create_table "test_quiz_emparejamientos", force: :cascade do |t|
+    t.string "nombre", null: false
+    t.text "descripcion"
+    t.jsonb "configuracion", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "usuarios", force: :cascade do |t|
@@ -336,6 +381,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_13_200736) do
   add_foreign_key "preferencias_notificaciones", "usuarios", name: "fk_rails_usuario"
   add_foreign_key "quiz_opciones", "quiz_preguntas", column: "pregunta_id"
   add_foreign_key "quiz_preguntas", "quizzes"
+  add_foreign_key "quiz_results", "intentos_quiz", column: "intento_quiz_id"
+  add_foreign_key "quiz_results", "quizzes"
+  add_foreign_key "quiz_results", "usuarios"
   add_foreign_key "quizzes", "cursos"
   add_foreign_key "quizzes", "laboratorios"
   add_foreign_key "quizzes", "usuarios"

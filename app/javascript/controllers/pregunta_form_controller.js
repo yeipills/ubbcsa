@@ -2,19 +2,55 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["tipoSelect", "respuestaCorta", "imagePreview", "previewImage"]
+  static targets = ["tipoSelect", "respuestaCorta", "emparejamiento", "imagePreview", "previewImage", "opcionesContainer", "multipleRespuesta"]
 
   connect() {
     this.tipoChanged()
+    this.initEmparejamiento()
+    this.initOpcionesMultiples()
   }
 
   tipoChanged() {
     const tipo = this.tipoSelectTarget.value
     
+    // Ocultar todos los tipos especficos primero
+    this.respuestaCortaTarget.classList.add("hidden")
+    if (this.hasEmparejamientoTarget) {
+      this.emparejamientoTarget.classList.add("hidden")
+    }
+    if (this.hasMultipleRespuestaTarget) {
+      this.multipleRespuestaTarget.classList.add("hidden")
+    }
+    
+    // Mostrar el tipo seleccionado
     if (tipo === "respuesta_corta") {
       this.respuestaCortaTarget.classList.remove("hidden")
-    } else {
-      this.respuestaCortaTarget.classList.add("hidden")
+    } else if (tipo === "emparejamiento" && this.hasEmparejamientoTarget) {
+      this.emparejamientoTarget.classList.remove("hidden")
+    } else if (tipo === "multiple_respuesta" && this.hasMultipleRespuestaTarget) {
+      this.multipleRespuestaTarget.classList.remove("hidden")
+    }
+    
+    // Actualizar el modo de opciones segn el tipo
+    this.actualizarModoOpciones(tipo)
+  }
+  
+  actualizarModoOpciones(tipo) {
+    // Para opciones mltiples y mltiple respuesta
+    if (this.hasOpcionesContainerTarget) {
+      const checkboxLabels = this.opcionesContainerTarget.querySelectorAll('.checkbox-label')
+      
+      if (tipo === "multiple_respuesta") {
+        // Cambiar textos por checkboxes para seleccin mltiple
+        checkboxLabels.forEach(label => {
+          label.textContent = "Correcta"
+        })
+      } else if (tipo === "opcion_multiple") {
+        // Cambiar textos por radio para opcin mltiple
+        checkboxLabels.forEach(label => {
+          label.textContent = "Correcta"
+        })
+      }
     }
   }
 
@@ -33,6 +69,220 @@ export default class extends Controller {
       }
       
       reader.readAsDataURL(input.files[0])
+    }
+  }
+  
+  initEmparejamiento() {
+    if (!this.hasEmparejamientoTarget) return
+    
+    // Agregar event listener para el botn de agregar par
+    const agregarBtn = document.getElementById('agregar-par')
+    if (agregarBtn) {
+      agregarBtn.addEventListener('click', this.agregarNuevoPar.bind(this))
+    }
+    
+    // Inicializar funcin de eliminar par para todos los botones existentes
+    this.initEliminarPar()
+    
+    // Inicializar los pares relacionados
+    if (this.tipoSelectTarget.value === 'emparejamiento') {
+      this.actualizarParesRelacionados()
+    }
+  }
+  
+  agregarNuevoPar() {
+    const container = document.getElementById('pares-container')
+    if (!container) return
+    
+    // Contar pares existentes para asignar nuevo ndice
+    const paresExistentes = container.querySelectorAll('.par-item').length
+    const nuevoIndice = paresExistentes + 1
+    
+    // Calcular nuevos valores de orden
+    const ordenTermino = (paresExistentes * 2) + 1
+    const ordenDefinicion = (paresExistentes * 2) + 2
+    
+    // Crear nuevo par
+    const nuevoPar = document.createElement('div')
+    nuevoPar.className = 'par-item border border-gray-700 p-3 rounded-lg'
+    nuevoPar.innerHTML = `
+      <div class="flex justify-between mb-2">
+        <h5 class="text-gray-300 font-medium">Par ${nuevoIndice}</h5>
+        <button type="button" class="text-red-400 hover:text-red-300 text-sm" onclick="eliminarPar(this)">
+          Eliminar
+        </button>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <input type="hidden" name="quiz_pregunta[opciones_attributes][${ordenTermino}][es_termino]" value="true" />
+          <input type="hidden" name="quiz_pregunta[opciones_attributes][${ordenTermino}][orden]" value="${ordenTermino}" class="orden-termino" />
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1" for="quiz_pregunta_opciones_attributes_${ordenTermino}_contenido">Trmino</label>
+            <input class="w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" 
+                placeholder="Escribe el trmino" 
+                type="text" 
+                name="quiz_pregunta[opciones_attributes][${ordenTermino}][contenido]" 
+                id="quiz_pregunta_opciones_attributes_${ordenTermino}_contenido" />
+          </div>
+        </div>
+        
+        <div>
+          <input type="hidden" name="quiz_pregunta[opciones_attributes][${ordenDefinicion}][es_termino]" value="false" />
+          <input type="hidden" name="quiz_pregunta[opciones_attributes][${ordenDefinicion}][orden]" value="${ordenDefinicion}" class="orden-definicion" />
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1" for="quiz_pregunta_opciones_attributes_${ordenDefinicion}_contenido">Definicin</label>
+            <input class="w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" 
+                placeholder="Escribe la definicin" 
+                type="text" 
+                name="quiz_pregunta[opciones_attributes][${ordenDefinicion}][contenido]" 
+                id="quiz_pregunta_opciones_attributes_${ordenDefinicion}_contenido" />
+          </div>
+        </div>
+      </div>
+    `
+    
+    // Agregar al contenedor
+    container.appendChild(nuevoPar)
+    
+    // Actualizar pares relacionados
+    this.actualizarParesRelacionados()
+  }
+  
+  actualizarParesRelacionados() {
+    const pares = document.querySelectorAll('.par-item')
+    
+    pares.forEach((par, index) => {
+      const ordenTermino = (index * 2) + 1
+      const ordenDefinicion = (index * 2) + 2
+      
+      // Crear o actualizar campo oculto para almacenar la relacin
+      let parRelacionadoInput = par.querySelector(`input[name="quiz_pregunta[opciones_attributes][${ordenTermino}][par_relacionado]"]`)
+      
+      if (!parRelacionadoInput) {
+        parRelacionadoInput = document.createElement('input')
+        parRelacionadoInput.type = 'hidden'
+        parRelacionadoInput.name = `quiz_pregunta[opciones_attributes][${ordenTermino}][par_relacionado]`
+        par.querySelector('div:first-child > div:first-child').appendChild(parRelacionadoInput)
+      }
+      
+      // Valor dummy para nuevos pares (se actualizar con IDs reales despus de guardar)
+      const valorRelacion = { id: `dummy_${ordenDefinicion}`, tipo: 'definicion' }
+      parRelacionadoInput.value = JSON.stringify(valorRelacion)
+    })
+  }
+  
+  initEliminarPar() {
+    // Definir la funcin global para eliminar pares
+    window.eliminarPar = (button) => {
+      const parItem = button.closest('.par-item')
+      
+      if (parItem) {
+        // Marcar para eliminacin si ya existe en la base de datos
+        const idInputs = parItem.querySelectorAll('input[name$="[id]"]')
+        idInputs.forEach(input => {
+          if (input.value) {
+            const destroyInput = document.createElement('input')
+            destroyInput.type = 'hidden'
+            destroyInput.name = input.name.replace('[id]', '[_destroy]')
+            destroyInput.value = '1'
+            parItem.appendChild(destroyInput)
+          }
+        })
+        
+        // Ocultar visualmente
+        parItem.style.display = 'none'
+        
+        // Actualizar pares relacionados
+        this.actualizarParesRelacionados()
+      }
+    }
+  }
+  
+  initOpcionesMultiples() {
+    // Solo inicializar si existe el contenedor de opciones
+    if (!this.hasOpcionesContainerTarget) return
+    
+    // Agregar event listener para el botn de agregar opcin
+    const agregarBtn = document.getElementById('agregar-opcion')
+    if (agregarBtn) {
+      agregarBtn.addEventListener('click', this.agregarNuevaOpcion.bind(this))
+    }
+    
+    // Inicializar funcin de eliminar opcin
+    this.initEliminarOpcion()
+  }
+  
+  agregarNuevaOpcion() {
+    const container = document.getElementById('opciones-container')
+    if (!container) return
+    
+    // Contar opciones existentes para asignar nuevo ndice
+    const opcionesExistentes = container.querySelectorAll('.opcion-item').length
+    const nuevoIndice = opcionesExistentes + 1
+    
+    // Crear nueva opcin
+    const nuevaOpcion = document.createElement('div')
+    nuevaOpcion.className = 'opcion-item mb-3 p-3 border border-gray-700 rounded-lg'
+    nuevaOpcion.innerHTML = `
+      <div class="flex items-start gap-4">
+        <div class="flex-grow">
+          <label class="block text-sm font-medium text-gray-300 mb-1" for="quiz_pregunta_opciones_attributes_${nuevoIndice}_contenido">
+            Opcin ${nuevoIndice}
+          </label>
+          <input type="hidden" name="quiz_pregunta[opciones_attributes][${nuevoIndice}][orden]" value="${nuevoIndice}" class="orden-opcion">
+          <input class="w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" 
+              placeholder="Texto de la opcin" 
+              type="text" 
+              name="quiz_pregunta[opciones_attributes][${nuevoIndice}][contenido]" 
+              id="quiz_pregunta_opciones_attributes_${nuevoIndice}_contenido">
+        </div>
+        
+        <div class="mt-6">
+          <label class="inline-flex items-center">
+            <input name="quiz_pregunta[opciones_attributes][${nuevoIndice}][es_correcta]" type="hidden" value="0">
+            <input class="rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800" 
+                type="checkbox" 
+                value="1" 
+                name="quiz_pregunta[opciones_attributes][${nuevoIndice}][es_correcta]" 
+                id="quiz_pregunta_opciones_attributes_${nuevoIndice}_es_correcta">
+            <span class="ml-2 text-sm text-gray-300 checkbox-label">Correcta</span>
+          </label>
+        </div>
+        
+        <div class="mt-4">
+          <button type="button" class="p-2 text-red-400 hover:text-red-300" onclick="eliminarOpcion(this)">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    `
+    
+    // Agregar al contenedor
+    container.appendChild(nuevaOpcion)
+  }
+  
+  initEliminarOpcion() {
+    // Definir la funcin global para eliminar opciones
+    window.eliminarOpcion = (button) => {
+      const opcionItem = button.closest('.opcion-item')
+      
+      if (opcionItem) {
+        // Marcar para eliminacin si ya existe en la base de datos
+        const idInput = opcionItem.querySelector('input[name$="[id]"]')
+        if (idInput && idInput.value) {
+          const destroyInput = document.createElement('input')
+          destroyInput.type = 'hidden'
+          destroyInput.name = idInput.name.replace('[id]', '[_destroy]')
+          destroyInput.value = '1'
+          opcionItem.appendChild(destroyInput)
+        }
+        
+        // Ocultar visualmente
+        opcionItem.style.display = 'none'
+      }
     }
   }
 }

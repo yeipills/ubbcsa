@@ -147,6 +147,16 @@ class ProgresoDashboardService
   # Estadísticas sobre los estudiantes (para profesores)
 
   def estadisticas_estudiantes(cursos)
+    # Si no hay cursos, devolver valores por defecto
+    if cursos.blank?
+      return {
+        total_estudiantes: 0,
+        estudiantes_activos: 0,
+        promedio_completados: 0,
+        nuevos_estudiantes: 0
+      }
+    end
+    
     estudiantes_ids = CursoEstudiante.where(curso_id: cursos.pluck(:id)).pluck(:usuario_id).uniq
     estudiantes = Usuario.where(id: estudiantes_ids)
 
@@ -161,7 +171,7 @@ class ProgresoDashboardService
                                              .count
                                              .values
                                              .then do |counts|
-        counts.sum.to_f / counts.size
+        counts.empty? ? 0 : (counts.sum.to_f / counts.size)
       rescue StandardError
         0
       end,

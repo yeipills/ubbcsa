@@ -1,235 +1,241 @@
-<div class="min-h-screen bg-gray-900">
-  <%= content_for :navbar do %>
-    <%= render 'shared/navbar' %>
-  <% end %>
+<% content_for :title, "Quiz: #{@quiz.titulo}" %>
 
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <!-- Cabecera con temporizador -->
-    <div class="sticky top-0 z-10 bg-gray-900 border-b border-gray-800 pb-4 mb-6">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 class="text-xl sm:text-2xl font-bold text-white"><%= @quiz.titulo %></h1>
-          <p class="text-gray-400 text-sm">Intento #<%= @intento.numero_intento %></p>
+<div class="container mx-auto px-4 py-6 max-w-7xl"
+     data-controller="quiz"
+     data-quiz-tiempo-limite-value="<%= @quiz.tiempo_limite %>"
+     data-quiz-iniciado-value="<%= @intento.iniciado_en.to_i %>"
+     data-quiz-quiz-id-value="<%= @quiz.id %>"
+     data-quiz-intento-id-value="<%= @intento.id %>"
+     data-quiz-pregunta-actual-value="<%= @current_pregunta&.id %>"
+     data-quiz-total-preguntas-value="<%= @preguntas.count %>"
+     data-quiz-respondidas-value="<%= @respuestas.keys.count %>"
+     data-quiz-auto-save-value="true"
+     data-quiz-completado-value="false">
+
+  <!-- Header con título y temporizador -->
+  <div class="sticky top-0 z-10 bg-gray-900 border-b border-gray-800 mb-6 -mx-4 px-4 py-3 shadow-md">
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+      <h1 class="text-xl font-bold text-white truncate">
+        <%= @quiz.titulo %>
+      </h1>
+      
+      <!-- Temporizador -->
+      <div class="flex items-center space-x-6">
+        <div 
+          class="bg-gray-800 p-2 rounded-lg border border-gray-700"
+          data-controller="quiz-timer"
+          data-quiz-timer-tiempo-limite-value="<%= @quiz.tiempo_limite %>"
+          data-quiz-timer-iniciado-en-value="<%= @intento.iniciado_en.to_i %>"
+          data-quiz-timer-intento-id-value="<%= @intento.id %>"
+          data-quiz-timer-quiz-id-value="<%= @quiz.id %>">
+          
+          <div class="flex flex-col items-center">
+            <div class="flex items-center mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-400 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+              </svg>
+              <span class="text-gray-300 text-sm font-medium">Tiempo Restante:</span>
+            </div>
+            
+            <div class="w-full bg-gray-700 h-1.5 rounded-full overflow-hidden mb-1">
+              <div 
+                data-quiz-timer-target="progressBar"
+                class="bg-green-500 h-full rounded-full transition-all duration-1000"></div>
+            </div>
+            
+            <span 
+              data-quiz-timer-target="timeText"
+              class="text-xl font-mono font-bold text-white">
+              <%= @tiempo_restante / 60 %>:<%= '%02d' % (@tiempo_restante % 60) %>
+            </span>
+          </div>
         </div>
         
-        <div class="flex space-x-4 items-center">
-          <!-- Temporizador -->
-          <div data-controller="quiz-timer" 
-               data-quiz-timer-duration-value="<%= @quiz.tiempo_limite * 60 %>"
-               data-quiz-timer-warning-threshold-value="300"
-               data-quiz-timer-critical-threshold-value="60">
-            <div class="flex flex-col items-center">
-              <div class="text-xl font-mono font-bold text-white" data-quiz-timer-target="display">
-                <%= formato_tiempo(@quiz.tiempo_limite * 60) %>
+        <!-- Progreso -->
+        <div class="bg-gray-800 p-2 rounded-lg border border-gray-700 hidden md:block">
+          <div class="flex flex-col items-center">
+            <div class="flex items-center mb-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+              </svg>
+              <span class="text-gray-300 text-sm font-medium">Progreso:</span>
+            </div>
+            
+            <div class="w-full bg-gray-700 h-1.5 rounded-full overflow-hidden mb-1">
+              <div 
+                data-quiz-target="progressBar"
+                class="bg-indigo-500 h-full rounded-full transition-all duration-300"
+                style="width: <%= @progreso %>%;"></div>
+            </div>
+            
+            <span 
+              data-quiz-target="progressText"
+              class="text-white font-medium">
+              <%= @progreso %>%
+            </span>
+          </div>
+        </div>
+        
+        <!-- Botón finalizar -->
+        <button 
+          type="button"
+          data-quiz-target="finishButton"
+          data-action="quiz#finalizarIntento"
+          class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-medium transition-colors duration-200 <%= @todas_respondidas ? '' : 'opacity-75 cursor-not-allowed' %>"
+          <%= 'disabled' unless @todas_respondidas %>>
+          Finalizar Intento
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel flexible con navegación y contenido de pregunta -->
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <!-- Navegación de preguntas - Panel lateral -->
+    <div class="lg:col-span-1">
+      <div class="sticky top-20">
+        <div class="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden shadow-md">
+          <div class="p-4 bg-gray-800 flex justify-between items-center">
+            <h2 class="font-medium text-white">Navegación</h2>
+            <span class="text-gray-400 text-sm">
+              <%= @respuestas.keys.count %> / <%= @preguntas.count %> respondidas
+            </span>
+          </div>
+          
+          <div class="p-4">
+            <!-- Cuadrícula de números de pregunta -->
+            <div class="grid grid-cols-5 gap-2 mb-4" data-quiz-target="preguntaNav">
+              <% @preguntas.each do |pregunta| %>
+                <div class="text-center">
+                  <a href="#"
+                     data-quiz-target="navItem"
+                     data-action="click->quiz#irAPregunta"
+                     data-pregunta-id="<%= pregunta.id %>"
+                     class="flex items-center justify-center h-9 w-9 rounded-lg <%= @current_pregunta&.id == pregunta.id ? 'bg-indigo-600 text-white' : (@respuestas[pregunta.id] ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-300') %> hover:bg-blue-600 transition-colors <%= @respuestas[pregunta.id] ? 'respondida' : '' %> <%= @current_pregunta&.id == pregunta.id ? 'activa' : '' %>">
+                    <%= pregunta.orden %>
+                  </a>
+                </div>
+              <% end %>
+            </div>
+            
+            <!-- Leyenda -->
+            <div class="flex flex-col space-y-2 text-sm">
+              <div class="flex items-center">
+                <span class="inline-block w-4 h-4 bg-gray-700 rounded mr-2"></span>
+                <span class="text-gray-400">Sin responder</span>
               </div>
-              <div class="w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
-                <div class="h-full bg-blue-500 transition-all duration-500 ease-linear" 
-                     data-quiz-timer-target="progress" 
-                     style="width: 100%">
+              <div class="flex items-center">
+                <span class="inline-block w-4 h-4 bg-green-600 rounded mr-2"></span>
+                <span class="text-gray-400">Respondida</span>
+              </div>
+              <div class="flex items-center">
+                <span class="inline-block w-4 h-4 bg-indigo-600 rounded mr-2"></span>
+                <span class="text-gray-400">Pregunta actual</span>
+              </div>
+            </div>
+            
+            <!-- Información del intento - Mobile Only -->
+            <div class="mt-4 md:hidden">
+              <div class="bg-gray-800 p-2 rounded-lg border border-gray-700 w-full">
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-300 text-sm">Progreso:</span>
+                  <span class="text-white font-medium"><%= @progreso %>%</span>
+                </div>
+                <div class="w-full bg-gray-700 h-1.5 rounded-full overflow-hidden my-2">
+                  <div 
+                    class="bg-indigo-500 h-full rounded-full"
+                    style="width: <%= @progreso %>%;"></div>
                 </div>
               </div>
             </div>
+            
+            <!-- Botones de navegación -->
+            <div class="flex justify-between mt-6">
+              <% if pregunta_anterior = @current_pregunta&.pregunta_anterior %>
+                <button 
+                  type="button"
+                  data-action="click->quiz#irAAnterior"
+                  class="flex items-center px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-sm rounded transition-colors duration-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                  </svg>
+                  Anterior
+                </button>
+              <% else %>
+                <div></div>
+              <% end %>
+              
+              <% if pregunta_siguiente = @current_pregunta&.siguiente_pregunta %>
+                <button 
+                  type="button"
+                  data-action="click->quiz#irASiguiente"
+                  class="flex items-center px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-sm rounded transition-colors duration-200">
+                  Siguiente
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              <% else %>
+                <div></div>
+              <% end %>
+            </div>
           </div>
-          
-          <!-- Botón Finalizar -->
-          <%= button_to finalizar_quiz_intento_path(@quiz, @intento),
-              method: :post,
-              data: { confirm: "¿Estás seguro de que quieres finalizar este intento? Esta acción no se puede deshacer." },
-              class: "px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium" do %>
-            Finalizar Intento
-          <% end %>
-        </div>
-      </div>
-      
-      <!-- Barra de progreso -->
-      <div class="mt-4">
-        <div class="flex justify-between text-sm text-gray-400 mb-1">
-          <span><%= @respondidas %> de <%= @total_preguntas %> preguntas respondidas</span>
-          <span><%= @progreso %>% completado</span>
-        </div>
-        <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
-          <div class="h-full bg-green-500 transition-all duration-300" style="width: <%= @progreso %>%"></div>
         </div>
       </div>
     </div>
     
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-      <!-- Navegación de preguntas -->
-      <div class="order-2 lg:order-1 lg:col-span-1">
-        <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 p-4 sticky top-32">
-          <h2 class="text-lg font-medium text-white mb-4">Navegación</h2>
-          
-          <div class="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-4 gap-2">
-            <% @preguntas.each_with_index do |pregunta, index| %>
-              <% respondida = @respuestas[pregunta.id].present? %>
-              <%= link_to quiz_intento_path(@quiz, @intento, pregunta_id: pregunta.id), 
-                  class: "h-9 w-9 flex items-center justify-center rounded-lg text-sm font-medium transition-colors duration-200 
-                          #{@current_pregunta&.id == pregunta.id ? 'bg-blue-600 text-white' : respondida ? 'bg-green-700 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}" do %>
-                <%= index + 1 %>
-              <% end %>
-            <% end %>
+    <!-- Contenido de la pregunta actual -->
+    <div class="lg:col-span-3" data-quiz-target="preguntaContainer">
+      <% if @current_pregunta %>
+        <%= render partial: 'pregunta', locals: { pregunta: @current_pregunta, respuesta: @respuestas[@current_pregunta.id], intento: @intento } %>
+      <% else %>
+        <div class="bg-gray-900 rounded-lg border border-gray-700 p-8 text-center">
+          <div class="mx-auto w-16 h-16 rounded-full bg-blue-900/30 flex items-center justify-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </div>
-          
-          <div class="mt-4 flex flex-col space-y-2">
-            <div class="flex items-center">
-              <div class="h-4 w-4 rounded-full bg-green-700"></div>
-              <span class="ml-2 text-sm text-gray-300">Respondida</span>
-            </div>
-            
-            <div class="flex items-center">
-              <div class="h-4 w-4 rounded-full bg-blue-600"></div>
-              <span class="ml-2 text-sm text-gray-300">Pregunta actual</span>
-            </div>
-            
-            <div class="flex items-center">
-              <div class="h-4 w-4 rounded-full bg-gray-700"></div>
-              <span class="ml-2 text-sm text-gray-300">Pendiente</span>
-            </div>
-          </div>
-          
-          <div class="mt-6 border-t border-gray-700 pt-4">
-            <%= button_to finalizar_quiz_intento_path(@quiz, @intento),
-                method: :post,
-                data: { confirm: "¿Estás seguro de que quieres finalizar y enviar este intento? Esta acción no se puede deshacer." },
-                class: "w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors duration-200" do %>
-              Finalizar y Enviar
-            <% end %>
-          </div>
+          <h3 class="text-lg font-medium text-gray-300 mb-2">No se encontró ninguna pregunta</h3>
+          <p class="text-gray-500 mb-4">Ha ocurrido un error al cargar la pregunta. Por favor, intenta seleccionar una pregunta de la navegación.</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  
+  <!-- Indicador de guardado automático -->
+  <div class="fixed bottom-4 right-4" data-quiz-target="saveIndicator">
+    <!-- Este contenedor se actualizará mediante JavaScript -->
+  </div>
+</div>
+
+<!-- Partial para pregunta individual -->
+<% content_for :partial_pregunta do %>
+  <script type="text/template" id="template-pregunta">
+    <div class="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden shadow-lg">
+      <!-- Encabezado de la pregunta -->
+      <div class="p-5 border-b border-gray-800 flex justify-between items-center">
+        <div class="flex items-center">
+          <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-indigo-900 text-indigo-300 border border-indigo-800/50 mr-3 font-medium">
+            {{orden}}
+          </span>
+          <h2 class="text-lg font-medium text-white">{{titulo}}</h2>
+        </div>
+        <div>
+          <span class="px-2 py-1 bg-blue-900/30 text-blue-300 text-xs rounded-lg border border-blue-800/30">
+            {{tipo}} - {{puntaje}} puntos
+          </span>
         </div>
       </div>
       
-      <!-- Contenido de pregunta actual -->
-      <div class="order-1 lg:order-2 lg:col-span-3">
-        <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 p-6">
-          <% if @current_pregunta %>
-            <div class="mb-6">
-              <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg sm:text-xl font-bold text-white">Pregunta <%= @current_pregunta.orden %></h2>
-                <span class="px-2 py-1 rounded-lg text-xs font-medium bg-blue-900 text-blue-200">
-                  <%= pluralize(@current_pregunta.puntaje, 'punto', 'puntos') %>
-                </span>
-              </div>
-              
-              <p class="text-gray-200 text-lg"><%= @current_pregunta.contenido %></p>
-              
-              <% if @current_pregunta.imagen.attached? %>
-                <div class="mt-4">
-                  <%= image_tag @current_pregunta.imagen, class: "max-h-60 rounded" %>
-                </div>
-              <% end %>
-            </div>
-            
-            <%= form_with url: quiz_intento_path(@quiz, @intento), 
-                method: :patch, 
-                class: "mt-6",
-                data: { controller: "quiz-response", action: "submit->quiz-response#autoSave" } do |f| %>
-              <%= hidden_field_tag :pregunta_id, @current_pregunta.id %>
-              
-              <div class="space-y-4">
-                <% case @current_pregunta.tipo %>
-                <% when 'opcion_multiple' %>
-                  <div class="space-y-3">
-                    <% @current_pregunta.opciones.each do |opcion| %>
-                      <label class="flex items-start p-3 rounded-lg border border-gray-700 hover:bg-gray-700 cursor-pointer transition-colors duration-200
-                              <%= @respuestas[@current_pregunta.id]&.opcion_id == opcion.id ? 'bg-blue-900/40 border-blue-500' : 'bg-gray-800' %>">
-                        <div class="flex items-center h-5">
-                          <%= radio_button_tag 'respuesta_quiz[opcion_id]', 
-                              opcion.id, 
-                              @respuestas[@current_pregunta.id]&.opcion_id == opcion.id,
-                              class: "h-4 w-4 text-blue-600 border-gray-600 bg-gray-800 focus:ring-offset-gray-800 focus:ring-blue-500" %>
-                        </div>
-                        <div class="ml-3 text-sm">
-                          <p class="font-medium text-gray-200"><%= opcion.contenido %></p>
-                          
-                          <% if opcion.imagen.attached? %>
-                            <div class="mt-2">
-                              <%= image_tag opcion.imagen, class: "max-h-40 rounded" %>
-                            </div>
-                          <% end %>
-                        </div>
-                      </label>
-                    <% end %>
-                  </div>
-                  
-                <% when 'verdadero_falso' %>
-                  <div class="space-y-3">
-                    <% @current_pregunta.opciones.each do |opcion| %>
-                      <label class="flex items-start p-3 rounded-lg border border-gray-700 hover:bg-gray-700 cursor-pointer transition-colors duration-200
-                              <%= @respuestas[@current_pregunta.id]&.opcion_id == opcion.id ? 'bg-blue-900/40 border-blue-500' : 'bg-gray-800' %>">
-                        <div class="flex items-center h-5">
-                          <%= radio_button_tag 'respuesta_quiz[opcion_id]', 
-                              opcion.id, 
-                              @respuestas[@current_pregunta.id]&.opcion_id == opcion.id,
-                              class: "h-4 w-4 text-blue-600 border-gray-600 bg-gray-800 focus:ring-offset-gray-800 focus:ring-blue-500" %>
-                        </div>
-                        <div class="ml-3 text-sm">
-                          <p class="font-medium text-gray-200"><%= opcion.contenido %></p>
-                        </div>
-                      </label>
-                    <% end %>
-                  </div>
-                  
-                <% when 'respuesta_corta' %>
-                  <%= text_area_tag 'respuesta_quiz[respuesta_texto]', 
-                      @respuestas[@current_pregunta.id]&.respuesta_texto,
-                      rows: 4,
-                      class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
-                      placeholder: "Escribe tu respuesta aquí..." %>
-                <% end %>
-              </div>
-              
-              <!-- Navegación entre preguntas -->
-              <div class="flex justify-between mt-8">
-                <% prev_pregunta = @preguntas.where('orden < ?', @current_pregunta.orden).order(orden: :desc).first %>
-                <% next_pregunta = @preguntas.where('orden > ?', @current_pregunta.orden).order(:orden).first %>
-                
-                <% if prev_pregunta %>
-                  <%= hidden_field_tag :anterior_pregunta_id, prev_pregunta.id if prev_pregunta %>
-                  <%= button_tag type: 'submit', 
-                      name: 'siguiente_pregunta_id',
-                      value: prev_pregunta.id,
-                      class: "px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors duration-200 flex items-center" do %>
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                    </svg>
-                    Anterior
-                  <% end %>
-                <% else %>
-                  <div></div> <!-- Espacio para alineación -->
-                <% end %>
-                
-                <div>
-                  <%= f.submit "Guardar Respuesta", 
-                      class: "px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors duration-200" %>
-                </div>
-                
-                <% if next_pregunta %>
-                  <%= hidden_field_tag :siguiente_pregunta_id, next_pregunta.id if next_pregunta %>
-                  <%= button_tag type: 'submit', 
-                      name: 'siguiente_pregunta_id',
-                      value: next_pregunta.id,
-                      class: "px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors duration-200 flex items-center" do %>
-                    Siguiente
-                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                  <% end %>
-                <% else %>
-                  <div></div> <!-- Espacio para alineación -->
-                <% end %>
-              </div>
-            <% end %>
-          <% else %>
-            <div class="text-center py-8">
-              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-              </svg>
-              <h3 class="mt-2 text-xl font-bold text-white">No hay preguntas disponibles</h3>
-              <p class="mt-1 text-gray-400">Este quiz no tiene preguntas configuradas.</p>
-            </div>
-          <% end %>
-        </div>
+      <!-- Contenido de la pregunta -->
+      <div class="p-5">
+        {{contenido}}
+      </div>
+      
+      <!-- Formulario de respuesta -->
+      <div class="p-5 bg-gray-850 border-t border-gray-800">
+        {{formulario}}
       </div>
     </div>
-  </div>
-</div>
+  </script>
+<% end %>

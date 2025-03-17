@@ -1,35 +1,65 @@
-<%= form_with(model: quiz, url: quiz.new_record? ? curso_quizzes_path(quiz.curso) : quiz_path(quiz), class: "space-y-6") do |f| %>
-  <% if quiz.errors.any? %>
-    <div class="bg-red-900/50 p-4 rounded-lg border border-red-800/50 mb-6">
-      <h2 class="text-red-300 font-medium mb-2 text-sm">
-        <%= pluralize(quiz.errors.count, "error") %> impidieron guardar este quiz:
-      </h2>
-      <ul class="list-disc list-inside text-red-300 text-sm space-y-1">
-        <% quiz.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
+<%= form_with(model: quiz, url: quiz.new_record? ? curso_quizzes_path(quiz.curso) : quiz_path(quiz), 
+               class: "space-y-6", 
+               data: { 
+                 controller: "quiz-form", 
+                 action: "submit->quiz-form#validateForm",
+                 quiz_form_edit_mode_value: !quiz.new_record?, 
+                 quiz_form_quiz_id_value: quiz.id
+               }) do |f| %>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="col-span-1 md:col-span-2">
-      <div class="p-4 bg-gray-900 rounded-lg border border-gray-700">
-        <h3 class="font-medium text-gray-300 mb-4">Información Básica</h3>
+  <div data-quiz-form-target="errorContainer" class="mb-4">
+    <% if quiz.errors.any? %>
+      <div class="bg-red-900/50 p-4 rounded-lg border border-red-800/50 mb-6">
+        <h2 class="text-red-300 font-medium mb-2 text-sm">
+          <%= pluralize(quiz.errors.count, "error") %> impidieron guardar este quiz:
+        </h2>
+        <ul class="list-disc list-inside text-red-300 text-sm space-y-1">
+          <% quiz.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  </div>
+  
+  <div class="bg-indigo-900/30 p-3 rounded-lg border border-indigo-800/50 mb-3">
+    <p class="text-indigo-300 text-sm">
+      <strong>Nota:</strong> Los campos marcados con asterisco (*) son obligatorios. Asegúrese de completar las fechas de inicio y finalización.
+    </p>
+  </div>
+
+  <div class="flex flex-col lg:flex-row gap-6">
+    <!-- Formulario principal -->
+    <div class="w-full lg:w-2/3 space-y-6">
+      <!-- Información básica -->
+      <div class="p-5 bg-gray-900 rounded-lg border border-gray-700 shadow-md">
+        <h3 class="font-medium text-gray-300 text-lg mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+            <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+          </svg>
+          Información Básica
+        </h3>
         
         <div class="space-y-4">
           <div>
-            <%= f.label :titulo, "Título", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.label :titulo, "Título *", class: "block text-sm font-medium text-gray-300" %>
             <%= f.text_field :titulo, 
                 class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
-                placeholder: "Ej: Evaluación sobre Seguridad en Redes" %>
+                placeholder: "Ej: Evaluación de Seguridad en Redes",
+                required: true,
+                data: { quiz_form_target: "titulo", action: "input->quiz-form#handleInputChange" } %>
+            <p class="mt-1 text-xs text-gray-500">Un título descriptivo para el quiz.</p>
           </div>
           
           <div>
-            <%= f.label :descripcion, "Descripción", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.label :descripcion, "Descripción *", class: "block text-sm font-medium text-gray-300" %>
             <%= f.text_area :descripcion, rows: 3, 
                 class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
-                placeholder: "Describe brevemente el contenido del quiz..." %>
+                placeholder: "Describe brevemente el contenido y objetivos del quiz...",
+                required: true,
+                data: { quiz_form_target: "descripcion", action: "input->quiz-form#handleInputChange" } %>
+            <p class="mt-1 text-xs text-gray-500">Breve descripción que verán los estudiantes.</p>
           </div>
           
           <div>
@@ -37,60 +67,98 @@
             <%= f.text_area :instrucciones, rows: 4,
                 class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
                 placeholder: "Instrucciones detalladas para los estudiantes..." %>
-            <p class="mt-1 text-xs text-gray-500">Puedes usar formato markdown básico.</p>
+            <p class="mt-1 text-xs text-gray-500">Puedes usar formato markdown básico. Se mostrarán estas instrucciones al iniciar el quiz.</p>
           </div>
         </div>
       </div>
-    </div>
-    
-    <div>
-      <div class="p-4 bg-gray-900 rounded-lg border border-gray-700 h-full">
-        <h3 class="font-medium text-gray-300 mb-4">Configuración</h3>
+      
+      <!-- Configuración -->
+      <div class="p-5 bg-gray-900 rounded-lg border border-gray-700 shadow-md">
+        <h3 class="font-medium text-gray-300 text-lg mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+          </svg>
+          Configuración
+        </h3>
         
-        <div class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <%= f.label :tiempo_limite, "Tiempo límite (minutos)", class: "block text-sm font-medium text-gray-300" %>
-            <%= f.number_field :tiempo_limite, min: 1, 
-                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" %>
+            <%= f.label :tiempo_limite, "Tiempo límite (minutos) *", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.number_field :tiempo_limite, min: 1, max: 180, 
+                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
+                required: true,
+                data: { quiz_form_target: "tiempoLimite", action: "input->quiz-form#handleInputChange" } %>
+            <p class="mt-1 text-xs text-gray-500">Tiempo máximo para completar el quiz.</p>
           </div>
           
           <div>
-            <%= f.label :intentos_permitidos, "Intentos permitidos", class: "block text-sm font-medium text-gray-300" %>
-            <%= f.number_field :intentos_permitidos, min: 1, 
-                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" %>
+            <%= f.label :intentos_permitidos, "Intentos permitidos *", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.number_field :intentos_permitidos, min: 1, max: 10, 
+                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
+                required: true,
+                data: { quiz_form_target: "intentosPermitidos", action: "input->quiz-form#handleInputChange" } %>
+            <p class="mt-1 text-xs text-gray-500">Número de veces que un estudiante puede intentar el quiz.</p>
           </div>
           
           <div>
             <%= f.label :peso_calificacion, "Peso en calificación (%)", class: "block text-sm font-medium text-gray-300" %>
             <%= f.number_field :peso_calificacion, min: 0, max: 100, 
                 class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" %>
+            <p class="mt-1 text-xs text-gray-500">Porcentaje que representa este quiz en la evaluación global.</p>
           </div>
           
-          <div class="flex items-center">
+          <div class="flex items-center mt-4">
             <%= f.check_box :mostrar_resultados_inmediatos, 
-                class: "h-4 w-4 rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800" %>
+                class: "h-4 w-4 rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800",
+                data: { action: "change->quiz-form#handleInputChange" } %>
             <%= f.label :mostrar_resultados_inmediatos, "Mostrar resultados inmediatamente", 
+                class: "ml-2 block text-sm text-gray-300" %>
+          </div>
+          
+          <div class="flex items-center mt-4">
+            <%= f.check_box :aleatorizar_preguntas, 
+                class: "h-4 w-4 rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800",
+                data: { action: "change->quiz-form#handleInputChange" } %>
+            <%= f.label :aleatorizar_preguntas, "Aleatorizar orden de preguntas", 
+                class: "ml-2 block text-sm text-gray-300" %>
+          </div>
+          
+          <div class="flex items-center mt-4">
+            <%= f.check_box :aleatorizar_opciones, 
+                class: "h-4 w-4 rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800",
+                data: { action: "change->quiz-form#handleInputChange" } %>
+            <%= f.label :aleatorizar_opciones, "Aleatorizar orden de opciones", 
                 class: "ml-2 block text-sm text-gray-300" %>
           </div>
         </div>
       </div>
-    </div>
-    
-    <div>
-      <div class="p-4 bg-gray-900 rounded-lg border border-gray-700 h-full">
-        <h3 class="font-medium text-gray-300 mb-4">Fechas y Asociaciones</h3>
+      
+      <!-- Fechas y Asociaciones -->
+      <div class="p-5 bg-gray-900 rounded-lg border border-gray-700 shadow-md">
+        <h3 class="font-medium text-gray-300 text-lg mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+          </svg>
+          Disponibilidad y Asociaciones
+        </h3>
         
-        <div class="space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <%= f.label :fecha_inicio, "Fecha de inicio", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.label :fecha_inicio, "Fecha de inicio *", class: "block text-sm font-medium text-gray-300" %>
             <%= f.datetime_field :fecha_inicio,
-                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" %>
+                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
+                required: true,
+                data: { quiz_form_target: "fechaInicio", action: "change->quiz-form#handleInputChange" } %>
+            <p class="mt-1 text-xs text-gray-500">Fecha y hora a partir de la cual el quiz estará disponible.</p>
           </div>
           
           <div>
-            <%= f.label :fecha_fin, "Fecha de finalización", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.label :fecha_fin, "Fecha de finalización *", class: "block text-sm font-medium text-gray-300" %>
             <%= f.datetime_field :fecha_fin,
-                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" %>
+                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
+                required: true,
+                data: { quiz_form_target: "fechaFin", action: "change->quiz-form#handleInputChange" } %>
+            <p class="mt-1 text-xs text-gray-500">Fecha y hora hasta la que el quiz estará disponible.</p>
           </div>
           
           <div>
@@ -99,42 +167,109 @@
                 @laboratorios || [], 
                 :id, 
                 :nombre, 
-                { include_blank: "Ninguno" },
-                { class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" } %>
+                { include_blank: "Ninguno (Quiz independiente)" },
+                { class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
+                  data: { action: "change->quiz-form#handleInputChange" } } %>
+            <p class="mt-1 text-xs text-gray-500">Opcional. Asocia este quiz a un laboratorio específico.</p>
+          </div>
+          
+          <div>
+            <%= f.label :codigo_acceso, "Código de acceso", class: "block text-sm font-medium text-gray-300" %>
+            <%= f.text_field :codigo_acceso, maxlength: 6,
+                class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500 font-mono uppercase",
+                placeholder: "Se generará automáticamente",
+                readonly: true,
+                value: quiz.codigo_acceso.present? ? quiz.codigo_acceso : "AUTO" %>
+            <p class="mt-1 text-xs text-gray-500">Código único para acceso rápido al quiz. Se genera automáticamente.</p>
           </div>
         </div>
       </div>
-    </div>
-  </div>
-  
-  <div class="p-4 bg-gray-900 rounded-lg border border-gray-700">
-    <h3 class="font-medium text-gray-300 mb-4">Estado</h3>
-    
-    <div class="space-y-4">
-      <div>
-        <%= f.select :estado, 
-            options_for_select([
-              ['Borrador', 'borrador'],
-              ['Publicado', 'publicado'],
-              ['Cerrado', 'cerrado']
-            ], quiz.estado),
-            {}, 
-            { class: "block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" } %>
-        <p class="mt-1 text-xs text-gray-500">
-          <strong>Borrador:</strong> Solo visible para ti. 
-          <strong>Publicado:</strong> Visible y disponible para los estudiantes. 
-          <strong>Cerrado:</strong> Visible pero no disponible para nuevos intentos.
-        </p>
+      
+      <!-- Estado -->
+      <div class="p-5 bg-gray-900 rounded-lg border border-gray-700 shadow-md">
+        <h3 class="font-medium text-gray-300 text-lg mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+          </svg>
+          Estado
+        </h3>
+        
+        <div class="space-y-4">
+          <div>
+            <%= f.select :estado, 
+                options_for_select([
+                  ['Borrador - Solo visible para ti', 'borrador'],
+                  ['Publicado - Visible para estudiantes según fechas', 'publicado'],
+                  ['Cerrado - No disponible para nuevos intentos', 'cerrado']
+                ], quiz.estado),
+                {}, 
+                { class: "block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500" } %>
+          </div>
+          
+          <div class="bg-indigo-900/20 p-3 rounded-lg border border-indigo-800/30">
+            <p class="text-sm text-indigo-200">
+              <strong>Nota:</strong> Los quizzes en estado <span class="font-medium">Borrador</span> solo son visibles para ti. 
+              Los quizzes <span class="font-medium">Publicados</span> estarán disponibles para los estudiantes según las fechas establecidas.
+              Puedes cambiar el estado en cualquier momento.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Botones de acción -->
+      <div class="flex justify-end space-x-3">
+        <%= link_to "Cancelar", 
+            quiz.new_record? ? curso_path(quiz.curso) : quiz_path(quiz), 
+            class: "px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors duration-200",
+            data: { quiz_form_target: "cancelButton", action: "click->quiz-form#cancelar" } %>
+        
+        <%= f.submit quiz.new_record? ? "Crear Quiz" : "Guardar Cambios", 
+            class: "px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors duration-200",
+            data: { quiz_form_target: "submitButton" } %>
       </div>
     </div>
-  </div>
-
-  <div class="flex justify-end space-x-3">
-    <%= link_to "Cancelar", 
-        quiz.new_record? ? curso_path(quiz.curso) : quiz_path(quiz), 
-        class: "px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors duration-200" %>
     
-    <%= f.submit quiz.new_record? ? "Crear Quiz" : "Actualizar Quiz", 
-        class: "px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors duration-200" %>
+    <!-- Panel lateral con vista previa -->
+    <div class="w-full lg:w-1/3">
+      <div class="sticky top-6 bg-gray-900 rounded-lg border border-gray-700 p-5 shadow-md">
+        <h3 class="font-medium text-gray-300 text-lg mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+          </svg>
+          Vista Previa
+        </h3>
+        <div data-quiz-form-target="preview" class="prose prose-invert max-w-none text-gray-300 bg-gray-800/50 p-4 rounded-lg border border-gray-700 min-h-[300px]">
+          <!-- La vista previa se actualiza mediante JavaScript -->
+          <div class="flex justify-center items-center h-full">
+            <p class="text-gray-500 text-sm">Complete el formulario para ver la vista previa.</p>
+          </div>
+        </div>
+        
+        <div class="mt-6 bg-gray-800/50 rounded-lg border border-gray-700 p-4">
+          <h4 class="text-gray-300 font-medium mb-3">Recordatorios</h4>
+          <ul class="text-gray-400 text-sm space-y-2">
+            <li class="flex items-start">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+              <span>Establezca un tiempo límite adecuado para la complejidad de las preguntas.</span>
+            </li>
+            <li class="flex items-start">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+              <span>Debe agregar preguntas después de crear el quiz.</span>
+            </li>
+            <li class="flex items-start">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+              <span>Un quiz debe tener al menos una pregunta para ser publicado.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 <% end %>

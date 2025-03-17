@@ -18,12 +18,12 @@ export default class TerminalChannel {
       },
       {
         connected: () => {
-          console.log(`Conectado al canal de terminal para sesión ${this.sessionId}`)
+          console.log(`Conectado al canal de terminal para sesin ${this.sessionId}`)
           this.trigger('connected')
         },
 
         disconnected: () => {
-          console.log(`Desconectado del canal de terminal para sesión ${this.sessionId}`)
+          console.log(`Desconectado del canal de terminal para sesin ${this.sessionId}`)
           this.trigger('disconnected')
         },
 

@@ -3,13 +3,13 @@ import { Controller } from "@hotwired/stimulus"
 import Chart from 'chart.js/auto'
 
 /**
- * Controlador para gráficos de estadísticas de quizzes
+ * Controlador para grficos de estadsticas de quizzes
  * 
  * Este controlador maneja varios tipos de visualizaciones:
- * - puntajes: Distribución de puntajes en rangos
- * - tiempos: Distribución de tiempos de respuesta
+ * - puntajes: Distribucin de puntajes en rangos
+ * - tiempos: Distribucin de tiempos de respuesta
  * - aciertos: Tasas de acierto por pregunta
- * - progreso: Gráfico de línea de progreso
+ * - progreso: Grfico de lnea de progreso
  */
 export default class extends Controller {
   static targets = ["puntajes", "tiempos", "aciertos", "progreso"]
@@ -27,7 +27,7 @@ export default class extends Controller {
   }
   
   /**
-   * Inicializa todos los gráficos disponibles según los targets presentes
+   * Inicializa todos los grficos disponibles segn los targets presentes
    */
   initializeCharts() {
     if (this.hasPuntajesTarget) this.initializePuntajesChart()
@@ -37,7 +37,7 @@ export default class extends Controller {
   }
   
   /**
-   * Inicializa el gráfico de distribución de puntajes
+   * Inicializa el grfico de distribucin de puntajes
    */
   initializePuntajesChart() {
     const ctx = this.puntajesTarget.getContext('2d')
@@ -48,19 +48,19 @@ export default class extends Controller {
       data: {
         labels: data.rangos || ['0-20', '21-40', '41-60', '61-80', '81-100'],
         datasets: [{
-          label: 'Distribución de Puntajes',
+          label: 'Distribucin de Puntajes',
           data: data.valores || [],
           backgroundColor: this.colorsValue.map(c => `${c}80`), // con transparencia
           borderColor: this.colorsValue,
           borderWidth: 1
         }]
       },
-      options: this.getChartOptions('Distribución de Puntajes')
+      options: this.getChartOptions('Distribucin de Puntajes')
     })
   }
   
   /**
-   * Inicializa el gráfico de distribución de tiempos
+   * Inicializa el grfico de distribucin de tiempos
    */
   initializeTiemposChart() {
     const ctx = this.tiemposTarget.getContext('2d')
@@ -71,19 +71,19 @@ export default class extends Controller {
       data: {
         labels: data.rangos_tiempo || ['< 5 min', '5-10 min', '10-15 min', '15-20 min', '> 20 min'],
         datasets: [{
-          label: 'Tiempo de Resolución',
+          label: 'Tiempo de Resolucin',
           data: data.valores_tiempo || [],
           backgroundColor: 'rgba(59, 130, 246, 0.5)',
           borderColor: 'rgb(59, 130, 246)',
           borderWidth: 1
         }]
       },
-      options: this.getChartOptions('Distribución de Tiempos')
+      options: this.getChartOptions('Distribucin de Tiempos')
     })
   }
   
   /**
-   * Inicializa el gráfico de tasas de acierto por pregunta
+   * Inicializa el grfico de tasas de acierto por pregunta
    */
   initializeAciertosChart() {
     const ctx = this.aciertosTarget.getContext('2d')
@@ -145,7 +145,7 @@ export default class extends Controller {
   }
   
   /**
-   * Inicializa el gráfico de línea de progreso
+   * Inicializa el grfico de lnea de progreso
    */
   initializeProgresoChart() {
     const ctx = this.progresoTarget.getContext('2d')
@@ -199,9 +199,9 @@ export default class extends Controller {
   }
   
   /**
-   * Obtiene opciones comunes para los gráficos
-   * @param {string} title - Título del gráfico
-   * @returns {Object} Opciones de configuración del gráfico
+   * Obtiene opciones comunes para los grficos
+   * @param {string} title - Ttulo del grfico
+   * @returns {Object} Opciones de configuracin del grfico
    */
   getChartOptions(title) {
     return {

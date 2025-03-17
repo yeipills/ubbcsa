@@ -2,19 +2,40 @@
   <h3 class="text-xl font-bold text-white mb-4">Recursos</h3>
   
   <div class="space-y-4">
-    <div class="flex justify-between">
+    <div class="flex justify-between items-center">
       <span class="text-gray-400">CPU</span>
-      <span class="text-white font-medium"><%= metricas[:cpu_usage] %>%</span>
+      <div class="flex-grow mx-4">
+        <div class="h-2 bg-gray-700 rounded overflow-hidden">
+          <div class="h-full bg-blue-500" style="width: <%= metricas[:cpu_usage] %>%"></div>
+        </div>
+      </div>
+      <span class="text-white font-medium" data-metric="cpu"><%= metricas[:cpu_usage] %>%</span>
     </div>
 
-    <div class="flex justify-between">
+    <div class="flex justify-between items-center">
       <span class="text-gray-400">Memoria</span>
-      <span class="text-white font-medium"><%= metricas[:memory_usage] %>%</span>
+      <div class="flex-grow mx-4">
+        <div class="h-2 bg-gray-700 rounded overflow-hidden">
+          <div class="h-full bg-purple-500" style="width: <%= metricas[:memory_usage] %>%"></div>
+        </div>
+      </div>
+      <span class="text-white font-medium" data-metric="memory"><%= metricas[:memory_usage] %>%</span>
     </div>
 
-    <div class="flex justify-between">
+    <div class="flex justify-between items-center">
       <span class="text-gray-400">Red</span>
-      <span class="text-white font-medium"><%= metricas[:network_usage] %> KB/s</span>
+      <div class="flex-grow mx-4">
+        <div class="h-2 bg-gray-700 rounded overflow-hidden">
+          <div class="h-full bg-green-500" style="width: <%= [metricas[:network_usage] / 2, 100].min %>%"></div>
+        </div>
+      </div>
+      <span class="text-white font-medium" data-metric="network"><%= metricas[:network_usage] %> KB/s</span>
     </div>
   </div>
+  
+  <% if defined?(show_chart) && show_chart && @sesion.present? %>
+    <div class="mt-6">
+      <%= render 'shared/metrics_chart', sesion_id: @sesion.id %>
+    </div>
+  <% end %>
 </div>

@@ -45,6 +45,24 @@ class ApplicationController < ActionController::Base
     redirect_to root_path
   end
 
+  # Verificadores de rol generales
+  def verify_role(required_role)
+    unless current_usuario&.rol == required_role.to_s
+      flash_error(t("errors.unauthorized.#{required_role}", default: "Acceso restringido"))
+      redirect_to root_path and return false
+    end
+    true
+  end
+  
+  def verify_any_role(*roles)
+    if current_usuario && roles.map(&:to_s).include?(current_usuario.rol)
+      return true
+    else
+      flash_error(t("errors.unauthorized.general", default: "Acceso restringido"))
+      redirect_to root_path and return false
+    end
+  end
+
   # Helpers para mensajes flash (ahora con mensajes estándar en español)
   def flash_success(message = nil)
     message ||= 'Operación realizada con éxito'

@@ -78,6 +78,29 @@ module QuizzesHelper
       'check-square'
     when 'respuesta_corta'
       'text'
+    when 'emparejamiento'
+      'git-merge'
+    when 'multiple_respuesta'
+      'check-circle'
+    else
+      'help-circle'
+    end
+  end
+  
+  def tipo_pregunta_display(tipo)
+    case tipo
+    when 'opcion_multiple'
+      'Opción Múltiple'
+    when 'verdadero_falso'
+      'Verdadero/Falso'
+    when 'respuesta_corta'
+      'Respuesta Corta'
+    when 'emparejamiento'
+      'Términos Pareados'
+    when 'multiple_respuesta'
+      'Selección Múltiple (Varias correctas)'
+    else
+      tipo.to_s.humanize
     end
   end
 

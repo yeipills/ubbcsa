@@ -303,8 +303,26 @@ module Api
     def authorize_session_access(session_id)
       sesion = SesionLaboratorio.find_by(id: session_id)
       
-      unless sesion.present? && (sesion.usuario_id == current_usuario.id || current_usuario.admin?)
-        raise "Acceso no autorizado a sesión #{session_id}"
+      # Verificar si la sesión existe
+      unless sesion.present?
+        raise "Sesión no encontrada: #{session_id}"
+      end
+      
+      # Verificar permisos según el rol
+      if current_usuario.admin?
+        # Los administradores tienen acceso completo a todas las sesiones
+        return sesion
+      elsif current_usuario.profesor?
+        # Los profesores solo pueden acceder a sesiones de sus cursos
+        curso = sesion.laboratorio.curso
+        unless curso.profesor_id == current_usuario.id
+          raise "Acceso no autorizado: el profesor no es dueño del curso"
+        end
+      else
+        # Los estudiantes solo pueden acceder a sus propias sesiones
+        unless sesion.usuario_id == current_usuario.id
+          raise "Acceso no autorizado: la sesión no pertenece a este usuario"
+        end
       end
       
       sesion

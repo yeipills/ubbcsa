@@ -5,7 +5,7 @@ export default class extends Controller {
   static targets = ["menu"]
   
   connect() {
-    // Cerrar el menú al hacer clic fuera de él
+    // Cerrar el men al hacer clic fuera de l
     this.clickOutsideHandler = this.closeMenuOnClickOutside.bind(this)
     document.addEventListener("click", this.clickOutsideHandler)
   }

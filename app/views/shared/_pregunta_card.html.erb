@@ -1,0 +1,102 @@
+<%# Vista compartida para mostrar una pregunta en modo vista previa %>
+<div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+  <%# Encabezado con tipo de pregunta y puntaje %>
+  <div class="flex justify-between items-center mb-4">
+    <div class="flex items-center">
+      <span class="bg-indigo-100 text-indigo-800 dark:bg-indigo-800 dark:text-indigo-100 text-xs font-medium px-2.5 py-0.5 rounded-full mr-2">
+        <%= t("activerecord.attributes.quiz_pregunta.tipos.#{pregunta.tipo}") %>
+      </span>
+      <span class="text-sm text-gray-500 dark:text-gray-400">
+        <%= pluralize(pregunta.puntaje, 'punto') %>
+      </span>
+    </div>
+    <span class="text-sm text-gray-500 dark:text-gray-400">Pregunta <%= pregunta.orden %></span>
+  </div>
+  
+  <%# Contenido de la pregunta %>
+  <div class="mb-4">
+    <h3 class="font-semibold text-gray-900 dark:text-white mb-2">
+      <%= pregunta.contenido.present? ? sanitize(pregunta.contenido.to_html) : "Sin contenido" %>
+    </h3>
+    
+    <%# Imagen si existe %>
+    <% if pregunta.imagen.attached? %>
+      <div class="mt-3 mb-4">
+        <%= image_tag url_for(pregunta.imagen), class: "max-w-full h-auto rounded", alt: "Imagen de la pregunta" %>
+      </div>
+    <% end %>
+  </div>
+  
+  <%# Opciones según el tipo de pregunta %>
+  <div class="mt-4">
+    <% case pregunta.tipo %>
+    <% when 'opcion_multiple', 'verdadero_falso' %>
+      <div class="space-y-2">
+        <% pregunta.opciones.order(:orden).each do |opcion| %>
+          <div class="flex items-center p-3 rounded-lg border <%= opcion.es_correcta? ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-700' %>">
+            <div class="h-5 w-5 flex-shrink-0 rounded-full border border-gray-300 dark:border-gray-600 mr-3 <%= opcion.es_correcta? ? 'bg-green-500 dark:bg-green-600' : 'bg-white dark:bg-gray-700' %>"></div>
+            <div class="text-gray-800 dark:text-gray-200"><%= opcion.contenido %></div>
+            <% if opcion.es_correcta? %>
+              <span class="ml-auto text-green-600 dark:text-green-400 text-sm font-medium">Correcta</span>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    
+    <% when 'multiple_respuesta' %>
+      <div class="space-y-2">
+        <% pregunta.opciones.order(:orden).each do |opcion| %>
+          <div class="flex items-center p-3 rounded-lg border <%= opcion.es_correcta? ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' : 'border-gray-200 dark:border-gray-700' %>">
+            <div class="h-5 w-5 flex-shrink-0 rounded border border-gray-300 dark:border-gray-600 mr-3 <%= opcion.es_correcta? ? 'bg-green-500 dark:bg-green-600' : 'bg-white dark:bg-gray-700' %>"></div>
+            <div class="text-gray-800 dark:text-gray-200"><%= opcion.contenido %></div>
+            <% if opcion.es_correcta? %>
+              <span class="ml-auto text-green-600 dark:text-green-400 text-sm font-medium">Correcta</span>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    
+    <% when 'respuesta_corta' %>
+      <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Respuesta correcta:</p>
+        <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded border border-green-200 dark:border-green-800">
+          <p class="text-gray-800 dark:text-gray-200"><%= pregunta.respuesta_correcta.present? ? pregunta.respuesta_correcta : "No especificada" %></p>
+        </div>
+      </div>
+    
+    <% when 'emparejamiento' %>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Términos:</p>
+          <div class="space-y-2">
+            <% pregunta.opciones.where(es_termino: true).order(:orden).each do |termino| %>
+              <div class="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                <%= termino.contenido %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Definiciones:</p>
+          <div class="space-y-2">
+            <% pregunta.opciones.where(es_termino: false).order(:orden).each do |definicion| %>
+              <div class="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                <%= definicion.contenido %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  
+  <%# Retroalimentación %>
+  <% if pregunta.retroalimentacion.present? %>
+    <div class="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
+      <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Retroalimentación:</h4>
+      <div class="text-gray-600 dark:text-gray-400 text-sm">
+        <%= sanitize(pregunta.retroalimentacion) %>
+      </div>
+    </div>
+  <% end %>
+</div>

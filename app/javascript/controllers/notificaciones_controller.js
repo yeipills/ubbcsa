@@ -40,13 +40,13 @@ export default class extends Controller {
     // Configurar canal de notificaciones en tiempo real
     subscribeToNotificaciones(this.usuarioIdValue, {
       onReceived: (data) => {
-        // Mostrar notificación toast
+        // Mostrar notificacin toast
         this.mostrarToast(data)
         
-        // Actualizar contador y lista si está abierta
+        // Actualizar contador y lista si est abierta
         this.reloadNotifications()
         
-        // Reproducir sonido si está habilitado
+        // Reproducir sonido si est habilitado
         if (this.soundEnabledValue) {
           this.playNotificationSound()
         }
@@ -70,7 +70,7 @@ export default class extends Controller {
     // Actualizar notificaciones al abrir
     this.reloadNotifications()
     
-    // Añadir listener para cerrar al hacer clic fuera
+    // Aadir listener para cerrar al hacer clic fuera
     document.addEventListener('click', this.closeOnClickOutside)
   }
   
@@ -102,10 +102,10 @@ export default class extends Controller {
     if (this.hasContadorTarget) {
       const contador = count || 0
       
-      // Actualizar número
+      // Actualizar nmero
       this.contadorTarget.textContent = contador
       
-      // Mostrar/ocultar según haya notificaciones
+      // Mostrar/ocultar segn haya notificaciones
       if (contador > 0) {
         this.contadorTarget.classList.remove('hidden')
       } else {
@@ -126,7 +126,7 @@ export default class extends Controller {
         emptyItem.textContent = 'No tienes notificaciones sin leer'
         this.listaTarget.appendChild(emptyItem)
       } else {
-        // Añadir cada notificación
+        // Aadir cada notificacin
         notificaciones.forEach(notif => {
           const item = this.crearItemNotificacion(notif)
           this.listaTarget.appendChild(item)
@@ -140,7 +140,7 @@ export default class extends Controller {
     item.className = 'border-b border-gray-700 hover:bg-gray-800'
     item.setAttribute('data-notificacion-id', notif.id)
     
-    // Determinar el icono según el tipo y nivel
+    // Determinar el icono segn el tipo y nivel
     let iconClass = ''
     switch (notif.tipo) {
       case 'laboratorio':
@@ -238,7 +238,7 @@ export default class extends Controller {
     const toast = document.createElement('div')
     toast.className = 'fixed bottom-4 right-4 bg-gray-800 text-white p-4 rounded-lg shadow-lg z-50 transform translate-y-full opacity-0 transition-all duration-300'
     
-    // Determinar color según nivel
+    // Determinar color segn nivel
     let borderColor = 'border-blue-500'
     switch (notificacion.nivel) {
       case 'error':
@@ -252,7 +252,7 @@ export default class extends Controller {
         break
     }
     
-    // Añadir borde de color
+    // Aadir borde de color
     toast.classList.add('border-l-4', borderColor)
     
     // Contenido del toast
@@ -271,15 +271,15 @@ export default class extends Controller {
       </div>
     `
     
-    // Añadir a la página
+    // Aadir a la pgina
     this.toastTarget.appendChild(toast)
     
-    // Mostrar con animación
+    // Mostrar con animacin
     setTimeout(() => {
       toast.classList.remove('translate-y-full', 'opacity-0')
     }, 10)
     
-    // Ocultar automáticamente después de 5 segundos
+    // Ocultar automticamente despus de 5 segundos
     setTimeout(() => {
       this.cerrarToast({ currentTarget: toast.querySelector('button') })
     }, 5000)
@@ -288,10 +288,10 @@ export default class extends Controller {
   cerrarToast(event) {
     const toast = event.currentTarget.closest('div')
     
-    // Ocultar con animación
+    // Ocultar con animacin
     toast.classList.add('translate-y-full', 'opacity-0')
     
-    // Eliminar después de la animación
+    // Eliminar despus de la animacin
     setTimeout(() => {
       toast.remove()
     }, 300)
@@ -305,8 +305,8 @@ export default class extends Controller {
     
     // Reproducir sonido
     this.notificationSound.play().catch(e => {
-      // Ignorar errores de reproducción (navegadores pueden bloquear)
-      console.info('No se pudo reproducir sonido de notificación', e)
+      // Ignorar errores de reproduccin (navegadores pueden bloquear)
+      console.info('No se pudo reproducir sonido de notificacin', e)
     })
   }
   
@@ -321,7 +321,7 @@ export default class extends Controller {
   }
   
   updateSoundToggleUI() {
-    // Actualizar icono o texto según estado
+    // Actualizar icono o texto segn estado
     const soundToggle = this.element.querySelector('[data-sound-toggle]')
     if (soundToggle) {
       if (this.soundEnabledValue) {
@@ -334,7 +334,7 @@ export default class extends Controller {
     }
   }
   
-  // Utilidad para obtener icono según tipo
+  // Utilidad para obtener icono segn tipo
   getIconForType(tipo) {
     switch (tipo) {
       case 'laboratorio':

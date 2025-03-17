@@ -22,11 +22,16 @@ RUN bundle install
 # Copiar el resto de la aplicación
 COPY . .
 
+# Fix encoding issues in JavaScript files
+COPY docker_fix_encoding.sh ./
+RUN chmod +x ./docker_fix_encoding.sh && ./docker_fix_encoding.sh
+
 # Instalar dependencias de Node.js
 RUN yarn install
 
-# Precompilar assets
-RUN rails assets:precompile
+# Precompilar assets - using a separate script for better error handling
+COPY docker_precompile_assets.sh ./
+RUN chmod +x ./docker_precompile_assets.sh && ./docker_precompile_assets.sh
 
 # Exponer puerto
 EXPOSE 3000

@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get 'quiz_results/show'
+  get 'quiz_results/index'
   # Rutas de autenticación
   devise_for :usuarios, controllers: {
     sessions: 'usuarios/sessions',
@@ -80,9 +82,14 @@ Rails.application.routes.draw do
 
       # Quizzes anidados con shallow routing
       resources :quizzes, shallow: true do
-        resources :preguntas, controller: 'quiz_preguntas', shallow: true do
-          resources :opciones, controller: 'quiz_opciones', shallow: true
+        resources :preguntas, controller: 'quiz_preguntas', shallow: true, path_names: { edit: 'editar' } do
+          resources :opciones, controller: 'quiz_opciones', shallow: true, as: 'opciones'
 
+          member do
+            delete :delete, as: 'delete'  # Ruta específica para eliminar preguntas
+            get :editar, to: 'quiz_preguntas#edit', as: 'edit'  # Ruta específica para editar preguntas
+          end
+          
           collection do
             post :reordenar
           end
@@ -100,10 +107,16 @@ Rails.application.routes.draw do
 
         member do
           post :publicar
+          get :publicar, to: 'quizzes#show' # Redirect GET requests to show
           post :despublicar
+          get :despublicar, to: 'quizzes#show' # Redirect GET requests to show
           post :duplicate
+          get :duplicate, to: 'quizzes#show' # Redirect GET requests to show
           get :estadisticas
           get :exportar_resultados  # Nueva ruta para exportar resultados
+          
+          # Ruta simplificada para gestión de preguntas
+          get :gestionar_preguntas
         end
       end
     end
@@ -126,6 +139,14 @@ Rails.application.routes.draw do
           post :finalizar
           get :resultados
           post :registrar_evento # También aquí para mantener coherencia
+        end
+      end
+      
+      # Resultados de quiz (nuevo)
+      resources :quiz_results, path: 'resultados' do
+        collection do
+          get :export
+          post :process_missing
         end
       end
 
@@ -169,12 +190,48 @@ Rails.application.routes.draw do
     # Panel de administración
     namespace :admin do
       get '/', to: 'dashboard#index'
-      resources :usuarios
-      resources :cursos
-      resources :laboratorios
-      resources :configuracion, only: %i[index update]
-      resources :monitor, only: %i[index show]
-      resources :reportes, only: %i[index show]
+      resources :usuarios do
+        member do
+          patch :cambiar_rol
+        end
+        collection do
+          get :profesores
+          get :estudiantes
+          get :administradores
+        end
+      end
+      resources :cursos do
+        member do
+          post :activar
+          post :desactivar
+        end
+      end
+      resources :laboratorios do
+        member do
+          post :activar
+          post :desactivar
+        end
+        collection do
+          get :metricas_uso
+        end
+      end
+      resources :configuracion, only: %i[index update show]
+      resources :monitor, only: %i[index show] do
+        collection do
+          get :metricas_sistema
+          get :sesiones_activas
+          get :alertas
+        end
+      end
+      resources :reportes, only: %i[index show] do
+        collection do
+          get :actividad_usuarios
+          get :rendimiento_cursos
+          get :uso_sistema
+          get :exportar_csv
+          get :exportar_pdf
+        end
+      end
     end
   end
 end

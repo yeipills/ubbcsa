@@ -55,23 +55,56 @@
         <h3 class="font-medium text-gray-300 mb-4">Configuración</h3>
         
         <div class="space-y-4">
-          <div>
-            <div class="flex items-center">
-              <%= f.check_box :es_correcta, 
-                  class: "h-4 w-4 rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800" %>
-              <%= f.label :es_correcta, "Esta es la opción correcta", 
-                  class: "ml-2 block text-sm text-gray-300" %>
-            </div>
-            
-            <% if @pregunta.verdadero_falso? %>
-              <p class="mt-1 text-sm text-yellow-500">
+          <% if @pregunta.emparejamiento? %>
+            <div>
+              <div class="flex items-center">
+                <%= f.check_box :es_termino, 
+                    class: "h-4 w-4 rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800" %>
+                <%= f.label :es_termino, "Este es un término (no una definición)", 
+                    class: "ml-2 block text-sm text-gray-300" %>
+              </div>
+              
+              <p class="mt-1 text-sm text-blue-500">
                 <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                En preguntas de Verdadero/Falso, solo una opción puede ser correcta.
+                Para términos pareados, debe indicar si este es un término o una definición.
               </p>
-            <% end %>
-          </div>
+              
+              <% if @opcion.persisted? && @opcion.es_termino && @pregunta.definiciones.any? %>
+                <div class="mt-3">
+                  <label class="block text-sm font-medium text-gray-300 mb-2">Seleccione la definición relacionada:</label>
+                  <select name="quiz_opcion[par_relacionado]" class="w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">-- Seleccione una definición --</option>
+                    <% @pregunta.definiciones.each do |definicion| %>
+                      <option value="<%= {id: definicion.id, tipo: 'definicion'}.to_json %>" 
+                              <%= 'selected' if @opcion.par_relacionado.present? && @opcion.par_relacionado["id"].to_i == definicion.id %>>
+                        <%= definicion.contenido %>
+                      </option>
+                    <% end %>
+                  </select>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div>
+              <div class="flex items-center">
+                <%= f.check_box :es_correcta, 
+                    class: "h-4 w-4 rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800" %>
+                <%= f.label :es_correcta, "Esta es la opción correcta", 
+                    class: "ml-2 block text-sm text-gray-300" %>
+              </div>
+              
+              <% if @pregunta.verdadero_falso? %>
+                <p class="mt-1 text-sm text-yellow-500">
+                  <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                  </svg>
+                  En preguntas de Verdadero/Falso, solo una opción puede ser correcta.
+                </p>
+              <% end %>
+            </div>
+          <% end %>
           
           <div>
             <%= f.label :orden, "Orden de aparición", class: "block text-sm font-medium text-gray-300" %>

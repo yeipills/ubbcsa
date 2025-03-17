@@ -9,7 +9,7 @@ Bienvenido a la **Plataforma de Ciberseguridad UBB-CSA**, un sistema educativo i
     
 ## Descripción
     
-**UBB-CSA** es una aplicación web desarrollada con **Ruby on Rails** que ofrece un entorno completo para el aprendizaje de ciberseguridad. El sistema integra terminales web (Wetty) a través de Docker para proporcionar entornos de laboratorio aislados y seguros donde los estudiantes pueden practicar habilidades prácticas de ciberseguridad en tiempo real.
+**UBB-CSA** es una aplicación web desarrollada con **Ruby on Rails** que ofrece un entorno completo para el aprendizaje de ciberseguridad. El sistema integra terminales web (ttyd) a través de Docker para proporcionar entornos de laboratorio aislados y seguros donde los estudiantes pueden practicar habilidades prácticas de ciberseguridad en tiempo real.
     
 ## Características
     
@@ -138,7 +138,7 @@ Abre tu navegador y navega a `http://localhost:3000`.
 El sistema está compuesto por dos componentes principales:
 
 1. **Aplicación Rails**: Maneja la interfaz de usuario, lógica de negocio y persistencia de datos.
-2. **Wetty (Web TTY)**: Terminal web que permite a los estudiantes interactuar con entornos virtuales de ciberseguridad.
+2. **ttyd (Terminal over HTTP)**: Terminal web liviana que permite a los estudiantes interactuar con entornos virtuales de ciberseguridad.
 
 ### Componentes clave
 
@@ -177,6 +177,33 @@ El sistema ofrece varios tipos de laboratorios especializados:
 - **Redes**: Configuración y análisis de seguridad en redes.
 
 Cada laboratorio se ejecuta en un contenedor Docker aislado con las herramientas necesarias pre-instaladas.
+
+## Terminal ttyd
+
+La plataforma utiliza ttyd para proporcionar acceso a una terminal Bash completa para los laboratorios de ciberseguridad. ttyd es una herramienta ligera escrita en C que comparte una terminal por web.
+
+### Características de ttyd:
+
+- Acceso a terminal real con capacidades completas
+- Soporte para comandos y herramientas nativas de Linux
+- Capacidad para realizar análisis de seguridad con herramientas como nmap, tcpdump, etc.
+- Interfaz web compatible con dispositivos móviles y tablets
+
+### Entorno de terminal:
+
+El entorno de terminal incluye:
+- Sistema operativo base Debian con herramientas de ciberseguridad
+- Configuración de prompt personalizada (`usuario@ubbcsa`)
+- Alias útiles para comandos frecuentes de ciberseguridad
+- Integración con servicios de máquinas objetivo para prácticas de pentesting
+
+### Comandos útiles:
+
+- `scan [ip]`: Escaneo básico de puertos con nmap
+- `portscan [ip]`: Escaneo completo de puertos 
+- `checksec`: Buscar binarios con permisos SUID
+- `sniff`: Iniciar captura de paquetes
+- `webcheck [url]`: Verificar encabezados HTTP
     
 ---
     
@@ -201,6 +228,7 @@ Si deseas contribuir a este proyecto:
 - **Devise**: Sistema de autenticación
 - **Pundit**: Para gestión de autorización
 - **Docker**: Para contenedores de laboratorio
+- **ttyd**: Terminal web ligera basada en C
 
 ### Frontend
 - **TailwindCSS**: Framework CSS para el diseño de la interfaz

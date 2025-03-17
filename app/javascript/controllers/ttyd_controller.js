@@ -3,8 +3,8 @@ import { Controller } from "@hotwired/stimulus"
 /**
  * Controlador para la interfaz de ttyd
  * 
- * Este controlador maneja la interacción con el iframe de la terminal ttyd,
- * incluyendo el ajuste de tamaño y la coordinación con el servidor.
+ * Este controlador maneja la interaccin con el iframe de la terminal ttyd,
+ * incluyendo el ajuste de tamao y la coordinacin con el servidor.
  */
 export default class extends Controller {
   static targets = ["terminal"]
@@ -20,7 +20,7 @@ export default class extends Controller {
   }
 
   /**
-   * Configura el observador de cambios de tamaño para el iframe
+   * Configura el observador de cambios de tamao para el iframe
    */
   setupResizeHandler() {
     this.resizeObserver = new ResizeObserver(() => {
@@ -32,12 +32,12 @@ export default class extends Controller {
     // Ajuste inicial
     this.adjustIframeSize()
     
-    // Ajustar también al cambiar el tamaño de la ventana
+    // Ajustar tambin al cambiar el tamao de la ventana
     window.addEventListener('resize', this.adjustIframeSize.bind(this))
   }
   
   /**
-   * Configura la verificación periódica del estado del contenedor
+   * Configura la verificacin peridica del estado del contenedor
    */
   setupHealthCheck() {
     if (!this.hasSessionIdValue || !this.hasContainerIdValue) return
@@ -47,12 +47,12 @@ export default class extends Controller {
       this.checkContainerHealth()
     }, 30000)
     
-    // Verificación inicial después de 5 segundos
+    // Verificacin inicial despus de 5 segundos
     setTimeout(() => this.checkContainerHealth(), 5000)
   }
   
   /**
-   * Verifica el estado del contenedor a través de la API
+   * Verifica el estado del contenedor a travs de la API
    */
   checkContainerHealth() {
     if (!this.hasSessionIdValue) return
@@ -65,7 +65,7 @@ export default class extends Controller {
         return response.json()
       })
       .then(data => {
-        // Verificar que hay métricas válidas
+        // Verificar que hay mtricas vlidas
         if (data && typeof data.cpu_usage !== 'undefined') {
           console.log('Contenedor activo:', data)
         } else {
@@ -78,7 +78,7 @@ export default class extends Controller {
   }
 
   /**
-   * Ajusta el tamaño del iframe para que ocupe todo el contenedor
+   * Ajusta el tamao del iframe para que ocupe todo el contenedor
    */
   adjustIframeSize() {
     if (!this.hasTerminalTarget) return
@@ -92,7 +92,7 @@ export default class extends Controller {
     iframe.style.height = `${container.offsetHeight}px`
     iframe.style.width = `${container.offsetWidth}px`
     
-    // Forzar un refresco después de un momento para asegurar que los cambios se apliquen
+    // Forzar un refresco despus de un momento para asegurar que los cambios se apliquen
     setTimeout(() => {
       iframe.style.height = `${container.offsetHeight}px`
       iframe.style.width = `${container.offsetWidth}px`
@@ -108,7 +108,7 @@ export default class extends Controller {
     const iframe = this.terminalTarget
     const currentSrc = iframe.src
     
-    // Añadir un parámetro temporal para evitar cache
+    // Aadir un parmetro temporal para evitar cache
     iframe.src = currentSrc.includes('?') 
       ? `${currentSrc}&t=${Date.now()}` 
       : `${currentSrc}?t=${Date.now()}`

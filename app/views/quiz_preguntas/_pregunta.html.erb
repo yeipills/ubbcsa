@@ -64,7 +64,7 @@
     </div>
     
     <div class="ml-4 flex-shrink-0 flex flex-col space-y-2">
-      <%= link_to edit_quiz_pregunta_path(@quiz, pregunta), 
+      <%= link_to edit_pregunta_path(pregunta), 
           class: "p-1.5 rounded-full bg-gray-800 text-gray-400 hover:bg-blue-900 hover:text-blue-200 transition-colors duration-200" do %>
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -72,7 +72,7 @@
       <% end %>
       
       <% if pregunta.requiere_opciones? %>
-        <%= link_to new_quiz_pregunta_opcion_path(@quiz, pregunta), 
+        <%= link_to new_pregunta_opcion_path(pregunta), 
             class: "p-1.5 rounded-full bg-gray-800 text-gray-400 hover:bg-green-900 hover:text-green-200 transition-colors duration-200" do %>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -80,7 +80,7 @@
         <% end %>
       <% end %>
       
-      <%= button_to quiz_pregunta_path(@quiz, pregunta), 
+      <%= button_to pregunta_path(pregunta), 
           method: :delete, 
           data: { confirm: "¿Estás seguro? Esta acción eliminará la pregunta y todas sus respuestas." },
           class: "p-1.5 rounded-full bg-gray-800 text-gray-400 hover:bg-red-900 hover:text-red-200 transition-colors duration-200" do %>

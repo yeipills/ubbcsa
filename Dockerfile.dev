@@ -27,6 +27,17 @@ RUN bundle install
 # Copiar el resto de la aplicación
 COPY . ./
 
+# Fix encoding issues in JavaScript files
+COPY docker_fix_encoding.sh ./
+RUN chmod +x ./docker_fix_encoding.sh && ./docker_fix_encoding.sh
+
+# Instalar dependencias frontend
+RUN yarn install
+
+# No precompile assets in development
+ENV RAILS_ENV=development
+ENV SECRET_KEY_BASE=temporarydevelopmentkey123456789
+
 # Configurar puerto
 EXPOSE 3000
 

@@ -1,0 +1,253 @@
+<div class="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden shadow-lg mb-6">
+  <!-- Encabezado de la pregunta -->
+  <div class="p-5 border-b border-gray-800 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+    <div class="flex items-center">
+      <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-indigo-900 text-indigo-300 border border-indigo-800/50 mr-3 font-medium">
+        <%= pregunta.orden %>
+      </span>
+      <h2 class="text-lg font-medium text-white">Pregunta <%= pregunta.orden %></h2>
+    </div>
+    <div>
+      <span class="px-2 py-1 bg-blue-900/30 text-blue-300 text-xs rounded-lg border border-blue-800/30">
+        <%= pregunta.tipo_display %> - <%= pregunta.puntaje %> puntos
+      </span>
+    </div>
+  </div>
+  
+  <!-- Contenido de la pregunta -->
+  <div class="p-5">
+    <div class="prose prose-invert max-w-none">
+      <p class="text-gray-100 text-lg"><%= pregunta.contenido %></p>
+      
+      <% if pregunta.imagen.attached? %>
+        <div class="mt-4 bg-gray-800/50 p-3 rounded-lg border border-gray-700 inline-block max-w-full">
+          <%= image_tag url_for(pregunta.imagen), class: "max-w-full h-auto rounded" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  
+  <!-- Formulario de respuesta -->
+  <div class="p-5 bg-gray-800/50 border-t border-gray-700">
+    <%= form_with url: update_quiz_intento_path(@quiz, intento), 
+                  method: :patch, 
+                  data: { 
+                    action: "change->quiz#formCambio input->quiz#formCambio submit->quiz#guardarRespuesta", 
+                    quiz_form_target: "form" 
+                  },
+                  class: "pregunta-form" do |f| %>
+                  
+      <%= hidden_field_tag :pregunta_id, pregunta.id %>
+      
+      <% case pregunta.tipo %>
+      <% when 'opcion_multiple' %>
+        <fieldset>
+          <legend class="text-gray-300 font-medium mb-3">Selecciona una respuesta:</legend>
+          <div class="space-y-2">
+            <% pregunta.opciones.each do |opcion| %>
+              <div class="relative flex items-start py-2 px-3 rounded-lg hover:bg-gray-700/30 transition-colors group">
+                <div class="min-w-0 flex-1 text-sm">
+                  <div class="flex items-center">
+                    <input 
+                      id="opcion_<%= opcion.id %>" 
+                      name="respuesta_quiz[opcion_id]" 
+                      type="radio" 
+                      value="<%= opcion.id %>"
+                      <%= 'checked' if respuesta&.opcion_id == opcion.id %>
+                      class="h-4 w-4 border-gray-600 bg-gray-800 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-gray-800">
+                    <label for="opcion_<%= opcion.id %>" class="ml-3 block text-gray-300 cursor-pointer select-none group-hover:text-white">
+                      <%= opcion.contenido %>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </fieldset>
+      
+      <% when 'verdadero_falso' %>
+        <fieldset>
+          <legend class="text-gray-300 font-medium mb-3">Indica si la afirmación es verdadera o falsa:</legend>
+          <div class="space-y-2">
+            <% pregunta.opciones.each do |opcion| %>
+              <div class="relative flex items-start py-2 px-3 rounded-lg hover:bg-gray-700/30 transition-colors group">
+                <div class="min-w-0 flex-1 text-sm">
+                  <div class="flex items-center">
+                    <input 
+                      id="opcion_<%= opcion.id %>" 
+                      name="respuesta_quiz[opcion_id]" 
+                      type="radio" 
+                      value="<%= opcion.id %>"
+                      <%= 'checked' if respuesta&.opcion_id == opcion.id %>
+                      class="h-4 w-4 border-gray-600 bg-gray-800 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-gray-800">
+                    <label for="opcion_<%= opcion.id %>" class="ml-3 block text-gray-300 cursor-pointer select-none group-hover:text-white font-medium">
+                      <%= opcion.contenido %>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </fieldset>
+        
+      <% when 'multiple_respuesta' %>
+        <fieldset>
+          <legend class="text-gray-300 font-medium mb-3">Selecciona todas las respuestas correctas:</legend>
+          <div class="space-y-2">
+            <% 
+            selected_ids = []
+            if respuesta&.opciones_multiples.present?
+              begin
+                selected_ids = JSON.parse(respuesta.opciones_multiples)
+              rescue JSON::ParserError
+                selected_ids = []
+              end
+            end
+            %>
+            
+            <% pregunta.opciones.each do |opcion| %>
+              <div class="relative flex items-start py-2 px-3 rounded-lg hover:bg-gray-700/30 transition-colors group">
+                <div class="min-w-0 flex-1 text-sm">
+                  <div class="flex items-center">
+                    <input 
+                      id="opcion_<%= opcion.id %>" 
+                      name="respuesta_quiz[opciones_seleccionadas][]" 
+                      type="checkbox" 
+                      value="<%= opcion.id %>"
+                      <%= 'checked' if selected_ids.include?(opcion.id) %>
+                      class="h-4 w-4 rounded border-gray-600 bg-gray-800 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-gray-800">
+                    <label for="opcion_<%= opcion.id %>" class="ml-3 block text-gray-300 cursor-pointer select-none group-hover:text-white">
+                      <%= opcion.contenido %>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </fieldset>
+        
+      <% when 'respuesta_corta' %>
+        <div class="space-y-2">
+          <label for="respuesta_texto" class="block text-gray-300 font-medium mb-2">Escribe tu respuesta:</label>
+          <%= text_area_tag 'respuesta_quiz[respuesta_texto]', respuesta&.respuesta_texto, 
+              rows: 3, 
+              class: "block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-indigo-500 focus:ring-indigo-500",
+              placeholder: "Escribe tu respuesta aquí..." %>
+          <p class="text-xs text-gray-500 mt-1">Tip: Sé conciso y específico en tu respuesta.</p>
+        </div>
+        
+      <% when 'emparejamiento' %>
+        <div class="space-y-4">
+          <p class="text-gray-300 font-medium mb-2">Relaciona cada término con su definición correcta:</p>
+          
+          <% 
+          pares_seleccionados = {}
+          if respuesta&.respuesta_texto.present?
+            begin
+              pares_seleccionados = JSON.parse(respuesta.respuesta_texto)
+            rescue JSON::ParserError
+              pares_seleccionados = {}
+            end
+          end
+          %>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Columna de términos -->
+            <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+              <h3 class="text-sm font-medium text-indigo-300 mb-3">Términos</h3>
+              <div class="space-y-3">
+                <% pregunta.terminos.each do |termino| %>
+                  <div class="flex items-center justify-between p-2 bg-gray-700 rounded-lg" id="termino_<%= termino.id %>">
+                    <span class="text-white"><%= termino.contenido %></span>
+                    <select 
+                      name="respuesta_quiz[emparejamiento][<%= termino.id %>]"
+                      class="ml-2 w-12 rounded-md border-gray-600 bg-gray-800 text-white focus:border-indigo-500 focus:ring-indigo-500"
+                      data-termino-id="<%= termino.id %>">
+                      <option value="">-</option>
+                      <% pregunta.definiciones.each_with_index do |definicion, index| %>
+                        <option 
+                          value="<%= definicion.id %>"
+                          <%= 'selected' if pares_seleccionados[termino.id.to_s] == definicion.id.to_s %>>
+                          <%= index + 1 %>
+                        </option>
+                      <% end %>
+                    </select>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            
+            <!-- Columna de definiciones -->
+            <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+              <h3 class="text-sm font-medium text-purple-300 mb-3">Definiciones</h3>
+              <div class="space-y-3">
+                <% pregunta.definiciones.each_with_index do |definicion, index| %>
+                  <div class="flex items-center p-2 bg-gray-700 rounded-lg" id="definicion_<%= definicion.id %>">
+                    <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-purple-900/50 text-purple-300 mr-2 text-sm font-medium">
+                      <%= index + 1 %>
+                    </span>
+                    <span class="text-white"><%= definicion.contenido %></span>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+          
+          <input type="hidden" name="respuesta_quiz[respuesta_texto]" id="emparejamiento_json" 
+                 value="<%= respuesta&.respuesta_texto.present? ? respuesta.respuesta_texto : '{}' %>">
+          
+          <script>
+            // Set up emparejamiento functionality
+            document.addEventListener('DOMContentLoaded', function() {
+              const selects = document.querySelectorAll('select[data-termino-id]');
+              const hiddenInput = document.getElementById('emparejamiento_json');
+              
+              // Initialize from current value
+              let currentPares = {};
+              try {
+                currentPares = JSON.parse(hiddenInput.value);
+              } catch (e) {
+                currentPares = {};
+              }
+              
+              // Update function
+              const updateJson = function() {
+                selects.forEach(select => {
+                  const terminoId = select.dataset.terminoId;
+                  const definicionId = select.value;
+                  
+                  if (definicionId) {
+                    currentPares[terminoId] = definicionId;
+                  } else {
+                    delete currentPares[terminoId];
+                  }
+                });
+                
+                hiddenInput.value = JSON.stringify(currentPares);
+              };
+              
+              // Add change listeners
+              selects.forEach(select => {
+                select.addEventListener('change', updateJson);
+              });
+              
+              // Initial update
+              updateJson();
+            });
+          </script>
+        </div>
+      <% end %>
+      
+      <div class="mt-6 flex justify-end items-center space-x-4">
+        <span data-quiz-target="saveIndicator" class="text-gray-500 text-sm"></span>
+        
+        <% if pregunta.siguiente_pregunta %>
+          <%= hidden_field_tag :siguiente_pregunta_id, pregunta.siguiente_pregunta.id %>
+          <%= f.submit "Guardar y Continuar", class: "px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors duration-200", data: { quiz_target: "submitButton" } %>
+        <% else %>
+          <%= f.submit "Guardar Respuesta", class: "px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors duration-200", data: { quiz_target: "submitButton" } %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

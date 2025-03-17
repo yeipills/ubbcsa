@@ -1,0 +1,40 @@
+<% content_for :page_title, "Editar pregunta" %>
+
+<div class="container mx-auto px-4 py-6">
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Editar pregunta</h1>
+      <p class="text-gray-600 dark:text-gray-400 mt-2">
+        Quiz: <%= link_to @quiz.titulo, quiz_path(@quiz), class: "text-indigo-600 dark:text-indigo-400 hover:underline" %>
+      </p>
+    </div>
+    <div>
+      <%= link_to quiz_preguntas_path(@quiz), class: "btn btn-outline-secondary" do %>
+        <i class="fas fa-arrow-left mr-1"></i> Volver a preguntas
+      <% end %>
+    </div>
+  </div>
+
+  <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+    <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+      <h2 class="text-xl font-bold text-gray-800 dark:text-white">Formulario de edición</h2>
+    </div>
+    
+    <div class="p-6">
+      <%= render 'form', pregunta: @pregunta, quiz: @quiz %>
+    </div>
+  </div>
+  
+  <!-- Vista previa -->
+  <div class="mt-6 bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+    <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+      <h2 class="text-xl font-bold text-gray-800 dark:text-white">Vista previa</h2>
+    </div>
+    
+    <div class="p-6">
+      <div id="vista-previa-pregunta">
+        <%= render 'pregunta_card', pregunta: @pregunta %>
+      </div>
+    </div>
+  </div>
+</div>

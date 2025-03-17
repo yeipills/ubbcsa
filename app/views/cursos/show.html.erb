@@ -275,7 +275,7 @@
                             Email
                           </th>
                           <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                            Último acceso
+                            Fecha de inscripción
                           </th>
                           <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
                             Acciones
@@ -301,7 +301,7 @@
                               <div class="text-sm text-gray-300"><%= estudiante.email %></div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                              <div class="text-sm text-gray-300"><%= estudiante.last_sign_in_at&.strftime("%d/%m/%Y %H:%M") || "Nunca" %></div>
+                              <div class="text-sm text-gray-300"><%= estudiante.created_at&.strftime("%d/%m/%Y %H:%M") || "Nunca" %></div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                               <div class="flex items-center justify-end gap-2">

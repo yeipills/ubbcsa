@@ -15,9 +15,10 @@ module ApplicationHelper
       'Your account has been locked' => 'Tu cuenta ha sido bloqueada',
       'Your password has been changed successfully' => 'Tu contraseña ha sido cambiada exitosamente',
       'Your account has been updated successfully' => 'Tu cuenta ha sido actualizada exitosamente'
-
     }
 
     translations[message] || message
   end
+  
+  # Métodos eliminados para evitar conflictos de ruta
 end

@@ -1,11 +1,9 @@
 #!/bin/bash
 
-# Script para iniciar Wetty con configuración simple y directa
-# siguiendo las recomendaciones oficiales de Wetty
+# Script para iniciar ttyd para el laboratorio de ciberseguridad UBB
 
 # Configurar variables de entorno
-WETTY_PORT=${WETTY_PORT:-3000}
-SSH_AUTH=${SSH_AUTH:-password}
+TTYD_PORT=${TTYD_PORT:-3000}
 DEFAULT_USER=${DEFAULT_USER:-kali}
 DEFAULT_PASS=${DEFAULT_PASS:-kali}
 
@@ -16,9 +14,11 @@ service ssh start || {
   exit 1
 }
 
-# Verificar la instalación de Wetty
-wetty_version=$(wetty --version 2>/dev/null || echo "Wetty no instalado")
-echo "Wetty version: $wetty_version"
+# Verificar la instalación de ttyd
+if ! command -v ttyd &> /dev/null; then
+  echo "Error: ttyd no está instalado"
+  exit 1
+fi
 
 # Asegurarse de que los directorios existen
 mkdir -p /home/kali/lab_data /home/kali/logs
@@ -38,78 +38,64 @@ if [ -n "$USERNAME" ]; then
   
   # Usar el usuario personalizado
   SSH_USER="$USERNAME"
-  SSH_PASS="$USERNAME"
 else
   # Usar el usuario por defecto
   SSH_USER="$DEFAULT_USER"
-  SSH_PASS="$DEFAULT_PASS"
 fi
 
 # Configurar mensaje de bienvenida
 cat > /etc/motd << EOF
- _    _ ______ ____     _____ _______ _____            _____  
-| |  | |  ____|  _ \   / ____|__   __/ ____|     /\   |  __ \ 
-| |  | | |__  | |_) | | |       | | | |         /  \  | |__) |
-| |  | |  __| |  _ <  | |       | | | |        / /\ \ |  _  / 
-| |__| | |____| |_) | | |____   | | | |____   / ____ \| | \ \ 
- \____/|______|____/   \_____|  |_|  \_____| /_/    \_\_|  \_\\
-
-         LABORATORIO DE CIBERSEGURIDAD UBB
-
-         Usuario: $SSH_USER
-         Sesión: TMUX
+ _    _ ______ ____     _____ _______  _____            _____  
+| |  | |  ____|  _ \   / ____|__   __||  __ \     /\   |  __ \ 
+| |  | | |__  | |_) | | |       | |   | |  | |   /  \  | |__) |
+| |  | |  __| |  _ <  | |       | |   | |  | |  / /\ \ |  _  / 
+| |__| | |____| |_) | | |____   | |   | |__| | / ____ \| | \ \ 
+ \____/|______|____/   \_____|  |_|   |_____/ /_/    \_\_|  \_\
+                                                               
+          Laboratorio de Ciberseguridad UBB - v3.0            
+                                                               
 EOF
 
-# Configurar el entorno bash para todos los usuarios
-cat > /etc/bash.bashrc.wetty << EOF
-# Configuración personalizada para Laboratorios UBB
+# Configurar alias útiles para ciberseguridad
+cat > /etc/bash.bashrc.local << EOF
+# Configuración personalizada para UBB CyberSec Labs
 export PS1='\[\033[01;32m\]\u@ubbcsa\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 export TERM=xterm-256color
 export PATH=\$PATH:/usr/local/bin
-export HISTTIMEFORMAT="%F %T "
-export HISTCONTROL=ignoredups
 
-# Alias útiles
+# Alias útiles para ciberseguridad
 alias ls='ls --color=auto'
 alias ll='ls -la'
 alias grep='grep --color=auto'
-alias clean='clear'
+alias scan='nmap -sV -sC'
+alias portscan='nmap -p-'
+alias checksec='find / -perm -4000 -type f 2>/dev/null'
+alias hashid='hash-identifier'
+alias sniff='sudo tcpdump -i any -w capture.pcap'
+alias webcheck='curl -I'
 
-# Mensaje de bienvenida
+# Mostrar mensaje de bienvenida
 cat /etc/motd
+echo ""
+echo "Bienvenido al Laboratorio de Ciberseguridad UBB"
+echo "Escribe 'help' para ver los comandos disponibles"
+echo ""
 EOF
 
-# Reemplazar la configuración bash para nuevos usuarios
-cp /etc/bash.bashrc.wetty /etc/bash.bashrc
+# Usar nuestra configuración personalizada
+cp /etc/bash.bashrc.local /etc/bash.bashrc
 
-# Información sobre inicio de Wetty
+# Información sobre inicio de ttyd
 echo "============================================="
-echo "Iniciando Wetty en puerto $WETTY_PORT"
-echo "Usuario SSH: $SSH_USER"
-echo "Autenticación: $SSH_AUTH"
+echo "Iniciando ttyd en puerto $TTYD_PORT"
+echo "Usuario: $SSH_USER"
 echo "============================================="
 
-# Opciones para Wetty basadas en documentación oficial
-OPTIONS="--port $WETTY_PORT"
-OPTIONS="$OPTIONS --host 0.0.0.0"
-OPTIONS="$OPTIONS --title 'UBB Cybersecurity Lab'"
-OPTIONS="$OPTIONS --base /wetty"
-OPTIONS="$OPTIONS --ssh-host localhost"
-OPTIONS="$OPTIONS --ssh-port 22"
-OPTIONS="$OPTIONS --ssh-user $SSH_USER"
-OPTIONS="$OPTIONS --ssh-auth $SSH_AUTH"
-OPTIONS="$OPTIONS --ssh-pass $SSH_PASS"
-OPTIONS="$OPTIONS --allow-iframe"
-# Opción para comando personalizado si se requiere
-[ -n "$CUSTOM_COMMAND" ] && OPTIONS="$OPTIONS --command '$CUSTOM_COMMAND'"
-
-# Verificar si Wetty está instalado correctamente
-if ! command -v wetty &> /dev/null; then
-  echo "ERROR: Wetty no está instalado correctamente"
-  echo "Intentando reinstalar Wetty..."
-  npm install -g wetty@2.7.0
-fi
-
-# Iniciar Wetty siguiendo la forma recomendada en la documentación
-echo "Ejecutando: wetty $OPTIONS"
-exec wetty $OPTIONS
+# Iniciar ttyd con opciones mejoradas
+exec ttyd -p $TTYD_PORT \
+  -t backgroundColor=#1a1a1a \
+  -t theme=monokai \
+  -t fontSize=14 \
+  -t titleFixed='UBB Cybersecurity Lab' \
+  -W \
+  bash -c "cd /home/kali && cat /etc/motd && bash --rcfile /etc/bash.bashrc"

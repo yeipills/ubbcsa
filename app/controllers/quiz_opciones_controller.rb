@@ -75,7 +75,9 @@ class QuizOpcionesController < ApplicationController
       :es_correcta,
       :orden,
       :retroalimentacion,
-      :imagen
+      :imagen,
+      :es_termino,
+      par_relacionado: {}
     )
   end
 

@@ -2,14 +2,14 @@ import consumer from "./consumer"
 
 let notificacionesSubscription = null;
 
-// Función para suscribirse al canal de notificaciones
+// Funcin para suscribirse al canal de notificaciones
 export function subscribeToNotificaciones(usuarioId, callbacks = {}) {
-  // Cancelar cualquier suscripción existente
+  // Cancelar cualquier suscripcin existente
   if (notificacionesSubscription) {
     notificacionesSubscription.unsubscribe();
   }
   
-  // Crear nueva suscripción
+  // Crear nueva suscripcin
   notificacionesSubscription = consumer.subscriptions.create(
     { channel: "NotificacionesChannel", usuario_id: usuarioId },
     {
@@ -24,16 +24,16 @@ export function subscribeToNotificaciones(usuarioId, callbacks = {}) {
       },
       
       received(data) {
-        console.log("Nueva notificación recibida:", data);
+        console.log("Nueva notificacin recibida:", data);
         if (callbacks.onReceived) callbacks.onReceived(data);
       },
       
-      // Método para marcar una notificación como leída
+      // Mtodo para marcar una notificacin como leda
       marcarComoLeida(id) {
         this.perform('marcar_como_leida', { id });
       },
       
-      // Método para marcar todas las notificaciones como leídas
+      // Mtodo para marcar todas las notificaciones como ledas
       marcarTodasComoLeidas() {
         this.perform('marcar_como_leida', { todas: true });
       }
@@ -43,5 +43,5 @@ export function subscribeToNotificaciones(usuarioId, callbacks = {}) {
   return notificacionesSubscription;
 }
 
-// Exportar también la suscripción actual
+// Exportar tambin la suscripcin actual
 export { notificacionesSubscription };

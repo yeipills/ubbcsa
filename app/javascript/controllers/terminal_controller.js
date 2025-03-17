@@ -66,7 +66,7 @@ export default class extends Controller {
         this.updateMetricsDisplay(data)
       })
       .catch(error => {
-        console.error('Error obteniendo métricas:', error)
+        console.error('Error obteniendo mtricas:', error)
       })
   }
 
@@ -80,7 +80,7 @@ export default class extends Controller {
     }
     
     if (this.hasNetworkTarget) {
-      this.networkTarget.textContent = `↓${metrics.network_received || 0} KB/s ↑${metrics.network_sent || 0} KB/s`
+      this.networkTarget.textContent = `${metrics.network_received || 0} KB/s ${metrics.network_sent || 0} KB/s`
     }
   }
 

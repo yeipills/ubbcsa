@@ -46,20 +46,23 @@ class IntentosQuizController < ApplicationController
 
   # Muestra un intento en progreso con las preguntas
   def show
-    # Obtener todas las preguntas con sus opciones, ordenadas por orden
-    @preguntas = @quiz.preguntas.includes(:opciones).order(orden: :asc)
+    # Obtener todas las preguntas en el orden apropiado (aleatorio si corresponde)
+    @preguntas = @intento.preguntas_ordenadas
 
     # Mapear las respuestas del usuario para acceso rápido
     @respuestas = @intento.respuestas.index_by(&:pregunta_id)
 
     # Si se especifica una pregunta, muestra solo esa
     @current_pregunta = if params[:pregunta_id].present?
-                          @preguntas.find_by(id: params[:pregunta_id])
+                          @preguntas.find { |p| p.id.to_s == params[:pregunta_id].to_s }
                         else
                           # Por defecto, mostrar la primera pregunta sin responder o la primera
                           primera_sin_responder = @preguntas.find { |p| !@respuestas[p.id] }
                           primera_sin_responder || @preguntas.first
                         end
+    
+    # Obtener las opciones en el orden apropiado (aleatorio si corresponde)
+    @opciones = @current_pregunta ? @intento.opciones_ordenadas(@current_pregunta) : []
 
     # Calcular progreso y tiempo
     calcular_progreso_y_tiempo
@@ -90,15 +93,35 @@ class IntentosQuizController < ApplicationController
   # Actualiza una respuesta del intento
   def update
     @respuesta = @intento.respuestas.find_or_initialize_by(pregunta_id: params[:pregunta_id])
+    pregunta = QuizPregunta.find(params[:pregunta_id])
 
-    if params[:respuesta_quiz][:opcion_id].present?
-      # Para preguntas de opción múltiple
-      @respuesta.opcion_id = params[:respuesta_quiz][:opcion_id]
-      @respuesta.respuesta_texto = nil
-    else
+    case pregunta.tipo
+    when 'opcion_multiple', 'verdadero_falso'
+      # Para preguntas de opción múltiple y verdadero/falso
+      if params[:respuesta_quiz][:opcion_id].present?
+        @respuesta.opcion_id = params[:respuesta_quiz][:opcion_id]
+        @respuesta.respuesta_texto = nil
+      end
+    when 'multiple_respuesta'
+      # Para preguntas de selección múltiple (varias correctas)
+      if params[:respuesta_quiz][:opciones_seleccionadas].present?
+        @respuesta.opcion_id = nil
+        @respuesta.respuesta_texto = nil
+        opciones_ids = params[:respuesta_quiz][:opciones_seleccionadas].reject(&:blank?)
+        @respuesta.set_opciones_multiples(opciones_ids)
+      end
+    when 'respuesta_corta'
       # Para preguntas de respuesta corta
-      @respuesta.opcion_id = nil
-      @respuesta.respuesta_texto = params[:respuesta_quiz][:respuesta_texto]
+      if params[:respuesta_quiz][:respuesta_texto].present?
+        @respuesta.opcion_id = nil
+        @respuesta.respuesta_texto = params[:respuesta_quiz][:respuesta_texto]
+      end
+    when 'emparejamiento'
+      # Para preguntas de emparejamiento
+      if params[:respuesta_quiz][:respuesta_texto].present?
+        @respuesta.opcion_id = nil
+        @respuesta.respuesta_texto = params[:respuesta_quiz][:respuesta_texto]
+      end
     end
 
     if @respuesta.save
@@ -144,6 +167,12 @@ class IntentosQuizController < ApplicationController
     ActiveRecord::Base.transaction do
       @intento.update!(estado: :completado, finalizado_en: Time.current)
       calcular_resultados
+      
+      # Crear o actualizar el QuizResult
+      if !@intento.has_result
+        result = QuizResult.crear_desde_intento(@intento)
+        @intento.update(has_result: true) if result
+      end
     end
 
     registrar_evento_intento('finalizar', @intento)
@@ -152,7 +181,15 @@ class IntentosQuizController < ApplicationController
 
   # Muestra los resultados de un intento completado
   def resultados
-    @preguntas = @quiz.preguntas.includes(:opciones).order(orden: :asc)
+    # En resultados usamos el orden en que se mostraron las preguntas originalmente
+    if @intento.orden_preguntas.present?
+      # Usar el orden personalizado del intento
+      @preguntas = @intento.preguntas_ordenadas
+    else
+      # Orden por defecto si no hay orden personalizado
+      @preguntas = @quiz.preguntas.includes(:opciones).order(orden: :asc)
+    end
+    
     @respuestas = @intento.respuestas.includes(:opcion).index_by(&:pregunta_id)
 
     # Estadísticas del intento
@@ -166,6 +203,9 @@ class IntentosQuizController < ApplicationController
                              .where('puntaje_total > ?', @intento.puntaje_total)
                              .count + 1
     @total_intentos = @quiz.intentos.completado.count
+
+    # Determinar si mostrar resultados inmediatos según configuración del quiz
+    @mostrar_detalles = @quiz.mostrar_resultados_inmediatos || current_usuario.profesor? || current_usuario.admin?
 
     # Datos para gráficos
     preparar_datos_graficos
@@ -183,15 +223,45 @@ class IntentosQuizController < ApplicationController
   def set_intento
     @intento = @quiz.intentos.find(params[:id])
 
-    # Verificar que el intento pertenece al usuario actual
-    return if @intento.usuario == current_usuario || current_usuario.profesor?
-
-    redirect_to quiz_path(@quiz), alert: 'No tienes acceso a este intento.'
+    # Verificar que el intento pertenece al usuario actual según su rol
+    if current_usuario.admin?
+      # Los administradores tienen acceso completo a todos los intentos
+      return
+    elsif current_usuario.profesor?
+      # Los profesores solo pueden ver intentos de sus propios quizzes
+      return if @quiz.curso.profesor_id == current_usuario.id
+      redirect_to quiz_path(@quiz), alert: 'No tienes acceso a este intento como profesor.'
+      return
+    elsif current_usuario.estudiante?
+      # Los estudiantes solo pueden ver sus propios intentos
+      return if @intento.usuario_id == current_usuario.id
+      redirect_to quiz_path(@quiz), alert: 'No tienes acceso a este intento de quiz.'
+      return
+    end
+    
+    # Si ninguna condición se cumple, redirigir
+    redirect_to quiz_path(@quiz), alert: 'No tienes permiso para acceder a este intento.'
   end
 
   def verificar_estudiante
-    return if @quiz.curso.estudiantes.include?(current_usuario) || current_usuario.profesor?
-
+    # Los administradores siempre tienen acceso
+    return if current_usuario.admin?
+    
+    # Profesores solo tienen acceso si el quiz pertenece a sus cursos
+    if current_usuario.profesor?
+      return if @quiz.curso.profesor_id == current_usuario.id
+      redirect_to quizzes_path, alert: 'No tienes acceso a este quiz como profesor.'
+      return
+    end
+    
+    # Estudiantes solo tienen acceso si están inscritos en el curso
+    if current_usuario.estudiante?
+      return if @quiz.curso.estudiantes.include?(current_usuario)
+      redirect_to quizzes_path, alert: 'No estás inscrito en el curso de este quiz.'
+      return
+    end
+    
+    # En caso que no se cumplan las condiciones anteriores
     redirect_to quizzes_path, alert: 'No tienes acceso a este quiz.'
   end
 

@@ -1,245 +1,278 @@
-// app/javascript/controllers/quiz_timer_controller.js
 import { Controller } from "@hotwired/stimulus"
 
+/**
+ * Quiz Timer Controller
+ * 
+ * Controla el temporizador para quizzes con tiempo límite.
+ * Características:
+ * - Cuenta regresiva visual
+ * - Alertas visuales y sonoras
+ * - Finalización automática al expirar
+ * - Protección contra manipulación del temporizador
+ */
 export default class extends Controller {
-  static targets = ["display", "progress"]
-  static values = { 
-    duration: Number,
-    warningThreshold: { type: Number, default: 300 }, // 5 minutos
-    criticalThreshold: { type: Number, default: 60 },  // 1 minuto
-    autoSaveInterval: { type: Number, default: 30 }    // 30 segundos
+  static targets = ["display", "progressBar", "timeText"]
+  
+  static values = {
+    tiempoLimite: Number, // en minutos
+    iniciadoEn: Number,   // timestamp UNIX
+    intentoId: Number,
+    quizId: Number,
+    finalizable: { type: Boolean, default: true }
   }
-
+  
   connect() {
-    // Inicializar tiempo restante
-    this.remaining = this.durationValue
+    // Valores iniciales
+    this.segundosTranscurridos = Math.floor((Date.now() / 1000) - this.iniciadoEnValue)
+    this.segundosTotales = this.tiempoLimiteValue * 60
+    this.segundosRestantes = Math.max(0, this.segundosTotales - this.segundosTranscurridos)
+    
+    // Verificar si el tiempo ya expiró
+    if (this.segundosRestantes <= 0 && this.finalizableValue) {
+      this.tiempoExpirado()
+      return
+    }
     
     // Iniciar temporizador
-    this.startTimer()
+    this.actualizarInterfaz()
+    this.iniciarTemporizador()
     
-    // Configurar autoguardado
-    this.setupAutoSave()
+    // Validación de seguridad
+    this.validarTiempoServidor()
     
-    // Registrar evento para finalización automática
-    this.handleFormSubmit = this.handleFormSubmit.bind(this)
-    document.addEventListener("submit", this.handleFormSubmit)
-    
-    // Agregar detección de cambio de foco
-    this.visibilityHandler = this.handleVisibilityChange.bind(this)
-    document.addEventListener("visibilitychange", this.visibilityHandler)
+    // Almacenar tiempo en sesión para validación contra manipulación
+    sessionStorage.setItem('quiz_timer_start', this.iniciadoEnValue.toString())
+    sessionStorage.setItem('quiz_timer_client_start', Math.floor(Date.now() / 1000).toString())
   }
-
-  startTimer() {
-    this.timer = setInterval(() => {
-      this.remaining -= 1
-      this.updateDisplay()
-      this.updateProgress()
-      this.checkThresholds()
+  
+  disconnect() {
+    this.detenerTemporizador()
+  }
+  
+  iniciarTemporizador() {
+    this.temporizador = setInterval(() => {
+      this.segundosTranscurridos += 1
+      this.segundosRestantes = Math.max(0, this.segundosTotales - this.segundosTranscurridos)
       
-      if (this.remaining <= 0) {
-        this.timeUp()
+      this.actualizarInterfaz()
+      
+      // Verificar alertas y expiración
+      this.verificarAlertas()
+      
+      if (this.segundosRestantes <= 0 && this.finalizableValue) {
+        this.tiempoExpirado()
       }
     }, 1000)
   }
   
-  updateDisplay() {
-    const minutes = Math.floor(this.remaining / 60)
-    const seconds = this.remaining % 60
-    this.displayTarget.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-  }
-  
-  updateProgress() {
-    const percentage = (this.remaining / this.durationValue) * 100
-    this.progressTarget.style.width = `${percentage}%`
-  }
-  
-  checkThresholds() {
-    // Comprobar umbral de advertencia
-    if (this.remaining <= this.warningThresholdValue && !this.warningState) {
-      this.setWarningState()
+  detenerTemporizador() {
+    if (this.temporizador) {
+      clearInterval(this.temporizador)
     }
     
-    // Comprobar umbral crítico
-    if (this.remaining <= this.criticalThresholdValue && !this.criticalState) {
-      this.setCriticalState()
+    if (this.validacionTimer) {
+      clearInterval(this.validacionTimer)
     }
   }
   
-  setWarningState() {
-    this.warningState = true
-    this.progressTarget.classList.remove('bg-blue-500')
-    this.progressTarget.classList.add('bg-yellow-500')
-    this.displayTarget.classList.add('text-yellow-400')
+  actualizarInterfaz() {
+    // Actualizar texto de tiempo
+    if (this.hasTimeTextTarget) {
+      const minutos = Math.floor(this.segundosRestantes / 60)
+      const segundos = this.segundosRestantes % 60
+      this.timeTextTarget.textContent = `${minutos}:${segundos.toString().padStart(2, '0')}`
+    }
     
-    // Notificar al usuario
-    this.showNotification("Advertencia", `Quedan ${Math.floor(this.remaining / 60)} minutos.`)
+    // Actualizar barra de progreso
+    if (this.hasProgressBarTarget) {
+      const porcentaje = (this.segundosRestantes / this.segundosTotales) * 100
+      this.progressBarTarget.style.width = `${porcentaje}%`
+      
+      // Cambiar clases de color según tiempo restante
+      this.progressBarTarget.classList.remove('bg-red-500', 'bg-yellow-500', 'bg-green-500')
+      
+      if (porcentaje < 25) {
+        this.progressBarTarget.classList.add('bg-red-500')
+      } else if (porcentaje < 50) {
+        this.progressBarTarget.classList.add('bg-yellow-500')
+      } else {
+        this.progressBarTarget.classList.add('bg-green-500')
+      }
+    }
+    
+    // Actualizar contenedor principal
+    if (this.segundosRestantes < 60) {
+      // Último minuto - animación de pulso
+      this.element.classList.add('animate-pulse', 'text-red-500', 'font-bold')
+    } else if (this.segundosRestantes < 300) {
+      // Últimos 5 minutos - alerta visual
+      this.element.classList.add('text-red-500', 'font-bold')
+      this.element.classList.remove('animate-pulse')
+    } else {
+      this.element.classList.remove('animate-pulse', 'text-red-500', 'font-bold')
+    }
   }
   
-  setCriticalState() {
-    this.criticalState = true
-    this.progressTarget.classList.remove('bg-yellow-500')
-    this.progressTarget.classList.add('bg-red-500')
-    this.displayTarget.classList.add('text-red-400', 'animate-pulse')
+  verificarAlertas() {
+    // Alertas en momentos específicos
+    const alertPoints = [
+      { tiempo: 300, mensaje: '¡Quedan 5 minutos!' },
+      { tiempo: 60, mensaje: '¡Queda 1 minuto!' },
+      { tiempo: 30, mensaje: '¡Quedan 30 segundos!' },
+      { tiempo: 10, mensaje: '¡Quedan 10 segundos!' }
+    ]
     
-    // Notificar al usuario
-    this.showNotification("¡Tiempo crítico!", "Menos de un minuto restante.")
+    // Verificar cada punto de alerta
+    alertPoints.forEach(point => {
+      if (this.segundosRestantes === point.tiempo) {
+        this.mostrarAlerta(point.mensaje)
+      }
+    })
   }
   
-  timeUp() {
-    clearInterval(this.timer)
-    clearInterval(this.autoSaveTimer)
+  mostrarAlerta(mensaje) {
+    // Crear elemento de alerta
+    const alerta = document.createElement('div')
+    alerta.classList.add(
+      'fixed', 'top-4', 'left-1/2', 'transform', '-translate-x-1/2',
+      'bg-red-600', 'text-white', 'py-2', 'px-4', 'rounded-lg',
+      'shadow-lg', 'z-50', 'animate-bounce', 'text-center', 'font-bold'
+    )
+    alerta.textContent = mensaje
+    document.body.appendChild(alerta)
     
-    // Notificar al usuario
-    this.showNotification("¡Tiempo agotado!", "El intento se finalizará automáticamente.")
+    // Reproducir sonido de alerta
+    try {
+      const audio = new Audio('/sounds/alert.mp3')
+      audio.play().catch(e => console.log('No se pudo reproducir el audio'))
+    } catch (e) {
+      console.log('Error reproduciendo audio', e)
+    }
+    
+    // Eliminar alerta después de 3 segundos
+    setTimeout(() => {
+      alerta.classList.add('opacity-0', 'transition-opacity', 'duration-500')
+      setTimeout(() => {
+        document.body.removeChild(alerta)
+      }, 500)
+    }, 3000)
+  }
+  
+  tiempoExpirado() {
+    // Detener temporizador
+    this.detenerTemporizador()
+    
+    // Actualizar interfaz
+    if (this.hasTimeTextTarget) {
+      this.timeTextTarget.textContent = '0:00'
+      this.timeTextTarget.classList.add('text-red-500', 'font-bold')
+    }
+    
+    if (this.hasProgressBarTarget) {
+      this.progressBarTarget.style.width = '0%'
+      this.progressBarTarget.classList.add('bg-red-500')
+    }
+    
+    // Mostrar alerta principal
+    this.mostrarAlerta('¡TIEMPO AGOTADO!')
     
     // Finalizar intento automáticamente
-    this.finalizeAttempt()
-  }
-  
-  showNotification(title, message) {
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(title, { body: message })
-    } else {
-      // Mostrar notificación en la interfaz
-      const notification = document.createElement('div')
-      notification.className = 'fixed bottom-4 right-4 bg-gray-800 border border-gray-700 p-4 rounded-lg shadow-lg z-50'
-      notification.innerHTML = `
-        <h4 class="font-bold text-white">${title}</h4>
-        <p class="text-gray-300">${message}</p>
-      `
-      document.body.appendChild(notification)
-      
-      // Eliminar notificación después de 5 segundos
-      setTimeout(() => {
-        notification.remove()
-      }, 5000)
+    if (this.finalizableValue) {
+      this.finalizarIntentoExpirado()
     }
   }
   
-  setupAutoSave() {
-    this.autoSaveTimer = setInterval(() => {
-      this.autoSave()
-    }, this.autoSaveIntervalValue * 1000)
-  }
-  
-  autoSave() {
-    const form = document.querySelector('form')
-    if (form) {
-      // Disparar evento personalizado para autoguardado
-      const event = new CustomEvent('quiz:autosave')
-      form.dispatchEvent(event)
-      
-      // Añadir mensaje temporal de autoguardado
-      const autoSaveMessage = document.createElement('div')
-      autoSaveMessage.className = 'fixed bottom-4 left-4 bg-green-900/80 text-green-300 px-3 py-1 rounded-lg text-sm z-50'
-      autoSaveMessage.textContent = 'Guardando respuesta...'
-      document.body.appendChild(autoSaveMessage)
-      
-      // Desaparecer mensaje después de 2 segundos
-      setTimeout(() => {
-        autoSaveMessage.remove()
-      }, 2000)
-    }
-  }
-  
-  finalizeAttempt() {
-    // Buscar formulario de finalización o crear uno
-    const existingForm = document.querySelector('form[action*="finalizar"]')
+  finalizarIntentoExpirado() {
+    // Mostrar modal de finalización
+    const modal = document.createElement('div')
+    modal.classList.add(
+      'fixed', 'inset-0', 'bg-gray-900', 'bg-opacity-90', 'z-50',
+      'flex', 'items-center', 'justify-center', 'p-4'
+    )
     
-    if (existingForm) {
-      existingForm.submit()
-    } else {
-      // Crear formulario dinámicamente
-      const form = document.createElement('form')
-      form.method = 'POST'
-      
-      // Extraer quiz_id e intento_id de la URL
-      const pathParts = window.location.pathname.split('/')
-      const quizId = pathParts[2]
-      const intentoId = pathParts[4]
-      
-      form.action = `/quizzes/${quizId}/intentos/${intentoId}/finalizar`
-      
-      // Añadir token CSRF
-      const csrfToken = document.querySelector('meta[name="csrf-token"]').content
-      const csrfInput = document.createElement('input')
-      csrfInput.type = 'hidden'
-      csrfInput.name = 'authenticity_token'
-      csrfInput.value = csrfToken
-      
-      form.appendChild(csrfInput)
-      document.body.appendChild(form)
-      form.submit()
-    }
-  }
-  
-  handleFormSubmit(event) {
-    // Guardar tiempo restante en sessionStorage al enviar formulario
-    if (event.target.closest('form')) {
-      sessionStorage.setItem('quiz_remaining_time', this.remaining)
-    }
-  }
-  
-  // Nuevo método para detectar cambio de foco
-  handleVisibilityChange(e) {
-    if (document.hidden) {
-      // Registrar evento de cambio de foco
-      this.registrarEvento('cambio_foco', { 
-        timestamp: new Date().toISOString(),
-        tiempo_restante: this.remaining 
-      })
-      
-      // Opcional: Mostrar advertencia al volver
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) {
-          this.showNotification('Advertencia', 'Se ha detectado que abandonaste la ventana del quiz. Esta acción ha quedado registrada.')
-        }
-      }, { once: true })
-    }
-  }
-  
-  // Método para registrar eventos de seguridad
-  registrarEvento(tipo, datos) {
-    // Extraer IDs del elemento o de data attributes
-    const intentoId = this.element.dataset.intentoId
-    const quizId = this.element.dataset.quizId
+    modal.innerHTML = `
+      <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full text-center shadow-xl border border-red-500">
+        <h2 class="text-xl font-bold text-white mb-4">¡Tiempo agotado!</h2>
+        <p class="text-gray-300 mb-6">El tiempo límite para completar este quiz ha terminado. Estamos finalizando tu intento automáticamente.</p>
+        <div class="flex justify-center">
+          <div class="loader animate-spin h-8 w-8 border-4 border-red-500 border-t-transparent rounded-full"></div>
+        </div>
+        <p class="text-gray-400 mt-4">Por favor espera mientras se guardan tus respuestas...</p>
+      </div>
+    `
     
-    if (!intentoId || !quizId) {
-      console.error('No se pudo determinar el ID del intento o quiz')
-      return
-    }
+    document.body.appendChild(modal)
     
-    fetch(`/quizzes/${quizId}/intentos/${intentoId}/registrar_evento`, {
+    // Enviar finalización al servidor
+    fetch(`/quizzes/${this.quizIdValue}/intentos/${this.intentoIdValue}/finalizar`, {
       method: 'POST',
       headers: {
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
         'Content-Type': 'application/json',
-        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        'Accept': 'application/json'
       },
       body: JSON.stringify({
-        tipo: tipo,
-        datos: datos
+        tiempo_expirado: true
       })
     })
     .then(response => {
-      if (!response.ok) {
-        console.error('Error al registrar evento de seguridad')
+      if (response.redirected) {
+        window.location.href = response.url
+      } else {
+        return response.json().then(data => {
+          if (data.redirect_url) {
+            window.location.href = data.redirect_url
+          } else {
+            console.error('No se recibió URL de redirección')
+            window.location.reload()
+          }
+        })
       }
     })
     .catch(error => {
-      console.error('Error de conexión al registrar evento:', error)
+      console.error('Error finalizando intento:', error)
+      alert('Ocurrió un error al finalizar el intento. La página se recargará.')
+      window.location.reload()
     })
   }
-
-  disconnect() {
-    if (this.timer) {
-      clearInterval(this.timer)
-    }
-    
-    if (this.autoSaveTimer) {
-      clearInterval(this.autoSaveTimer)
-    }
-    
-    document.removeEventListener("submit", this.handleFormSubmit)
-    document.removeEventListener("visibilitychange", this.visibilityHandler)
+  
+  // Validación de seguridad para evitar manipulación del temporizador
+  validarTiempoServidor() {
+    // Verificar cada 30 segundos que el cliente no manipule el tiempo
+    this.validacionTimer = setInterval(() => {
+      fetch(`/quizzes/${this.quizIdValue}/intentos/${this.intentoIdValue}/verificar_tiempo`, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          cliente_tiempo_restante: this.segundosRestantes,
+          cliente_inicio: sessionStorage.getItem('quiz_timer_client_start'),
+          servidor_inicio: this.iniciadoEnValue
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Si hay una diferencia de más de 10 segundos, sincronizar con el servidor
+        if (data.servidor_tiempo_restante && 
+            Math.abs(data.servidor_tiempo_restante - this.segundosRestantes) > 10) {
+          
+          console.log('Sincronizando tiempo con servidor')
+          this.segundosRestantes = data.servidor_tiempo_restante
+          this.segundosTranscurridos = this.segundosTotales - this.segundosRestantes
+          this.actualizarInterfaz()
+        }
+        
+        // Si el servidor indica que el tiempo expiró
+        if (data.expirado && this.finalizableValue) {
+          this.tiempoExpirado()
+        }
+      })
+      .catch(error => {
+        console.error('Error validando tiempo:', error)
+      })
+    }, 30000) // Cada 30 segundos
   }
 }

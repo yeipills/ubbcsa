@@ -22,7 +22,7 @@ export default class extends Controller {
   }
   
   setupFilterListeners() {
-    // Configurar listeners para filtros de período
+    // Configurar listeners para filtros de perodo
     document.querySelectorAll('[data-action="progreso-charts#changePeriod"]').forEach(element => {
       element.addEventListener('click', this.changePeriod.bind(this))
     })
@@ -57,7 +57,7 @@ export default class extends Controller {
     url.searchParams.set('curso_id', cursoId)
     history.pushState({}, '', url)
     
-    // Recargar página completa para actualizar todos los datos
+    // Recargar pgina completa para actualizar todos los datos
     window.location.reload()
   }
   
@@ -99,7 +99,7 @@ export default class extends Controller {
   initializeActivityChart(data) {
     const ctx = this.activityChartTarget.getContext('2d')
     
-    // Destruir gráfico existente si hay uno
+    // Destruir grfico existente si hay uno
     if (this.activityChart) {
       this.activityChart.destroy()
     }
@@ -145,7 +145,7 @@ export default class extends Controller {
   initializeDifficultyChart(data) {
     const ctx = this.difficultyChartTarget.getContext('2d')
     
-    // Destruir gráfico existente si hay uno
+    // Destruir grfico existente si hay uno
     if (this.difficultyChart) {
       this.difficultyChart.destroy()
     }
@@ -183,7 +183,7 @@ export default class extends Controller {
   initializeSkillsChart(data) {
     const ctx = this.skillsChartTarget.getContext('2d')
     
-    // Destruir gráfico existente si hay uno
+    // Destruir grfico existente si hay uno
     if (this.skillsChart) {
       this.skillsChart.destroy()
     }
@@ -223,7 +223,7 @@ export default class extends Controller {
   initializeProgressChart(data) {
     const ctx = this.progressChartTarget.getContext('2d')
     
-    // Destruir gráfico existente si hay uno
+    // Destruir grfico existente si hay uno
     if (this.progressChart) {
       this.progressChart.destroy()
     }
@@ -270,7 +270,7 @@ export default class extends Controller {
   initializeCourseProgressChart(data) {
     const ctx = this.courseProgressChartTarget.getContext('2d')
     
-    // Destruir gráfico existente si hay uno
+    // Destruir grfico existente si hay uno
     if (this.courseProgressChart) {
       this.courseProgressChart.destroy()
     }
@@ -327,7 +327,7 @@ export default class extends Controller {
       'exploit': 'Exploits',
       'escaneo_red': 'Escaneo',
       'fuerza_bruta': 'Fuerza Bruta',
-      'analisis_trafico': 'Análisis de Tráfico'
+      'analisis_trafico': 'Anlisis de Trfico'
     }
     
     return mapping[tipo] || this.capitalizeFirstLetter(tipo)

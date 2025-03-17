@@ -1,0 +1,147 @@
+<% content_for :page_title, "Mis intentos - #{@quiz.titulo}" %>
+
+<div class="container mx-auto px-4 py-6">
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Mis intentos: <%= @quiz.titulo %></h1>
+      <p class="text-gray-600 dark:text-gray-400 mt-2">
+        Curso: <%= link_to @quiz.curso.nombre, curso_path(@quiz.curso), class: "text-indigo-600 dark:text-indigo-400 hover:underline" %>
+      </p>
+    </div>
+    <div>
+      <%= link_to quiz_path(@quiz), class: "btn btn-outline-secondary" do %>
+        <i class="fas fa-arrow-left mr-1"></i> Volver al quiz
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Tarjeta de resumen -->
+  <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="stat-card">
+        <div class="text-sm text-gray-500 dark:text-gray-400">Intentos realizados</div>
+        <div class="text-2xl font-bold"><%= @intentos_realizados %> / <%= @quiz.intentos_permitidos %></div>
+        <div class="text-sm mt-1">Intentos disponibles: <%= @intentos_disponibles %></div>
+      </div>
+
+      <div class="stat-card">
+        <div class="text-sm text-gray-500 dark:text-gray-400">Intentos completados</div>
+        <div class="text-2xl font-bold"><%= @intentos_completados %></div>
+        <div class="text-sm mt-1">(<%= number_to_percentage(@intentos_completados.to_f / @intentos_realizados * 100, precision: 0) rescue '0%' %> completados)</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="text-sm text-gray-500 dark:text-gray-400">Mejor puntuación</div>
+        <div class="text-2xl font-bold">
+          <% if @mejor_intento %>
+            <%= number_to_percentage(@mejor_intento.puntaje_total, precision: 1) %>
+          <% else %>
+            -
+          <% end %>
+        </div>
+        <div class="text-sm mt-1"><%= @mejor_intento ? "Intento ##{@mejor_intento.numero_intento}" : "Sin intentos completados" %></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de intentos -->
+  <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+    <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+      <h2 class="text-xl font-bold text-gray-800 dark:text-white">Historial de intentos</h2>
+    </div>
+
+    <% if @intentos.any? %>
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-100 dark:bg-gray-700">
+            <tr>
+              <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">#</th>
+              <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">Fecha</th>
+              <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">Estado</th>
+              <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">Puntuación</th>
+              <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">Tiempo</th>
+              <th class="py-3 px-4 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            <% @intentos.each do |intento| %>
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-750">
+                <td class="py-3 px-4 text-sm text-gray-800 dark:text-gray-200">
+                  <%= intento.numero_intento %>
+                </td>
+                <td class="py-3 px-4 text-sm text-gray-800 dark:text-gray-200">
+                  <%= l intento.created_at, format: :short %>
+                </td>
+                <td class="py-3 px-4 text-sm">
+                  <% if intento.en_progreso? %>
+                    <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100">
+                      En progreso
+                    </span>
+                  <% elsif intento.completado? %>
+                    <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                      Completado
+                    </span>
+                  <% else %>
+                    <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                      <%= intento.estado.humanize %>
+                    </span>
+                  <% end %>
+                </td>
+                <td class="py-3 px-4 text-sm text-gray-800 dark:text-gray-200">
+                  <% if intento.completado? %>
+                    <%= number_to_percentage(intento.puntaje_total, precision: 1) %>
+                  <% else %>
+                    <span class="text-gray-500 dark:text-gray-400">-</span>
+                  <% end %>
+                </td>
+                <td class="py-3 px-4 text-sm text-gray-800 dark:text-gray-200">
+                  <% if intento.completado? && intento.iniciado_en && intento.finalizado_en %>
+                    <%= distance_of_time_in_words(intento.iniciado_en, intento.finalizado_en) %>
+                  <% elsif intento.en_progreso? && intento.iniciado_en %>
+                    <span class="text-yellow-600 dark:text-yellow-400">
+                      <%= distance_of_time_in_words(intento.iniciado_en, Time.current) %>
+                    </span>
+                  <% else %>
+                    <span class="text-gray-500 dark:text-gray-400">-</span>
+                  <% end %>
+                </td>
+                <td class="py-3 px-4 text-sm text-gray-800 dark:text-gray-200">
+                  <% if intento.en_progreso? %>
+                    <%= link_to "Continuar", quiz_intento_path(@quiz, intento), class: "btn btn-primary btn-sm" %>
+                  <% elsif intento.completado? %>
+                    <%= link_to "Ver resultados", resultados_quiz_intento_path(@quiz, intento), class: "btn btn-outline-secondary btn-sm" %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <div class="p-6 text-center text-gray-500 dark:text-gray-400">
+        <p>No has realizado ningún intento en este quiz.</p>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Botón para iniciar nuevo intento -->
+  <div class="mt-6 flex justify-center">
+    <% if @intentos_disponibles > 0 && Time.current.between?(@quiz.fecha_inicio, @quiz.fecha_fin) && @quiz.publicado? %>
+      <%= button_to "Iniciar nuevo intento", quiz_intentos_path(@quiz), method: :post, class: "btn btn-primary" %>
+    <% elsif @intentos_disponibles <= 0 %>
+      <div class="text-center p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+        <p class="text-gray-700 dark:text-gray-300">Has alcanzado el número máximo de intentos permitidos.</p>
+      </div>
+    <% elsif !Time.current.between?(@quiz.fecha_inicio, @quiz.fecha_fin) %>
+      <div class="text-center p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+        <p class="text-gray-700 dark:text-gray-300">
+          <% if Time.current < @quiz.fecha_inicio %>
+            Este quiz estará disponible a partir del <%= l @quiz.fecha_inicio, format: :long %>.
+          <% else %>
+            Este quiz ya no está disponible. Finalizó el <%= l @quiz.fecha_fin, format: :long %>.
+          <% end %>
+        </p>
+      </div>
+    <% end %>
+  </div>
+</div>

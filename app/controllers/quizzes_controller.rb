@@ -41,17 +41,53 @@ class QuizzesController < ApplicationController
       redirect_to cursos_path, alert: 'Debe seleccionar un curso para crear un quiz'
       return
     end
+    
+    # Verificar que el curso tenga laboratorios asociados
+    if @curso.laboratorios.empty?
+      redirect_to curso_path(@curso), alert: 'El curso no tiene laboratorios asociados. Debe crear al menos un laboratorio antes de poder crear un quiz.'
+      return
+    end
+    
     @quiz = @curso.quizzes.build
+    # Set default dates for the quiz
+    @quiz.fecha_inicio = Time.current.beginning_of_hour + 1.hour
+    @quiz.fecha_fin = Time.current.beginning_of_hour + 1.day + 1.hour
     @laboratorios = @curso.laboratorios
   end
 
   def create
+    # Verificar nuevamente que el curso tenga laboratorios asociados
+    if @curso.laboratorios.empty?
+      redirect_to curso_path(@curso), alert: 'El curso no tiene laboratorios asociados. Debe crear al menos un laboratorio antes de poder crear un quiz.'
+      return
+    end
+    
     @quiz = @curso.quizzes.build(quiz_params)
     @quiz.usuario = current_usuario
+    
+    # Set default dates if not provided in the params
+    if params[:quiz][:fecha_inicio].blank? || params[:quiz][:fecha_fin].blank?
+      @quiz.fecha_inicio = Time.current.beginning_of_hour + 1.hour if @quiz.fecha_inicio.nil?
+      @quiz.fecha_fin = Time.current.beginning_of_hour + 1.day + 1.hour if @quiz.fecha_fin.nil?
+    end
+    
+    # Verificar que se haya seleccionado un laboratorio
+    if params[:quiz][:laboratorio_id].blank?
+      flash.now[:alert] = 'Debe seleccionar un laboratorio para el quiz'
+      @laboratorios = @curso.laboratorios
+      render :new, status: :unprocessable_entity
+      return
+    end
 
-    if @quiz.save
-      redirect_to quiz_path(@quiz), notice: 'Quiz creado exitosamente.'
-    else
+    begin
+      if @quiz.save
+        redirect_to quiz_path(@quiz), notice: 'Quiz creado exitosamente. Ahora puedes agregar preguntas.'
+      else
+        @laboratorios = @curso.laboratorios
+        render :new, status: :unprocessable_entity
+      end
+    rescue ActiveRecord::RecordNotUnique => e
+      @quiz.errors.add(:titulo, "ya existe un quiz con este título para el mismo curso y laboratorio")
       @laboratorios = @curso.laboratorios
       render :new, status: :unprocessable_entity
     end
@@ -79,6 +115,10 @@ class QuizzesController < ApplicationController
     return unless @quiz.borrador?
 
     if @quiz.update(estado: :publicado, fecha_publicacion: Time.current)
+      # Asegurarse de que tenga un código de acceso generado
+      @quiz.generar_codigo_acceso if @quiz.codigo_acceso.blank?
+      
+      # Notificar a los estudiantes
       QuizNotificationJob.perform_later(@quiz.id)
       redirect_to @quiz, notice: 'Quiz publicado exitosamente. Los estudiantes han sido notificados.'
     else
@@ -124,6 +164,15 @@ class QuizzesController < ApplicationController
     redirect_to edit_quiz_path(@quiz), notice: 'Quiz duplicado correctamente. Ahora puedes editarlo.'
   rescue ActiveRecord::RecordInvalid => e
     redirect_to @original_quiz, alert: "Error al duplicar: #{e.message}"
+  end
+  
+  # Método simplificado para gestionar preguntas
+  def gestionar_preguntas
+    @quiz = Quiz.find(params[:id])
+    @preguntas = @quiz.preguntas.includes(:opciones).order(orden: :asc)
+    
+    # Redireccionar a la vista normal del quiz
+    redirect_to quiz_path(@quiz), notice: "Esta funcionalidad ha sido simplificada temporalmente."
   end
 
   def estadisticas
@@ -190,13 +239,31 @@ class QuizzesController < ApplicationController
       :fecha_fin,
       :instrucciones,
       :mostrar_resultados_inmediatos,
-      :peso_calificacion
+      :peso_calificacion,
+      :aleatorizar_preguntas,
+      :aleatorizar_opciones,
+      :codigo_acceso
     )
   end
+  
+  # Método eliminado para evitar conflictos
 
   def verify_role_access
-    return if current_usuario.profesor? || current_usuario.admin?
-
-    redirect_to quizzes_path, alert: 'No tienes permiso para realizar esta acción'
+    unless current_usuario.profesor? || current_usuario.admin?
+      redirect_to quizzes_path, alert: 'No tienes permiso para realizar esta acción'
+      return
+    end
+    
+    # Para acciones que requieren verificación de propiedad de quiz
+    if ['edit', 'update', 'destroy', 'publicar', 'despublicar'].include?(action_name) && @quiz.present?
+      # Permitir a administradores hacer cualquier acción
+      return if current_usuario.admin?
+      
+      # Verificar que el profesor sea dueño del curso al que pertenece el quiz
+      unless current_usuario.profesor? && @quiz.curso.profesor_id == current_usuario.id
+        redirect_to quiz_path(@quiz), alert: 'No tienes permiso para editar este quiz'
+        return
+      end
+    end
   end
 end

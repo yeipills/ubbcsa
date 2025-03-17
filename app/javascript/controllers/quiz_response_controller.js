@@ -20,7 +20,7 @@ export default class extends Controller {
         // Marcar como modificado para autoguardado
         this.element.dataset.modified = 'true'
         
-        // Guardar en sessionStorage para prevenir pérdida
+        // Guardar en sessionStorage para prevenir prdida
         this.saveFormValues()
       })
     })
@@ -39,6 +39,43 @@ export default class extends Controller {
         }
       })
     })
+    
+    // Escuchar cambios en selects de emparejamiento
+    this.element.querySelectorAll('select.matching-select').forEach(select => {
+      select.addEventListener('change', () => {
+        this.element.dataset.modified = 'true'
+        this.saveFormValues()
+        
+        // Actualizar campo oculto con los pares seleccionados
+        this.updateMatchingPairs()
+      })
+    })
+  }
+  
+  updateMatchingPairs() {
+    // Obtener todos los selects de emparejamiento
+    const matchingSelects = this.element.querySelectorAll('select.matching-select')
+    
+    if (matchingSelects.length === 0) return
+    
+    // Crear objeto para almacenar los pares (trmino_id => definicin_id)
+    const matchingPairs = {}
+    
+    // Recorrer todos los selects
+    matchingSelects.forEach(select => {
+      const terminoId = select.dataset.terminoId
+      const definicionId = select.value
+      
+      if (terminoId && definicionId) {
+        matchingPairs[terminoId] = definicionId
+      }
+    })
+    
+    // Actualizar el campo oculto
+    const hiddenField = this.element.querySelector('input[name="respuesta_quiz[respuesta_texto]"]')
+    if (hiddenField) {
+      hiddenField.value = JSON.stringify(matchingPairs)
+    }
   }
   
   saveFormValues() {
@@ -50,7 +87,7 @@ export default class extends Controller {
       formValues[key] = value
     }
     
-    // Guardar en sessionStorage con ID único basado en pregunta
+    // Guardar en sessionStorage con ID nico basado en pregunta
     const preguntaId = this.element.querySelector('input[name="pregunta_id"]').value
     sessionStorage.setItem(`quiz_response_${preguntaId}`, JSON.stringify(formValues))
   }
@@ -73,6 +110,21 @@ export default class extends Controller {
       if (formValues['respuesta_quiz[respuesta_texto]']) {
         const textarea = this.element.querySelector('textarea[name="respuesta_quiz[respuesta_texto]"]')
         if (textarea) textarea.value = formValues['respuesta_quiz[respuesta_texto]']
+        
+        // Si es emparejamiento, restaurar los selects
+        if (this.element.querySelector('select.matching-select')) {
+          try {
+            const matchingPairs = JSON.parse(formValues['respuesta_quiz[respuesta_texto]'])
+            
+            // Recorrer cada par y restaurar selects
+            Object.entries(matchingPairs).forEach(([terminoId, definicionId]) => {
+              const select = this.element.querySelector(`select[data-termino-id="${terminoId}"]`)
+              if (select) select.value = definicionId
+            })
+          } catch (e) {
+            console.error('Error al restaurar pares de emparejamiento:', e)
+          }
+        }
       }
     }
   }

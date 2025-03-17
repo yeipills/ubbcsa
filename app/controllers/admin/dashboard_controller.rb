@@ -4,7 +4,7 @@ module Admin
     def index
       @total_usuarios = Usuario.count
       @total_laboratorios = Laboratorio.count
-      @sesiones_activas = SesionLaboratorio.active.count
+      @sesiones_activas = SesionLaboratorio.activas.count
       @metricas_sistema = MetricsService.system_metrics
     end
   end

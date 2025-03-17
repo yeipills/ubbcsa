@@ -81,6 +81,7 @@ Rails.application.configure do
   config.hosts << "ttyd"
   config.hosts << "ttyd:3000"
   config.hosts << "target-host"
+  config.hosts << "target-host:3030"
   config.hosts << /.*\.localhost$/
 
 end

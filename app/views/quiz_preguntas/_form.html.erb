@@ -69,7 +69,9 @@
                 options_for_select([
                   ['Opción Múltiple', 'opcion_multiple'],
                   ['Verdadero/Falso', 'verdadero_falso'],
-                  ['Respuesta Corta', 'respuesta_corta']
+                  ['Respuesta Corta', 'respuesta_corta'],
+                  ['Términos Pareados', 'emparejamiento'],
+                  ['Selección Múltiple (Varias correctas)', 'multiple_respuesta']
                 ], @pregunta.tipo),
                 {}, 
                 { class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
@@ -81,6 +83,214 @@
             <%= f.text_field :respuesta_correcta, 
                 class: "mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
                 placeholder: "Respuesta exacta esperada" %>
+          </div>
+          
+          <div data-pregunta-form-target="multipleRespuesta" class="<%= 'hidden' unless @pregunta.multiple_respuesta? %>">
+            <div class="bg-gray-800 p-4 rounded-md border border-gray-700">
+              <h4 class="font-medium text-blue-400 mb-3">Opciones (selección múltiple)</h4>
+              <p class="text-gray-400 text-sm mb-4">Añade las opciones y marca las que son correctas. Los estudiantes deberán seleccionar todas las correctas.</p>
+              
+              <div id="opciones-container" data-pregunta-form-target="opcionesContainer">
+                <% if @pregunta.multiple_respuesta? && @pregunta.opciones.any? %>
+                  <% @pregunta.opciones.each_with_index do |opcion, index| %>
+                    <div class="opcion-item mb-3 p-3 border border-gray-700 rounded-lg">
+                      <%= f.fields_for :opciones, opcion do |opcion_form| %>
+                        <%= opcion_form.hidden_field :id %>
+                        <%= opcion_form.hidden_field :orden, value: index + 1 %>
+                        
+                        <div class="flex items-start gap-4">
+                          <div class="flex-grow">
+                            <%= opcion_form.label :contenido, "Opción #{index + 1}", class: "block text-sm font-medium text-gray-300 mb-1" %>
+                            <%= opcion_form.text_field :contenido, 
+                                class: "w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
+                                placeholder: "Texto de la opción" %>
+                          </div>
+                          
+                          <div class="mt-6">
+                            <label class="inline-flex items-center">
+                              <%= opcion_form.check_box :es_correcta, 
+                                  class: "rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800" %>
+                              <span class="ml-2 text-sm text-gray-300 checkbox-label">Correcta</span>
+                            </label>
+                          </div>
+                          
+                          <div class="mt-4">
+                            <button type="button" class="p-2 text-red-400 hover:text-red-300" onclick="eliminarOpcion(this)">
+                              <i class="fas fa-trash"></i>
+                            </button>
+                          </div>
+                        </div>
+                      <% end %>
+                    </div>
+                  <% end %>
+                <% else %>
+                  <!-- Plantilla para nuevas opciones -->
+                  <div class="opcion-item mb-3 p-3 border border-gray-700 rounded-lg">
+                    <%= f.fields_for :opciones, @pregunta.opciones.build(orden: 1) do |opcion_form| %>
+                      <%= opcion_form.hidden_field :orden, value: 1, class: "orden-opcion" %>
+                      
+                      <div class="flex items-start gap-4">
+                        <div class="flex-grow">
+                          <%= opcion_form.label :contenido, "Opción 1", class: "block text-sm font-medium text-gray-300 mb-1" %>
+                          <%= opcion_form.text_field :contenido, 
+                              class: "w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
+                              placeholder: "Texto de la opción" %>
+                        </div>
+                        
+                        <div class="mt-6">
+                          <label class="inline-flex items-center">
+                            <%= opcion_form.check_box :es_correcta, 
+                                class: "rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800" %>
+                            <span class="ml-2 text-sm text-gray-300 checkbox-label">Correcta</span>
+                          </label>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                  
+                  <div class="opcion-item mb-3 p-3 border border-gray-700 rounded-lg">
+                    <%= f.fields_for :opciones, @pregunta.opciones.build(orden: 2) do |opcion_form| %>
+                      <%= opcion_form.hidden_field :orden, value: 2, class: "orden-opcion" %>
+                      
+                      <div class="flex items-start gap-4">
+                        <div class="flex-grow">
+                          <%= opcion_form.label :contenido, "Opción 2", class: "block text-sm font-medium text-gray-300 mb-1" %>
+                          <%= opcion_form.text_field :contenido, 
+                              class: "w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
+                              placeholder: "Texto de la opción" %>
+                        </div>
+                        
+                        <div class="mt-6">
+                          <label class="inline-flex items-center">
+                            <%= opcion_form.check_box :es_correcta, 
+                                class: "rounded border-gray-600 bg-gray-800 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800" %>
+                            <span class="ml-2 text-sm text-gray-300 checkbox-label">Correcta</span>
+                          </label>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+              
+              <div class="mt-4">
+                <button type="button" id="agregar-opcion" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm transition-colors">
+                  + Agregar opción
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div data-pregunta-form-target="emparejamiento" class="<%= 'hidden' unless @pregunta.emparejamiento? %>">
+            <div class="bg-gray-800 p-4 rounded-md border border-gray-700">
+              <h4 class="font-medium text-blue-400 mb-3">Términos y Definiciones</h4>
+              <p class="text-gray-400 text-sm mb-4">Agrega pares de términos y sus definiciones. Los estudiantes deberán relacionarlos correctamente.</p>
+              
+              <div id="pares-container" class="space-y-6">
+                <% if @pregunta.emparejamiento? %>
+                  <% terminos = @pregunta.terminos %>
+                  <% definiciones = @pregunta.definiciones %>
+                  
+                  <% terminos.each_with_index do |termino, index| %>
+                    <div class="par-item border border-gray-700 p-3 rounded-lg">
+                      <div class="flex justify-between mb-2">
+                        <h5 class="text-gray-300 font-medium">Par <%= index + 1 %></h5>
+                        <button type="button" class="text-red-400 hover:text-red-300 text-sm" onclick="eliminarPar(this)">
+                          Eliminar
+                        </button>
+                      </div>
+                      
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <%= f.fields_for :opciones, termino do |opcion_form| %>
+                            <%= opcion_form.hidden_field :id %>
+                            <%= opcion_form.hidden_field :es_termino, value: true %>
+                            <%= opcion_form.hidden_field :orden, value: termino.orden %>
+                            
+                            <div>
+                              <%= opcion_form.label :contenido, "Término", class: "block text-sm font-medium text-gray-300 mb-1" %>
+                              <%= opcion_form.text_field :contenido, 
+                                  class: "w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
+                                  placeholder: "Escribe el término" %>
+                            </div>
+                            
+                            <% if termino.par_relacionado.present? && termino.par_relacionado["id"].present? %>
+                              <%= opcion_form.hidden_field :par_relacionado, value: termino.par_relacionado.to_json %>
+                            <% end %>
+                          <% end %>
+                        </div>
+                        
+                        <div>
+                          <% definicion = definiciones.find { |d| d.id == termino.par_relacionado["id"].to_i } if termino.par_relacionado.present? %>
+                          <% definicion ||= definiciones[index] if index < definiciones.size %>
+                          
+                          <% if definicion %>
+                            <%= f.fields_for :opciones, definicion do |opcion_form| %>
+                              <%= opcion_form.hidden_field :id %>
+                              <%= opcion_form.hidden_field :es_termino, value: false %>
+                              <%= opcion_form.hidden_field :orden, value: definicion.orden %>
+                              
+                              <div>
+                                <%= opcion_form.label :contenido, "Definición", class: "block text-sm font-medium text-gray-300 mb-1" %>
+                                <%= opcion_form.text_field :contenido, 
+                                    class: "w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
+                                    placeholder: "Escribe la definición" %>
+                              </div>
+                            <% end %>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                <% else %>
+                  <!-- Plantilla para nuevos pares -->
+                  <div class="par-item border border-gray-700 p-3 rounded-lg">
+                    <div class="flex justify-between mb-2">
+                      <h5 class="text-gray-300 font-medium">Par 1</h5>
+                      <button type="button" class="text-red-400 hover:text-red-300 text-sm" onclick="eliminarPar(this)">
+                        Eliminar
+                      </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <%= f.fields_for :opciones, @pregunta.opciones.build(es_termino: true, orden: 1) do |opcion_form| %>
+                          <%= opcion_form.hidden_field :es_termino, value: true %>
+                          <%= opcion_form.hidden_field :orden, value: 1, class: "orden-termino" %>
+                          
+                          <div>
+                            <%= opcion_form.label :contenido, "Término", class: "block text-sm font-medium text-gray-300 mb-1" %>
+                            <%= opcion_form.text_field :contenido, 
+                                class: "w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
+                                placeholder: "Escribe el término" %>
+                          </div>
+                        <% end %>
+                      </div>
+                      
+                      <div>
+                        <%= f.fields_for :opciones, @pregunta.opciones.build(es_termino: false, orden: 2) do |opcion_form| %>
+                          <%= opcion_form.hidden_field :es_termino, value: false %>
+                          <%= opcion_form.hidden_field :orden, value: 2, class: "orden-definicion" %>
+                          
+                          <div>
+                            <%= opcion_form.label :contenido, "Definición", class: "block text-sm font-medium text-gray-300 mb-1" %>
+                            <%= opcion_form.text_field :contenido, 
+                                class: "w-full rounded-md border-gray-600 bg-gray-800 text-white focus:border-blue-500 focus:ring-blue-500",
+                                placeholder: "Escribe la definición" %>
+                          </div>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+              
+              <div class="mt-4">
+                <button type="button" id="agregar-par" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm transition-colors">
+                  + Agregar par de términos
+                </button>
+              </div>
+            </div>
           </div>
           
           <div>

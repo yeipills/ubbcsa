@@ -23,7 +23,6 @@ pin "controllers/quiz_timer_controller", preload: true
 pin "controllers/terminal_controller", preload: true
 pin "controllers/theme_controller", preload: true
 pin "controllers/ttyd_controller", preload: true
-pin "controllers/wetty_controller", preload: true 
 pin "controllers/notifications_controller", preload: true
 
 # Pin all channels

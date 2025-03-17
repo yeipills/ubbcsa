@@ -1,0 +1,357 @@
+import { Controller } from "@hotwired/stimulus"
+import { Chart, registerables } from "chart.js"
+
+// Registrar componentes de Chart.js
+Chart.register(...registerables)
+
+/**
+ * Quiz Results Controller
+ * 
+ * Controla la visualizacin de resultados de quiz, incluyendo:
+ * - Grficos de rendimiento
+ * - Filtrado de preguntas
+ * - Impresin de resultados
+ */
+export default class extends Controller {
+  static targets = ["chart", "detailToggle", "detailContent", "questionFilter", "correctCount", "incorrectCount"]
+  
+  static values = {
+    intentoId: Number,
+    quizId: Number,
+    puntaje: Number,
+    datosGrafico: Object,
+    comparacionCurso: Object
+  }
+  
+  connect() {
+    this.inicializarGraficos()
+    this.inicializarFiltros()
+  }
+  
+  // Grficos de resultados
+  
+  inicializarGraficos() {
+    this.renderizarGraficoPuntaje()
+    this.renderizarGraficoComparacion()
+    this.renderizarGraficoTiempo()
+  }
+  
+  renderizarGraficoPuntaje() {
+    const chartElement = this.chartTargets.find(el => el.dataset.chartType === "puntaje")
+    if (!chartElement) return
+    
+    const ctx = chartElement.getContext('2d')
+    
+    // Para grfico de dona
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Correcto', 'Incorrecto'],
+        datasets: [{
+          data: [this.puntajeValue, 100 - this.puntajeValue],
+          backgroundColor: [
+            'rgba(75, 192, 192, 0.8)',
+            'rgba(255, 99, 132, 0.8)'
+          ],
+          borderColor: [
+            'rgba(75, 192, 192, 1)',
+            'rgba(255, 99, 132, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '70%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: '#e2e8f0' // text-gray-200
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return `${context.label}: ${context.raw}%`
+              }
+            }
+          }
+        }
+      }
+    })
+  }
+  
+  renderizarGraficoComparacion() {
+    const chartElement = this.chartTargets.find(el => el.dataset.chartType === "comparacion")
+    if (!chartElement || !this.hasComparacionCursoValue) return
+    
+    const ctx = chartElement.getContext('2d')
+    const datosComparacion = this.comparacionCursoValue
+    
+    // Para grfico de barras de comparacin
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Tu puntaje', 'Promedio curso', 'Mejor puntaje'],
+        datasets: [{
+          label: 'Puntaje (%)',
+          data: [
+            this.puntajeValue, 
+            datosComparacion.promedio || 0, 
+            datosComparacion.mejor || 0
+          ],
+          backgroundColor: [
+            'rgba(54, 162, 235, 0.8)',
+            'rgba(255, 206, 86, 0.8)',
+            'rgba(75, 192, 192, 0.8)'
+          ],
+          borderColor: [
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            ticks: {
+              color: '#e2e8f0' // text-gray-200
+            },
+            grid: {
+              color: 'rgba(255, 255, 255, 0.1)'
+            }
+          },
+          x: {
+            ticks: {
+              color: '#e2e8f0' // text-gray-200
+            },
+            grid: {
+              color: 'rgba(255, 255, 255, 0.1)'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    })
+  }
+  
+  renderizarGraficoTiempo() {
+    const chartElement = this.chartTargets.find(el => el.dataset.chartType === "tiempo")
+    if (!chartElement || !this.hasComparacionCursoValue) return
+    
+    const ctx = chartElement.getContext('2d')
+    const datosComparacion = this.comparacionCursoValue
+    
+    // Datos para grfico de tiempo (en minutos)
+    const tiempoUsuario = datosComparacion.tiempo_usuario ? datosComparacion.tiempo_usuario / 60 : 0
+    const tiempoPromedio = datosComparacion.tiempo_promedio ? datosComparacion.tiempo_promedio / 60 : 0
+    
+    // Para grfico de barras de tiempo
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Tu tiempo', 'Tiempo promedio'],
+        datasets: [{
+          label: 'Tiempo (minutos)',
+          data: [tiempoUsuario, tiempoPromedio],
+          backgroundColor: [
+            'rgba(153, 102, 255, 0.8)',
+            'rgba(255, 159, 64, 0.8)'
+          ],
+          borderColor: [
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: '#e2e8f0' // text-gray-200
+            },
+            grid: {
+              color: 'rgba(255, 255, 255, 0.1)'
+            }
+          },
+          x: {
+            ticks: {
+              color: '#e2e8f0' // text-gray-200
+            },
+            grid: {
+              color: 'rgba(255, 255, 255, 0.1)'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const minutos = Math.floor(context.raw)
+                const segundos = Math.round((context.raw - minutos) * 60)
+                return `${minutos}m ${segundos}s`
+              }
+            }
+          }
+        }
+      }
+    })
+  }
+  
+  // Filtrado de preguntas
+  
+  inicializarFiltros() {
+    // Si no hay filtros, salir
+    if (!this.hasQuestionFilterTarget) return
+    
+    // Inicializar contadores
+    this.actualizarContadores()
+  }
+  
+  filtrarPreguntas(event) {
+    const filtro = event.target.value
+    const preguntas = document.querySelectorAll('.pregunta-resultado')
+    
+    preguntas.forEach(pregunta => {
+      const esCorrecta = pregunta.dataset.correcta === "true"
+      
+      switch (filtro) {
+        case "todas":
+          pregunta.classList.remove("hidden")
+          break
+        case "correctas":
+          pregunta.classList.toggle("hidden", !esCorrecta)
+          break
+        case "incorrectas":
+          pregunta.classList.toggle("hidden", esCorrecta)
+          break
+      }
+    })
+  }
+  
+  actualizarContadores() {
+    if (!this.hasCorrectCountTarget || !this.hasIncorrectCountTarget) return
+    
+    const preguntas = document.querySelectorAll('.pregunta-resultado')
+    let correctas = 0
+    let incorrectas = 0
+    
+    preguntas.forEach(pregunta => {
+      if (pregunta.dataset.correcta === "true") {
+        correctas++
+      } else {
+        incorrectas++
+      }
+    })
+    
+    this.correctCountTarget.textContent = correctas
+    this.incorrectCountTarget.textContent = incorrectas
+  }
+  
+  // Funciones de detalle
+  
+  toggleDetalles(event) {
+    const detalleId = event.currentTarget.dataset.detalleTarget
+    const contenido = document.getElementById(detalleId)
+    
+    if (contenido) {
+      const estaExpandido = contenido.classList.contains("hidden")
+      
+      // Cambiar icono del toggle
+      const icono = event.currentTarget.querySelector("i") || event.currentTarget.querySelector("svg")
+      if (icono) {
+        if (estaExpandido) {
+          icono.classList.remove("fa-plus", "fa-chevron-down")
+          icono.classList.add("fa-minus", "fa-chevron-up")
+        } else {
+          icono.classList.remove("fa-minus", "fa-chevron-up")
+          icono.classList.add("fa-plus", "fa-chevron-down")
+        }
+      }
+      
+      // Mostrar/ocultar contenido
+      contenido.classList.toggle("hidden", !estaExpandido)
+      
+      // Cambiar texto del botn
+      if (event.currentTarget.dataset.toggleText) {
+        const textoOriginal = event.currentTarget.textContent
+        event.currentTarget.textContent = event.currentTarget.dataset.toggleText
+        event.currentTarget.dataset.toggleText = textoOriginal
+      }
+    }
+  }
+  
+  // Funciones de impresin
+  
+  imprimirResultados(event) {
+    event.preventDefault()
+    window.print()
+  }
+  
+  exportarPDF(event) {
+    event.preventDefault()
+    window.location.href = `/quizzes/${this.quizIdValue}/intentos/${this.intentoIdValue}/exportar?formato=pdf`
+  }
+  
+  // Funciones para compartir
+  
+  compartirResultados(event) {
+    event.preventDefault()
+    
+    // Crear enlace para compartir
+    const url = `${window.location.origin}/quizzes/${this.quizIdValue}/intentos/${this.intentoIdValue}/resultados`
+    
+    // Intentar usar la API Web Share si est disponible
+    if (navigator.share) {
+      navigator.share({
+        title: 'Resultados de mi Quiz',
+        text: `He obtenido ${this.puntajeValue}% en este quiz. Intntalo t tambin!`,
+        url: url
+      }).catch(error => {
+        console.log('Error compartiendo resultados', error)
+        this.copiarEnlace(url)
+      })
+    } else {
+      this.copiarEnlace(url)
+    }
+  }
+  
+  copiarEnlace(url) {
+    // Crear elemento temporal
+    const input = document.createElement('input')
+    input.value = url
+    document.body.appendChild(input)
+    input.select()
+    
+    // Copiar y notificar
+    try {
+      document.execCommand('copy')
+      alert('Enlace copiado al portapapeles')
+    } catch (err) {
+      console.error('Error al copiar', err)
+      alert('No se pudo copiar el enlace. Por favor, cpialo manualmente: ' + url)
+    }
+    
+    // Limpiar
+    document.body.removeChild(input)
+  }
+}

@@ -1,0 +1,219 @@
+<% content_for :page_title, "Resultado #{@result.id} - #{@quiz.titulo}" %>
+
+<div class="container mx-auto px-4 py-6">
+  <!-- Encabezado -->
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Resultado del Quiz</h1>
+      <p class="text-gray-600 dark:text-gray-400 mt-2">
+        <%= link_to @quiz.titulo, quiz_path(@quiz), class: "text-indigo-600 dark:text-indigo-400 hover:underline" %>
+        - Estudiante: <%= link_to @result.usuario.nombre_completo, usuario_path(@result.usuario), class: "text-indigo-600 dark:text-indigo-400 hover:underline" %>
+      </p>
+    </div>
+    <div class="flex space-x-2">
+      <%= link_to quiz_quiz_result_path(@quiz, @result, format: :pdf), class: "btn btn-outline-secondary" do %>
+        <i class="fas fa-file-pdf mr-2"></i> Exportar PDF
+      <% end %>
+      <%= link_to quiz_quiz_results_path(@quiz), class: "btn btn-outline-secondary" do %>
+        <i class="fas fa-arrow-left mr-2"></i> Volver a Resultados
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Tarjeta de resumen -->
+  <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden mb-6">
+    <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+      <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Resumen del Resultado</h2>
+    </div>
+    
+    <div class="p-6">
+      <div class="flex flex-col md:flex-row md:items-center">
+        <!-- Puntaje grande -->
+        <div class="flex flex-col items-center justify-center mb-6 md:mb-0 md:mr-10">
+          <div class="w-32 h-32 rounded-full flex items-center justify-center <%= @result.aprobado ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30' %>">
+            <span class="text-4xl font-bold <%= @result.aprobado ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
+              <%= number_to_percentage(@result.puntaje_total, precision: 1) %>
+            </span>
+          </div>
+          <div class="mt-2 text-center">
+            <span class="text-lg font-semibold <%= @result.aprobado ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
+              <%= @result.aprobado ? 'Aprobado' : 'Reprobado' %>
+            </span>
+          </div>
+          <div class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Posición #<%= @posicion %> de <%= @total_resultados %>
+          </div>
+        </div>
+        
+        <!-- Detalles -->
+        <div class="flex-grow grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Respuestas</h3>
+            <p class="text-lg font-semibold text-gray-800 dark:text-gray-200">
+              <%= @result.respuestas_correctas %> correctas de <%= @result.total_preguntas %>
+              (<%= number_to_percentage(@result.respuestas_correctas.to_f / @result.total_preguntas * 100, precision: 1) %>)
+            </p>
+          </div>
+          
+          <div>
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Tiempo utilizado</h3>
+            <p class="text-lg font-semibold text-gray-800 dark:text-gray-200">
+              <% if @result.tiempo_segundos %>
+                <%= distance_of_time_in_words(0, @result.tiempo_segundos) %>
+              <% else %>
+                No registrado
+              <% end %>
+            </p>
+          </div>
+          
+          <div>
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Fecha de realización</h3>
+            <p class="text-lg font-semibold text-gray-800 dark:text-gray-200">
+              <%= l @result.created_at, format: :long %>
+            </p>
+          </div>
+          
+          <div>
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Comparado con la media</h3>
+            <p class="text-lg font-semibold">
+              <% if @promedio > 0 %>
+                <% diff = @result.puntaje_total - @promedio %>
+                <span class="<%= diff >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
+                  <%= diff >= 0 ? '+' : '' %><%= number_to_percentage(diff, precision: 1) %>
+                </span>
+              <% else %>
+                <span class="text-gray-500 dark:text-gray-400">Sin datos</span>
+              <% end %>
+            </p>
+          </div>
+          
+          <div>
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Percentil</h3>
+            <p class="text-lg font-semibold text-gray-800 dark:text-gray-200">
+              <%= @percentil %>%
+            </p>
+          </div>
+          
+          <div>
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Intento #</h3>
+            <p class="text-lg font-semibold text-gray-800 dark:text-gray-200">
+              <%= @intento.numero_intento %> de <%= @quiz.intentos_permitidos %>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Recomendaciones -->
+  <% if @recomendaciones.any? %>
+    <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Recomendaciones</h2>
+      
+      <ul class="space-y-2 text-gray-700 dark:text-gray-300">
+        <% @recomendaciones.each do |recomendacion| %>
+          <li class="flex items-start">
+            <span class="text-blue-500 dark:text-blue-400 mr-2">
+              <i class="fas fa-lightbulb"></i>
+            </span>
+            <%= recomendacion %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+  
+  <!-- Detalle de respuestas -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <!-- Preguntas correctas -->
+    <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+      <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-green-50 dark:bg-green-900/20">
+        <h2 class="text-lg font-semibold text-green-800 dark:text-green-300">
+          <i class="fas fa-check-circle mr-2"></i> Respuestas Correctas (<%= @preguntas_correctas.size %>)
+        </h2>
+      </div>
+      
+      <div class="p-4">
+        <% if @preguntas_correctas.any? %>
+          <div class="divide-y divide-gray-200 dark:divide-gray-700">
+            <% @preguntas_correctas.each_with_index do |pregunta, index| %>
+              <div class="py-4">
+                <h3 class="font-medium text-gray-800 dark:text-gray-200 mb-2">
+                  <%= index + 1 %>. <%= pregunta.contenido.to_plain_text.truncate(100) %>
+                </h3>
+                <div class="flex items-center text-sm">
+                  <span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full text-gray-600 dark:text-gray-300 mr-2">
+                    <%= pregunta.tipo_display %>
+                  </span>
+                  <span class="text-gray-500 dark:text-gray-400">
+                    <%= pluralize(pregunta.puntaje, 'punto') %>
+                  </span>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-6 text-gray-500 dark:text-gray-400">
+            <p>No hay respuestas correctas en este intento.</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- Preguntas incorrectas -->
+    <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+      <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-red-50 dark:bg-red-900/20">
+        <h2 class="text-lg font-semibold text-red-800 dark:text-red-300">
+          <i class="fas fa-times-circle mr-2"></i> Respuestas Incorrectas (<%= @preguntas_incorrectas.size %>)
+        </h2>
+      </div>
+      
+      <div class="p-4">
+        <% if @preguntas_incorrectas.any? %>
+          <div class="divide-y divide-gray-200 dark:divide-gray-700">
+            <% @preguntas_incorrectas.each_with_index do |pregunta, index| %>
+              <div class="py-4">
+                <h3 class="font-medium text-gray-800 dark:text-gray-200 mb-2">
+                  <%= index + 1 %>. <%= pregunta.contenido.to_plain_text.truncate(100) %>
+                </h3>
+                <div class="flex items-center text-sm mb-2">
+                  <span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full text-gray-600 dark:text-gray-300 mr-2">
+                    <%= pregunta.tipo_display %>
+                  </span>
+                  <span class="text-gray-500 dark:text-gray-400">
+                    <%= pluralize(pregunta.puntaje, 'punto') %>
+                  </span>
+                </div>
+                
+                <% respuesta = @respuestas.find { |r| r.pregunta_id == pregunta.id } %>
+                <% if respuesta && pregunta.retroalimentacion.present? %>
+                  <div class="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 text-sm rounded-md">
+                    <div class="font-medium mb-1">Retroalimentación:</div>
+                    <%= pregunta.retroalimentacion %>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-6 text-gray-500 dark:text-gray-400">
+            <p>¡Todas las respuestas son correctas!</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Botones de acción -->
+  <div class="flex justify-center space-x-4 mt-6">
+    <%= link_to quiz_path(@quiz), class: "btn btn-outline-secondary" do %>
+      <i class="fas fa-arrow-left mr-2"></i> Volver al Quiz
+    <% end %>
+    
+    <% if current_usuario.id == @result.usuario_id && @quiz.intentos_disponibles_para?(current_usuario) %>
+      <%= link_to quiz_intentos_path(@quiz), method: :post, class: "btn btn-primary" do %>
+        <i class="fas fa-redo mr-2"></i> Intentar nuevamente
+      <% end %>
+    <% end %>
+  </div>
+</div>

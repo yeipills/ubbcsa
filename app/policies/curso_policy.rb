@@ -5,26 +5,39 @@ class CursoPolicy < ApplicationPolicy
   end
 
   def show?
-    user.profesor? || record.estudiante?(user)
+    user.admin? || user.profesor? || record.estudiante?(user)
   end
 
   def create?
-    user.profesor?
+    user.admin? || user.profesor?
   end
 
   def update?
-    user.profesor? && record.profesor?(user)
+    user.admin? || (user.profesor? && record.profesor?(user))
   end
 
   def destroy?
-    user.profesor? && record.profesor?(user)
+    user.admin? || (user.profesor? && record.profesor?(user))
   end
 
   def inscribir_estudiante?
-    user.profesor? && record.profesor?(user)
+    user.admin? || (user.profesor? && record.profesor?(user))
   end
 
   def desinscribir_estudiante?
-    user.profesor? && record.profesor?(user)
+    user.admin? || (user.profesor? && record.profesor?(user))
+  end
+  
+  class Scope < Scope
+    def resolve
+      if user.admin?
+        scope.all
+      elsif user.profesor?
+        scope.where(profesor_id: user.id)
+      else
+        # Para estudiantes, solo los cursos en los que están inscritos
+        user.cursos
+      end
+    end
   end
 end

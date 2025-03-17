@@ -1,0 +1,47 @@
+import consumer from "./consumer"
+
+let notificacionesSubscription = null;
+
+// FunciÃ³n para suscribirse al canal de notificaciones
+export function subscribeToNotificaciones(usuarioId, callbacks = {}) {
+  // Cancelar cualquier suscripciÃ³n existente
+  if (notificacionesSubscription) {
+    notificacionesSubscription.unsubscribe();
+  }
+  
+  // Crear nueva suscripciÃ³n
+  notificacionesSubscription = consumer.subscriptions.create(
+    { channel: "NotificacionesChannel", usuario_id: usuarioId },
+    {
+      connected() {
+        console.log("Conectado al canal de notificaciones");
+        if (callbacks.onConnected) callbacks.onConnected();
+      },
+      
+      disconnected() {
+        console.log("Desconectado del canal de notificaciones");
+        if (callbacks.onDisconnected) callbacks.onDisconnected();
+      },
+      
+      received(data) {
+        console.log("Nueva notificaciÃ³n recibida:", data);
+        if (callbacks.onReceived) callbacks.onReceived(data);
+      },
+      
+      // MÃ©todo para marcar una notificaciÃ³n como leÃ­da
+      marcarComoLeida(id) {
+        this.perform('marcar_como_leida', { id });
+      },
+      
+      // MÃ©todo para marcar todas las notificaciones como leÃ­das
+      marcarTodasComoLeidas() {
+        this.perform('marcar_como_leida', { todas: true });
+      }
+    }
+  );
+  
+  return notificacionesSubscription;
+}
+
+// Exportar tambiÃ©n la suscripciÃ³n actual
+export { notificacionesSubscription };

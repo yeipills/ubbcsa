@@ -1,0 +1,456 @@
+<% content_for :title, "Resultados - #{@quiz.titulo}" %>
+
+<div class="container mx-auto px-4 py-6 max-w-7xl"
+     data-controller="quiz-results"
+     data-quiz-results-intento-id-value="<%= @intento.id %>"
+     data-quiz-results-quiz-id-value="<%= @quiz.id %>"
+     data-quiz-results-puntaje-value="<%= @intento.puntaje_total %>"
+     data-quiz-results-comparacion-curso-value="<%= {
+       promedio: @promedio_curso,
+       mejor: @quiz.intentos.completado.maximum(:puntaje_total),
+       tiempo_usuario: @tiempo_total,
+       tiempo_promedio: @quiz.tiempo_promedio_segundos
+     }.to_json %>">
+
+  <!-- Cabecera con resultados generales -->
+  <div class="mb-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <nav class="flex" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+          <li class="inline-flex items-center">
+            <%= link_to quizzes_path, class: "inline-flex items-center text-sm font-medium text-gray-400 hover:text-blue-400" do %>
+              <svg class="mr-2 w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+              </svg>
+              Quizzes
+            <% end %>
+          </li>
+          <li>
+            <div class="flex items-center">
+              <svg class="w-6 h-6 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <%= link_to @quiz.titulo, quiz_path(@quiz), class: "ml-1 text-sm font-medium text-gray-400 hover:text-blue-400 md:ml-2 truncate max-w-[150px] sm:max-w-xs" %>
+            </div>
+          </li>
+          <li aria-current="page">
+            <div class="flex items-center">
+              <svg class="w-6 h-6 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">
+                Resultados
+              </span>
+            </div>
+          </li>
+        </ol>
+      </nav>
+      
+      <div class="flex items-center space-x-3">
+        <%= link_to quiz_path(@quiz), class: "inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors duration-200" do %>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+          </svg>
+          Volver al Quiz
+        <% end %>
+        
+        <button 
+          type="button"
+          data-action="quiz-results#imprimirResultados"
+          class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg bg-indigo-700 text-white hover:bg-indigo-600 transition-colors duration-200 print:hidden">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" />
+          </svg>
+          Imprimir
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resumen de resultados -->
+  <div class="bg-gradient-to-r from-indigo-900 to-blue-900 rounded-lg shadow-xl p-6 mb-8 border border-indigo-800/50 print:border print:border-gray-300 print:shadow-none print:bg-white print:text-black">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+      <div class="col-span-2">
+        <div class="flex flex-col md:flex-row md:items-center gap-4">
+          <div>
+            <h1 class="text-2xl font-bold text-white mb-2 print:text-black"><%= @quiz.titulo %></h1>
+            <p class="text-indigo-200 print:text-gray-700">Intento #<%= @intento.numero_intento %></p>
+            <div class="flex flex-col md:flex-row md:items-center gap-1 md:gap-4 text-indigo-200/80 text-sm mt-2 print:text-gray-700">
+              <p>Completado: <%= l @intento.finalizado_en, format: :long %></p>
+              <div class="hidden md:block w-1 h-1 rounded-full bg-indigo-400/50"></div>
+              <p>Duración: <%= distance_of_time_in_words(@intento.iniciado_en, @intento.finalizado_en) %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="flex justify-center md:justify-end">
+        <div class="relative">
+          <div class="w-32 h-32 rounded-full flex items-center justify-center bg-gradient-to-br <%= @intento.puntaje_total >= 60 ? 'from-green-500 to-emerald-700' : 'from-red-500 to-red-700' %> shadow-lg">
+            <span class="text-3xl font-bold text-white"><%= @intento.puntaje_total %>%</span>
+          </div>
+          <div class="absolute top-0 right-0 transform translate-x-1/4 -translate-y-1/4">
+            <div class="bg-gray-900 rounded-full p-2 border-2 <%= @intento.puntaje_total >= 60 ? 'border-green-500' : 'border-red-500' %>">
+              <% if @intento.puntaje_total >= 60 %>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+              <% else %>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-indigo-800/50 rounded-lg p-4 border border-indigo-700/50 print:bg-gray-100 print:border-gray-300">
+        <h2 class="text-sm font-medium text-indigo-300 mb-1 print:text-gray-700">Resultado</h2>
+        <p class="text-lg font-semibold text-white print:text-black"><%= @intento.resultado_texto %></p>
+      </div>
+      
+      <div class="bg-indigo-800/50 rounded-lg p-4 border border-indigo-700/50 print:bg-gray-100 print:border-gray-300">
+        <h2 class="text-sm font-medium text-indigo-300 mb-1 print:text-gray-700">Preguntas</h2>
+        <p class="text-lg font-semibold text-white print:text-black">
+          <%= @preguntas_correctas %> de <%= @preguntas.count %> correctas
+        </p>
+      </div>
+      
+      <div class="bg-indigo-800/50 rounded-lg p-4 border border-indigo-700/50 print:bg-gray-100 print:border-gray-300">
+        <h2 class="text-sm font-medium text-indigo-300 mb-1 print:text-gray-700">Tiempo empleado</h2>
+        <p class="text-lg font-semibold text-white print:text-black">
+          <% 
+            minutos = (@tiempo_total / 60).to_i
+            segundos = @tiempo_total % 60
+          %>
+          <%= minutos %> min <%= segundos %> seg
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección de gráficos y detalles -->
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <!-- Panel principal con resultados detallados -->
+    <div class="lg:col-span-3">
+      <!-- Filtros de preguntas -->
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <label for="pregunta-filtro" class="block text-gray-400 text-sm mb-1">Filtrar preguntas</label>
+          <select 
+            id="pregunta-filtro" 
+            data-quiz-results-target="questionFilter"
+            data-action="change->quiz-results#filtrarPreguntas"
+            class="bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 print:hidden">
+              <option value="todas">Todas las preguntas</option>
+              <option value="correctas">Solo correctas</option>
+              <option value="incorrectas">Solo incorrectas</option>
+          </select>
+        </div>
+        
+        <div class="text-right">
+          <p class="text-gray-400 text-sm mb-1">Respuestas</p>
+          <p class="text-sm">
+            <span data-quiz-results-target="correctCount" class="font-medium text-green-400"><%= @preguntas_correctas %></span> correctas, 
+            <span data-quiz-results-target="incorrectCount" class="font-medium text-red-400"><%= @preguntas.count - @preguntas_correctas %></span> incorrectas
+          </p>
+        </div>
+      </div>
+      
+      <!-- Lista de preguntas con respuestas -->
+      <div class="space-y-6 mb-6">
+        <% @preguntas.each_with_index do |pregunta, index| %>
+          <% respuesta = @respuestas[pregunta.id] %>
+          <div class="pregunta-resultado bg-gray-900 rounded-lg border <%= respuesta&.es_correcta? ? 'border-green-700' : 'border-red-700' %>" data-correcta="<%= respuesta&.es_correcta? || false %>">
+            <!-- Encabezado de pregunta -->
+            <div class="p-4 flex items-start justify-between border-b border-gray-800">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 mr-3">
+                  <span class="inline-flex h-8 w-8 items-center justify-center rounded-md <%= respuesta&.es_correcta? ? 'bg-green-900/50 text-green-300 border border-green-700/50' : 'bg-red-900/50 text-red-300 border border-red-700/50' %>">
+                    <%= index + 1 %>
+                  </span>
+                </div>
+                <div>
+                  <h3 class="text-white font-medium"><%= truncate(pregunta.contenido, length: 80) %></h3>
+                  <p class="text-gray-400 text-sm mt-1">
+                    <%= pregunta.tipo_display %> - <%= pregunta.puntaje %> puntos
+                    <% if respuesta&.puntaje_obtenido %>
+                      <span class="<%= respuesta.es_correcta? ? 'text-green-400' : 'text-red-400' %> ml-2">
+                        <%= respuesta.puntaje_obtenido %> puntos obtenidos
+                      </span>
+                    <% end %>
+                  </p>
+                </div>
+              </div>
+              
+              <div>
+                <% if respuesta&.es_correcta? %>
+                  <div class="bg-green-900/30 p-1 rounded">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                <% else %>
+                  <div class="bg-red-900/30 p-1 rounded">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                    </svg>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            
+            <!-- Detalles colapsables -->
+            <div class="p-4">
+              <button 
+                type="button"
+                data-quiz-results-target="detailToggle"
+                data-action="quiz-results#toggleDetalles"
+                data-detalle-target="detalles_<%= pregunta.id %>"
+                data-toggle-text="Ocultar detalles"
+                class="text-sm text-indigo-400 hover:text-indigo-300 mb-3 flex items-center focus:outline-none print:hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+                Ver detalles
+              </button>
+              
+              <!-- Contenido colapsable -->
+              <div id="detalles_<%= pregunta.id %>" class="hidden space-y-4 print:block">
+                <% if pregunta.imagen.attached? %>
+                  <div class="bg-gray-800 p-3 rounded-lg border border-gray-700 inline-block max-w-full">
+                    <%= image_tag url_for(pregunta.imagen), class: "max-w-full h-auto rounded" %>
+                  </div>
+                <% end %>
+                
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                  <h4 class="text-gray-300 font-medium mb-2">Pregunta completa:</h4>
+                  <p class="text-white"><%= simple_format(pregunta.contenido) %></p>
+                </div>
+                
+                <div class="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                  <h4 class="text-gray-300 font-medium mb-2">Tu respuesta:</h4>
+                  
+                  <% case pregunta.tipo %>
+                  <% when 'opcion_multiple', 'verdadero_falso' %>
+                    <% if respuesta&.opcion_id %>
+                      <div class="<%= respuesta.es_correcta? ? 'bg-green-900/20 text-green-300 border-green-800/30' : 'bg-red-900/20 text-red-300 border-red-800/30' %> p-3 rounded-lg border">
+                        <%= respuesta.opcion.contenido %>
+                      </div>
+                      
+                      <% if !respuesta.es_correcta? %>
+                        <div class="mt-3">
+                          <h5 class="text-sm text-gray-400">Respuesta correcta:</h5>
+                          <div class="bg-green-900/20 mt-1 p-3 rounded-lg border border-green-800/30 text-green-300">
+                            <%= pregunta.opciones.find_by(es_correcta: true)&.contenido || "No disponible" %>
+                          </div>
+                        </div>
+                      <% end %>
+                    <% else %>
+                      <p class="text-gray-500 italic">Sin respuesta</p>
+                    <% end %>
+                    
+                  <% when 'multiple_respuesta' %>
+                    <% 
+                      opciones_seleccionadas = []
+                      if respuesta&.opciones_multiples.present?
+                        begin
+                          ids = JSON.parse(respuesta.opciones_multiples)
+                          opciones_seleccionadas = pregunta.opciones.where(id: ids)
+                        rescue JSON::ParserError
+                          opciones_seleccionadas = []
+                        end
+                      end
+                    %>
+                    
+                    <% if opciones_seleccionadas.any? %>
+                      <div class="space-y-2">
+                        <% opciones_seleccionadas.each do |opcion| %>
+                          <div class="<%= opcion.es_correcta? ? 'bg-green-900/20 text-green-300 border-green-800/30' : 'bg-red-900/20 text-red-300 border-red-800/30' %> p-2 rounded-lg border">
+                            <%= opcion.contenido %>
+                          </div>
+                        <% end %>
+                      </div>
+                      
+                      <% if !respuesta.es_correcta? %>
+                        <div class="mt-3">
+                          <h5 class="text-sm text-gray-400">Opciones correctas que no seleccionaste:</h5>
+                          <div class="space-y-2 mt-1">
+                            <% 
+                              opciones_correctas_faltantes = pregunta.opciones.where(es_correcta: true)
+                                                                    .where.not(id: opciones_seleccionadas.select(&:es_correcta?).map(&:id))
+                            %>
+                            <% opciones_correctas_faltantes.each do |opcion| %>
+                              <div class="bg-green-900/20 p-2 rounded-lg border border-green-800/30 text-green-300">
+                                <%= opcion.contenido %>
+                              </div>
+                            <% end %>
+                          </div>
+                        </div>
+                      <% end %>
+                    <% else %>
+                      <p class="text-gray-500 italic">Sin respuesta</p>
+                    <% end %>
+                    
+                  <% when 'respuesta_corta' %>
+                    <% if respuesta&.respuesta_texto.present? %>
+                      <div class="<%= respuesta.es_correcta? ? 'bg-green-900/20 text-green-300 border-green-800/30' : 'bg-red-900/20 text-red-300 border-red-800/30' %> p-3 rounded-lg border">
+                        <%= respuesta.respuesta_texto %>
+                      </div>
+                      
+                      <% if !respuesta.es_correcta? %>
+                        <div class="mt-3">
+                          <h5 class="text-sm text-gray-400">Respuesta correcta:</h5>
+                          <div class="bg-green-900/20 mt-1 p-3 rounded-lg border border-green-800/30 text-green-300">
+                            <%= pregunta.respuesta_correcta %>
+                          </div>
+                        </div>
+                      <% end %>
+                      
+                      <% if respuesta.comentario_revision.present? %>
+                        <div class="mt-3 p-3 bg-indigo-900/20 rounded-lg border border-indigo-800/30">
+                          <h5 class="text-sm text-indigo-300 font-medium">Comentario del revisor:</h5>
+                          <p class="text-indigo-200 mt-1"><%= respuesta.comentario_revision %></p>
+                        </div>
+                      <% end %>
+                    <% else %>
+                      <p class="text-gray-500 italic">Sin respuesta</p>
+                    <% end %>
+                    
+                  <% when 'emparejamiento' %>
+                    <% 
+                      pares_seleccionados = {}
+                      if respuesta&.respuesta_texto.present?
+                        begin
+                          pares_seleccionados = JSON.parse(respuesta.respuesta_texto)
+                        rescue JSON::ParserError
+                          pares_seleccionados = {}
+                        end
+                      end
+                    %>
+                    
+                    <% if pares_seleccionados.any? %>
+                      <div class="space-y-3">
+                        <% pregunta.terminos.each do |termino| %>
+                          <% 
+                            par_seleccionado_id = pares_seleccionados[termino.id.to_s]
+                            par_correcto_id = termino.par_relacionado["id"].to_s
+                            par_seleccionado = pregunta.opciones.find_by(id: par_seleccionado_id)
+                            par_correcto = pregunta.opciones.find_by(id: par_correcto_id)
+                            es_correcto = par_seleccionado_id == par_correcto_id
+                          %>
+                          
+                          <div class="flex items-center">
+                            <div class="bg-gray-700 p-2 rounded-lg w-1/2 text-white"><%= termino.contenido %></div>
+                            <div class="text-gray-400 mx-2">→</div>
+                            <div class="<%= es_correcto ? 'bg-green-900/20 text-green-300 border-green-800/30' : 'bg-red-900/20 text-red-300 border-red-800/30' %> p-2 rounded-lg border w-1/2">
+                              <%= par_seleccionado&.contenido || "No seleccionado" %>
+                              
+                              <% if !es_correcto && par_correcto %>
+                                <div class="mt-1 text-xs">
+                                  <span class="text-gray-400">Respuesta correcta:</span>
+                                  <span class="text-green-300 ml-1"><%= par_correcto.contenido %></span>
+                                </div>
+                              <% end %>
+                            </div>
+                          </div>
+                        <% end %>
+                      </div>
+                    <% else %>
+                      <p class="text-gray-500 italic">Sin respuesta</p>
+                    <% end %>
+                  <% end %>
+                </div>
+                
+                <% if pregunta.retroalimentacion.present? %>
+                  <div class="bg-indigo-900/20 p-4 rounded-lg border border-indigo-800/30">
+                    <h4 class="text-indigo-300 font-medium mb-2">Retroalimentación:</h4>
+                    <p class="text-indigo-200"><%= pregunta.retroalimentacion %></p>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- Panel lateral con estadísticas -->
+    <div class="lg:col-span-1">
+      <div class="sticky top-6 space-y-6">
+        <!-- Resumen estadístico -->
+        <div class="bg-gray-900 rounded-lg border border-gray-700 overflow-hidden shadow-md">
+          <div class="p-4 bg-gray-800">
+            <h3 class="font-medium text-white">Comparativa</h3>
+          </div>
+          <div class="p-4">
+            <!-- Gráfico de rendimiento -->
+            <div class="mb-6">
+              <h4 class="text-sm font-medium text-gray-400 mb-3">Puntaje vs Promedio</h4>
+              <div class="h-40">
+                <canvas 
+                  data-quiz-results-target="chart" 
+                  data-chart-type="comparacion"
+                  class="print:hidden"></canvas>
+                <!-- Versión para impresión -->
+                <div class="hidden print:block">
+                  <p class="text-black font-medium">Tu puntaje: <%= @intento.puntaje_total %>%</p>
+                  <p class="text-black">Promedio del curso: <%= @promedio_curso.round(1) %>%</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Gráfico circular de respuestas -->
+            <div class="mb-6">
+              <h4 class="text-sm font-medium text-gray-400 mb-3">Respuestas</h4>
+              <div class="h-40">
+                <canvas 
+                  data-quiz-results-target="chart" 
+                  data-chart-type="puntaje"
+                  class="print:hidden"></canvas>
+                <!-- Versión para impresión -->
+                <div class="hidden print:block">
+                  <p class="text-black"><%= @preguntas_correctas %> correctas, <%= @preguntas.count - @preguntas_correctas %> incorrectas</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Comparativa de tiempo -->
+            <div>
+              <h4 class="text-sm font-medium text-gray-400 mb-3">Tiempo Invertido</h4>
+              <div class="h-40">
+                <canvas 
+                  data-quiz-results-target="chart" 
+                  data-chart-type="tiempo"
+                  class="print:hidden"></canvas>
+                <!-- Versión para impresión -->
+                <div class="hidden print:block">
+                  <p class="text-black font-medium">Tu tiempo: <%= (@tiempo_total / 60).to_i %> min <%= @tiempo_total % 60 %> seg</p>
+                  <p class="text-black">Tiempo promedio: <%= (@quiz.tiempo_promedio_segundos / 60).to_i %> min <%= @quiz.tiempo_promedio_segundos % 60 %> seg</p>
+                </div>
+              </div>
+            </div>
+            
+            <% if @posicion_ranking && @total_intentos > 0 %>
+              <div class="mt-6 text-center">
+                <p class="text-gray-400 mb-1">Posición en el ranking:</p>
+                <p class="text-xl font-bold text-white">
+                  <%= @posicion_ranking %> de <%= @total_intentos %>
+                </p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Información del pie de página para impresión -->
+  <div class="hidden print:block mt-12 pt-8 border-t border-gray-300 text-black text-xs">
+    <p>Resultados generados el <%= Time.current.strftime("%d/%m/%Y %H:%M") %></p>
+    <p>Quiz: <%= @quiz.titulo %> | Estudiante: <%= current_usuario.nombre_completo %></p>
+  </div>
+</div>

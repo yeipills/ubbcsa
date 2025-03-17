@@ -1,0 +1,166 @@
+<% content_for :page_title, "Gestionar preguntas - #{@quiz.titulo}" %>
+
+<div class="container mx-auto px-4 py-6">
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Preguntas del Quiz</h1>
+      <p class="text-gray-600 dark:text-gray-400 mt-2">
+        <%= @quiz.titulo %> - Curso: <%= link_to @quiz.curso.nombre, curso_path(@quiz.curso), class: "text-indigo-600 dark:text-indigo-400 hover:underline" %>
+      </p>
+    </div>
+    <div class="flex space-x-2">
+      <%= link_to new_quiz_pregunta_path(@quiz), class: "btn btn-primary" do %>
+        <i class="fas fa-plus mr-1"></i> Nueva pregunta
+      <% end %>
+      <%= link_to quiz_path(@quiz), class: "btn btn-outline-secondary" do %>
+        <i class="fas fa-arrow-left mr-1"></i> Volver al quiz
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Resumen del quiz -->
+  <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="stat-card">
+        <div class="text-sm text-gray-500 dark:text-gray-400">Total preguntas</div>
+        <div class="text-2xl font-bold"><%= @preguntas.count %></div>
+      </div>
+      <div class="stat-card">
+        <div class="text-sm text-gray-500 dark:text-gray-400">Puntaje total</div>
+        <div class="text-2xl font-bold"><%= @preguntas.sum(:puntaje) %> pts</div>
+      </div>
+      <div class="stat-card">
+        <div class="text-sm text-gray-500 dark:text-gray-400">Estado</div>
+        <div class="text-2xl font-bold">
+          <% if @quiz.borrador? %>
+            <span class="text-yellow-500">Borrador</span>
+          <% elsif @quiz.publicado? %>
+            <span class="text-green-500">Publicado</span>
+          <% else %>
+            <span class="text-red-500">Cerrado</span>
+          <% end %>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="text-sm text-gray-500 dark:text-gray-400">Fecha límite</div>
+        <div class="text-2xl font-bold"><%= l @quiz.fecha_fin, format: :short %></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de preguntas -->
+  <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden mb-6">
+    <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+      <h2 class="text-xl font-bold text-gray-800 dark:text-white">Preguntas (<%= @preguntas.count %>)</h2>
+      <div class="text-sm text-gray-600 dark:text-gray-400">Arrastra para reordenar</div>
+    </div>
+
+    <% if @preguntas.any? %>
+      <div id="preguntas-sortable" class="divide-y divide-gray-200 dark:divide-gray-700">
+        <% @preguntas.order(:orden).each do |pregunta| %>
+          <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-750 flex items-center" data-pregunta-id="<%= pregunta.id %>">
+            <div class="mr-3 cursor-move handle">
+              <i class="fas fa-grip-vertical text-gray-400"></i>
+            </div>
+            
+            <div class="flex-grow">
+              <div class="flex items-start">
+                <div class="h-7 w-7 flex items-center justify-center rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-800 dark:text-indigo-100 mr-3">
+                  <%= pregunta.orden %>
+                </div>
+                <div>
+                  <h3 class="font-medium text-gray-900 dark:text-white">
+                    <%= truncate(pregunta.contenido.to_plain_text.strip, length: 100) %>
+                  </h3>
+                  <div class="mt-1 flex items-center space-x-2">
+                    <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                      <%= t("activerecord.attributes.quiz_pregunta.tipos.#{pregunta.tipo}") %>
+                    </span>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                      <%= pluralize(pregunta.puntaje, 'punto') %>
+                    </span>
+                    <% if pregunta.opciones.any? %>
+                      <span class="text-sm text-gray-500 dark:text-gray-400">
+                        <%= pluralize(pregunta.opciones.count, 'opción') %>
+                      </span>
+                    <% end %>
+                    <% if pregunta.imagen.attached? %>
+                      <span class="text-sm text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-image"></i> Imagen
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="flex space-x-2">
+              <%= link_to edit_quiz_pregunta_path(@quiz, pregunta), class: "btn btn-outline-secondary btn-sm" do %>
+                <i class="fas fa-edit"></i>
+              <% end %>
+              <%= button_to delete_quiz_pregunta_path(@quiz, pregunta), method: :delete, form: { data: { turbo_confirm: '¿Estás seguro? Esta acción no se puede deshacer.' } }, class: "btn btn-outline-danger btn-sm" do %>
+                <i class="fas fa-trash"></i>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="p-6 text-center text-gray-500 dark:text-gray-400">
+        <p>Este quiz no tiene preguntas. Haz clic en "Nueva pregunta" para comenzar.</p>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Consejos -->
+  <div class="bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 p-4 rounded-lg">
+    <h3 class="font-semibold">Consejos para crear un buen quiz:</h3>
+    <ul class="mt-2 list-disc pl-5 space-y-1">
+      <li>Incluye preguntas de diferentes tipos para evaluar distintas habilidades</li>
+      <li>Ordena las preguntas de menor a mayor dificultad</li>
+      <li>Asigna puntajes mayores a las preguntas más complejas</li>
+      <li>Proporciona retroalimentación específica para cada pregunta</li>
+      <li>Revisa cuidadosamente la ortografía y gramática</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('turbo:load', function() {
+    if (document.getElementById('preguntas-sortable')) {
+      new Sortable(document.getElementById('preguntas-sortable'), {
+        handle: '.handle',
+        animation: 150,
+        onEnd: function(evt) {
+          // Actualizar el orden
+          const preguntas = document.querySelectorAll('#preguntas-sortable > div');
+          const orden = {};
+          
+          preguntas.forEach((pregunta, index) => {
+            const preguntaId = pregunta.dataset.preguntaId;
+            orden[preguntaId] = index + 1;
+          });
+          
+          // Enviar al servidor
+          fetch('<%= reordenar_quiz_preguntas_path(@quiz) %>', {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ orden: orden })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.error) {
+              console.error('Error al reordenar:', data.error);
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+        }
+      });
+    }
+  });
+</script>
