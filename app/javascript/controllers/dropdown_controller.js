@@ -16,6 +16,7 @@ export default class extends Controller {
   
   toggle(event) {
     event.stopPropagation()
+    console.log("Toggling dropdown menu")
     this.menuTarget.classList.toggle("hidden")
   }
   

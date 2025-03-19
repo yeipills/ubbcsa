@@ -1,3 +1,4 @@
+<%# app/views/quizzes/index.html.erb %>
 <div class="min-h-screen bg-gray-900">
   <%= content_for :navbar do %>
     <%= render 'shared/navbar' %>
@@ -8,85 +9,144 @@
     <div class="mb-8">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-white">Quizzes</h1>
+          <h1 class="text-2xl sm:text-3xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500">Quizzes</h1>
           <p class="mt-2 text-sm sm:text-base text-gray-400">Gestiona y realiza evaluaciones en línea</p>
         </div>
 
         <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <% if current_usuario.profesor? %>
-            <!-- Selector de curso para crear quiz -->
-            <div class="dropdown">
-              <input type="checkbox" id="dropdown-toggle" class="dropdown-toggle sr-only">
-              <label for="dropdown-toggle" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-200 w-full sm:w-auto cursor-pointer">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- Botón nuevo quiz con menú desplegable mejorado -->
+            <div class="dropdown relative">
+              <button type="button" class="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-lg transition-all duration-300 w-full sm:w-auto" id="dropdown-toggle">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
                 Nuevo Quiz
-              </label>
+              </button>
               
-              <div class="dropdown-content bg-gray-800 rounded-lg shadow-lg mt-2">
-                <% current_usuario.cursos_como_profesor.each do |curso| %>
-                  <%= link_to new_curso_quiz_path(curso), class: "block px-4 py-2 text-white hover:bg-gray-700" do %>
-                    Crear Quiz en <%= curso.nombre %>
+              <div class="dropdown-content hidden absolute right-0 mt-2 w-64 bg-gray-800 rounded-lg shadow-xl border border-gray-700 z-50 transition-all duration-200 transform origin-top-right" id="dropdown-menu">
+                <div class="p-3 border-b border-gray-700">
+                  <h3 class="text-sm font-medium text-gray-300">Selecciona un curso</h3>
+                </div>
+                <div class="max-h-60 overflow-y-auto py-1">
+                  <% current_usuario.cursos_como_profesor.each do |curso| %>
+                    <%= link_to new_curso_quiz_path(curso), class: "flex items-center px-4 py-3 text-white hover:bg-gray-700 transition-colors" do %>
+                      <div class="w-8 h-8 rounded-full bg-indigo-900/60 flex items-center justify-center text-indigo-300 mr-3">
+                        <%= curso.nombre[0,2].upcase %>
+                      </div>
+                      <div>
+                        <p class="font-medium"><%= curso.nombre %></p>
+                        <p class="text-xs text-gray-400"><%= pluralize(curso.quizzes.count, 'quiz existente') %></p>
+                      </div>
+                    <% end %>
                   <% end %>
+                </div>
+                <% if current_usuario.cursos_como_profesor.empty? %>
+                  <div class="p-4 text-center text-gray-400 text-sm">
+                    <p>No tienes cursos disponibles para crear quizzes.</p>
+                    <%= link_to "Crear un curso primero", new_curso_path, class: "text-blue-400 hover:text-blue-300 mt-1 inline-block" %>
+                  </div>
                 <% end %>
               </div>
             </div>
           <% end %>
 
-          <!-- Filtros -->
-          <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            <%= form_with url: quizzes_path, method: :get, class: "flex flex-col sm:flex-row gap-3" do |f| %>
-              <%= f.select :curso_id, 
-                  options_from_collection_for_select(current_usuario.todos_cursos, :id, :nombre, params[:curso_id]),
-                  { include_blank: 'Todos los cursos' },
-                  { class: "bg-gray-800 text-white rounded-md border border-gray-700 px-3 py-2 w-full sm:w-auto",
-                    onchange: 'this.form.submit()' } %>
+          <!-- Filtros mejorados con animación y diseño más integrado -->
+          <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto bg-gray-800/50 p-2 rounded-lg backdrop-blur-sm">
+            <%= form_with url: quizzes_path, method: :get, class: "flex flex-col sm:flex-row gap-3 w-full" do |f| %>
+              <div class="relative">
+                <%= f.select :curso_id, 
+                    options_from_collection_for_select(current_usuario.todos_cursos, :id, :nombre, params[:curso_id]),
+                    { include_blank: 'Todos los cursos' },
+                    { class: "appearance-none bg-gray-800 text-white rounded-md border border-gray-700 pl-3 pr-10 py-2 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500",
+                      onchange: 'this.form.submit()' } %>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
               
-              <%= f.select :estado, 
-                  options_for_select([
-                    ['Todos los estados', ''],
-                    ['Borrador', 'borrador'],
-                    ['Publicado', 'publicado'],
-                    ['Cerrado', 'cerrado']
-                  ], params[:estado]),
-                  {},
-                  { class: "bg-gray-800 text-white rounded-md border border-gray-700 px-3 py-2 w-full sm:w-auto",
-                    onchange: 'this.form.submit()' } %>
+              <div class="relative">
+                <%= f.select :estado, 
+                    options_for_select([
+                      ['Todos los estados', ''],
+                      ['Borrador', 'borrador'],
+                      ['Publicado', 'publicado'],
+                      ['Cerrado', 'cerrado']
+                    ], params[:estado]),
+                    {},
+                    { class: "appearance-none bg-gray-800 text-white rounded-md border border-gray-700 pl-3 pr-10 py-2 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-500",
+                      onchange: 'this.form.submit()' } %>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+              
+              <!-- Botón de búsqueda adicional -->
+              <div class="relative flex-grow sm:max-w-xs">
+                <%= f.text_field :query, value: params[:query], placeholder: "Buscar quiz...", class: "bg-gray-800 text-white rounded-md border border-gray-700 px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 pl-10" %>
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+              </div>
             <% end %>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Listado de Quizzes -->
+    <!-- Listado de Quizzes con nuevo diseño de tarjetas -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <% if @quizzes.any? %>
         <% @quizzes.each do |quiz| %>
-          <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg border border-gray-700 hover:border-blue-500 transition-all duration-200">
-            <div class="p-6">
-              <div class="flex justify-between items-start mb-3">
-                <h2 class="text-lg font-bold text-white"><%= quiz.titulo %></h2>
-                <span class="px-2 py-1 text-xs font-medium rounded-full <%= estado_quiz_badge(quiz.estado) %>">
+          <div class="bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-700/50 hover:border-blue-500/50 transition-all duration-300 hover:shadow-blue-900/20 hover:shadow-2xl group">
+            <div class="relative h-24 bg-gradient-to-r from-gray-700 to-gray-800 border-b border-gray-700/50">
+              <!-- Indicador de estado -->
+              <div class="absolute top-0 right-0 mt-4 mr-4">
+                <span class="px-2 py-1 text-xs font-medium rounded-full 
+                      <%= case quiz.estado
+                          when 'borrador' then 'bg-gray-900/80 text-gray-300 border border-gray-600'
+                          when 'publicado' then 'bg-green-900/80 text-green-300 border border-green-600'
+                          when 'cerrado' then 'bg-red-900/80 text-red-300 border border-red-600'
+                          end %> backdrop-blur-sm">
                   <%= quiz.estado.titleize %>
                 </span>
               </div>
               
-              <p class="text-sm text-gray-400 mb-4 line-clamp-3"><%= quiz.descripcion %></p>
+              <!-- Fecha prominente -->
+              <div class="absolute bottom-0 left-0 ml-6 mb-0 translate-y-1/2 bg-gray-900 rounded-lg shadow-md px-3 py-2 border border-gray-700">
+                <div class="text-center">
+                  <span class="text-xs text-gray-400 block">Fecha límite</span>
+                  <span class="text-white font-semibold"><%= quiz.fecha_fin.present? ? l(quiz.fecha_fin, format: :short) : 'Sin fecha' %></span>
+                </div>
+              </div>
               
-              <div class="grid grid-cols-2 gap-y-2 mb-4 text-xs sm:text-sm text-gray-400">
+              <!-- Curso indicador -->
+              <div class="absolute top-0 left-0 mt-4 ml-4">
+                <div class="flex items-center">
+                  <div class="h-6 w-6 rounded-full bg-indigo-900/60 flex items-center justify-center text-indigo-300 text-xs">
+                    <%= quiz.curso.nombre[0,2].upcase %>
+                  </div>
+                  <span class="ml-2 text-xs text-gray-300 font-medium"><%= quiz.curso.nombre %></span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="p-6 pt-8">
+              <h2 class="text-lg font-bold text-white truncate group-hover:text-blue-400 transition-colors"><%= quiz.titulo %></h2>
+              <p class="text-sm text-gray-400 mt-2 line-clamp-2 h-10"><%= quiz.descripcion %></p>
+              
+              <div class="grid grid-cols-2 gap-y-2 mt-4 text-xs sm:text-sm text-gray-400">
                 <div class="flex items-center">
                   <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                   </svg>
                   <span><%= quiz.tiempo_limite %> min</span>
-                </div>
-                
-                <div class="flex items-center">
-                  <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                  </svg>
-                  <span><%= quiz.fecha_fin.present? ? l(quiz.fecha_fin, format: :short) : 'Sin fecha' %></span>                
                 </div>
                 
                 <div class="flex items-center">
@@ -102,33 +162,99 @@
                   </svg>
                   <span><%= quiz.intentos_permitidos %> intentos</span>
                 </div>
+                
+                <% if current_usuario.estudiante? && quiz.intentos.where(usuario: current_usuario).exists? %>
+                  <div class="flex items-center">
+                    <svg class="w-4 h-4 mr-1.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>
+                      <% mejor_intento = quiz.intentos.where(usuario: current_usuario).order(puntaje_total: :desc).first %>
+                      <% if mejor_intento %>
+                        <%= number_to_percentage(mejor_intento.puntaje_total, precision: 0) %>
+                      <% else %>
+                        En progreso
+                      <% end %>
+                    </span>
+                  </div>
+                <% end %>
               </div>
               
-              <div class="flex justify-between items-center pt-4 border-t border-gray-700">
-                <div class="text-sm text-gray-400">
-                  <span><%= quiz.curso.nombre %></span>
-                </div>
+              <div class="mt-6 pt-4 border-t border-gray-700/50 flex justify-between items-center">
+                <!-- Indicador de progreso (para estudiantes) -->
+                <% if current_usuario.estudiante? %>
+                  <div class="flex items-center">
+                    <% intentos_hechos = quiz.intentos.where(usuario: current_usuario).count %>
+                    <% if intentos_hechos > 0 %>
+                      <div class="w-10 h-10 rounded-full <%= intentos_hechos >= quiz.intentos_permitidos ? 'bg-red-900/30 text-red-300' : 'bg-blue-900/30 text-blue-300' %> flex items-center justify-center mr-3">
+                        <%= intentos_hechos %>/<%= quiz.intentos_permitidos %>
+                      </div>
+                      <div class="text-xs text-gray-400">
+                        <% if intentos_hechos >= quiz.intentos_permitidos %>
+                          <span class="text-red-400">Sin intentos</span>
+                        <% else %>
+                          <span><%= pluralize(quiz.intentos_permitidos - intentos_hechos, 'intento') %> disponible</span>
+                        <% end %>
+                      </div>
+                    <% else %>
+                      <div class="text-xs text-gray-400">No iniciado</div>
+                    <% end %>
+                  </div>
+                <% else %>
+                  <!-- Para profesores: mostrar tasa de completado -->
+                  <div class="flex items-center">
+                    <% total_estudiantes = quiz.curso.estudiantes.count %>
+                    <% completados = quiz.intentos.select(:usuario_id).distinct.count %>
+                    <% if total_estudiantes > 0 %>
+                      <div class="w-8 h-8 rounded-full overflow-hidden mr-2">
+                        <svg viewBox="0 0 36 36" class="circular-chart">
+                          <path class="circle-bg" 
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
+                                fill="none" 
+                                stroke="#2a323c" 
+                                stroke-width="3"/>
+                          <path class="circle" 
+                                stroke-dasharray="<%= completados * 100.0 / total_estudiantes %>, 100" 
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
+                                fill="none" 
+                                stroke="#3b82f6" 
+                                stroke-width="3"/>
+                        </svg>
+                      </div>
+                      <span class="text-xs text-gray-400"><%= completados %>/<%= total_estudiantes %> completados</span>
+                    <% else %>
+                      <span class="text-xs text-gray-400">Sin estudiantes</span>
+                    <% end %>
+                  </div>
+                <% end %>
                 
                 <%= link_to quiz_path(quiz), 
-                    class: "px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors duration-200" do %>
-                  Ver Detalles
+                    class: "px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors duration-200 group-hover:shadow-lg" do %>
+                  <span class="flex items-center">
+                    <span>Ver Detalles</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 transition-transform duration-200 group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
                 <% end %>
               </div>
             </div>
           </div>
         <% end %>
       <% else %>
-        <div class="col-span-3 bg-gray-800 rounded-lg shadow-lg border border-gray-700 p-8 text-center">
-          <svg class="mx-auto h-16 w-16 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-          </svg>
+        <div class="col-span-3 bg-gray-800 rounded-xl shadow-lg border border-gray-700 p-8 text-center">
+          <div class="inline-block p-6 bg-gray-900/60 rounded-full mb-4">
+            <svg class="mx-auto h-16 w-16 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+          </div>
           <h3 class="mt-4 text-xl font-bold text-white">No hay quizzes disponibles</h3>
-          <p class="mt-2 text-gray-400">No se encontraron quizzes con los criterios seleccionados.</p>
+          <p class="mt-2 text-gray-400 max-w-md mx-auto">No se encontraron quizzes con los criterios seleccionados. Intenta cambiar los filtros o crea un nuevo quiz.</p>
           
           <% if current_usuario.profesor? && current_usuario.cursos_como_profesor.any? %>
             <div class="mt-6">
               <%= link_to new_curso_quiz_path(current_usuario.cursos_como_profesor.first), 
-                  class: "inline-flex items-center px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200" do %>
+                  class: "inline-flex items-center px-5 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg transition-colors duration-300 shadow-lg hover:shadow-blue-900/20" do %>
                 <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -139,42 +265,63 @@
         </div>
       <% end %>
     </div>
+    
+    <% if @quizzes.any? && @quizzes.respond_to?(:total_pages) && (@quizzes.respond_to?(:total_count) && @quizzes.respond_to?(:limit_value) && @quizzes.total_count > @quizzes.limit_value) %>
+      <div class="mt-8 flex justify-center">
+        <nav class="relative z-0 inline-flex rounded-md shadow-sm" aria-label="Pagination">
+          <%= paginate @quizzes rescue pagination_manual(@quizzes) %>
+        </nav>
+      </div>
+    <% end %>
   </div>
 </div>
 
 <style>
 .dropdown {
   position: relative;
-  display: inline-block;
 }
 
-.dropdown-content {
-  display: none;
-  position: absolute;
-  min-width: 200px;
-  z-index: 10;
-}
-
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
-}
-
-/* Esto mantiene el menú abierto cuando se hace clic en el botón */
-.dropdown-toggle:checked ~ .dropdown-content {
+.dropdown:hover .dropdown-content {
   display: block;
 }
 
-/* Mantener compatibilidad con hover para escritorio */
-@media (hover: hover) {
-  .dropdown:hover .dropdown-content {
-    display: block;
-  }
+/* Gráfico circular para progreso */
+.circular-chart {
+  width: 100%;
+  height: 100%;
+}
+
+.circle-bg {
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+.circle {
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.8s ease;
 }
 </style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Toggle para el menú desplegable en móvil
+    const dropdownToggle = document.getElementById('dropdown-toggle');
+    const dropdownMenu = document.getElementById('dropdown-menu');
+    
+    if (dropdownToggle && dropdownMenu) {
+      dropdownToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('hidden');
+      });
+      
+      // Cerrar al hacer clic fuera
+      document.addEventListener('click', function(e) {
+        if (!dropdownMenu.contains(e.target) && !dropdownToggle.contains(e.target)) {
+          dropdownMenu.classList.add('hidden');
+        }
+      });
+    }
+  });
+</script>

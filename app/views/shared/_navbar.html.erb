@@ -40,10 +40,10 @@
               <% end %>
             <% end %>
             
-            <%= link_to quizzes_path, 
-                class: "text-gray-300 hover:text-white text-sm font-medium transition-colors duration-200 relative #{controller_name == 'quizzes' ? 'text-white' : ''}" do %>
+            <%= link_to quiz_resumen_path, 
+                class: "text-gray-300 hover:text-white text-sm font-medium transition-colors duration-200 relative #{controller_name == 'quizzes' || controller_name == 'quiz_resumen' || controller_name == 'intentos_quiz' || controller_name == 'quiz_results' ? 'text-white' : ''}" do %>
               Quizzes
-              <% if controller_name == 'quizzes' %>
+              <% if controller_name == 'quizzes' || controller_name == 'quiz_resumen' || controller_name == 'intentos_quiz' || controller_name == 'quiz_results' %>
                 <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-blue-500 rounded-full"></span>
               <% end %>
             <% end %>
@@ -60,16 +60,21 @@
           <%# Notificaciones y perfil de usuario %>
           <div class="flex items-center space-x-4">
             <%# Componente de notificaciones %>
-            <div class="relative" data-controller="notifications">
-                <button type="button" class="flex items-center justify-center h-8 w-8 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all duration-200 focus:outline-none">
+            <div class="relative">
+                <button type="button" class="flex items-center justify-center h-8 w-8 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-all duration-200 focus:outline-none" id="notificaciones-button" onclick="toggleNotificacionesMenu()">
                   <span class="sr-only">Ver notificaciones</span>
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                   </svg>
+                  
+                  <!-- Contador de notificaciones -->
+                  <span class="absolute top-0 right-0 bg-red-500 text-white rounded-full h-4 w-4 flex items-center justify-center text-xs <%= current_usuario.notificaciones.no_leidas.count == 0 ? 'hidden' : '' %>" id="notificaciones-contador">
+                    <%= current_usuario.notificaciones.no_leidas.count %>
+                  </span>
                 </button>
               <div 
                 class="origin-top-right absolute right-0 mt-2 w-80 rounded-lg shadow-lg py-1 bg-gray-800 border border-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none z-50 hidden"
-                data-notifications-target="dropdown"
+                id="notificaciones-menu"
                 role="menu" 
                 aria-orientation="vertical" 
                 aria-labelledby="notificaciones-menu"
@@ -79,7 +84,7 @@
                   <a href="<%= notificaciones_path %>" class="text-blue-400 hover:text-blue-300 text-xs">Ver todas</a>
                 </div>
                 
-                <div data-notifications-target="content" class="max-h-96 overflow-y-auto">
+                <div data-notificaciones-target="lista" class="max-h-96 overflow-y-auto">
                   <% if usuario_signed_in? && current_usuario.notificaciones.recientes.exists? %>
                     <% current_usuario.notificaciones.recientes.limit(5).each do |notificacion| %>
                       <%= render 'notificaciones/notificacion', notificacion: notificacion %>
@@ -95,7 +100,7 @@
                   <% if usuario_signed_in? && current_usuario.notificaciones.no_leidas.exists? %>
                     <button 
                       class="text-blue-400 hover:text-blue-300"
-                      data-action="click->notifications#markAllAsRead"
+                      data-action="notificaciones#marcarTodasLeidas"
                     >
                       Marcar todas como leídas
                     </button>
@@ -105,6 +110,8 @@
                   <a href="<%= preferencias_notificaciones_path %>" class="text-blue-400 hover:text-blue-300">Preferencias</a>
                 </div>
               </div>
+              <!-- Contenedor para notificaciones toast -->
+              <div data-notificaciones-target="toast" class="toast-container"></div>
             </div>
 
             <%# Perfil usuario con hover mejorado %>
@@ -201,8 +208,8 @@
               </div>
             <% end %>
             
-            <%= link_to quizzes_path, 
-                class: "block py-2 px-3 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm font-medium transition-colors duration-200 #{controller_name == 'quizzes' ? 'text-white bg-gray-800 border-l-2 border-blue-500 pl-4' : ''}" do %>
+            <%= link_to quiz_resumen_path, 
+                class: "block py-2 px-3 rounded-lg text-gray-300 hover:text-white hover:bg-gray-800 text-sm font-medium transition-colors duration-200 #{controller_name == 'quizzes' || controller_name == 'quiz_resumen' ? 'text-white bg-gray-800 border-l-2 border-blue-500 pl-4' : ''}" do %>
               <div class="flex items-center">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -317,5 +324,28 @@
         mobileMenu.classList.add("hidden");
       }
     });
+    
+    // Funcionalidad para el menú de notificaciones
+    window.toggleNotificacionesMenu = function() {
+      console.log("Toggling notifications menu");
+      const menu = document.getElementById("notificaciones-menu");
+      menu.classList.toggle("hidden");
+      
+      // Click fuera para cerrar
+      const handleOutsideClick = function(e) {
+        const button = document.getElementById("notificaciones-button");
+        const menu = document.getElementById("notificaciones-menu");
+        
+        if (!button.contains(e.target) && !menu.contains(e.target) && !menu.classList.contains("hidden")) {
+          menu.classList.add("hidden");
+          document.removeEventListener("click", handleOutsideClick);
+        }
+      };
+      
+      // Agregar event listener con delay para evitar que se active inmediatamente
+      setTimeout(() => {
+        document.addEventListener("click", handleOutsideClick);
+      }, 100);
+    }
   });
 <% end %>

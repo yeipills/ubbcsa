@@ -1,0 +1,2 @@
+class QuizPreguntum < ApplicationRecord
+end

@@ -54,7 +54,14 @@ export default class extends Controller {
     })
   }
   
-  toggle() {
+  toggle(event) {
+    if (event) {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+    
+    console.log("Toggle notificaciones dropdown")
+    
     if (this.isOpen) {
       this.close()
     } else {
@@ -63,6 +70,7 @@ export default class extends Controller {
   }
   
   open() {
+    console.log("Abriendo dropdown de notificaciones")
     // Abrir dropdown
     this.dropdownTarget.classList.remove('hidden')
     this.isOpen = true
@@ -70,7 +78,7 @@ export default class extends Controller {
     // Actualizar notificaciones al abrir
     this.reloadNotifications()
     
-    // Aadir listener para cerrar al hacer clic fuera
+    // Añadir listener para cerrar al hacer clic fuera
     document.addEventListener('click', this.closeOnClickOutside)
   }
   
@@ -234,11 +242,15 @@ export default class extends Controller {
   mostrarToast(notificacion) {
     if (!this.hasToastTarget) return
     
+    const toastId = 'toast-' + Date.now()
+    
     // Crear elemento de toast
     const toast = document.createElement('div')
-    toast.className = 'fixed bottom-4 right-4 bg-gray-800 text-white p-4 rounded-lg shadow-lg z-50 transform translate-y-full opacity-0 transition-all duration-300'
+    toast.id = toastId
+    toast.className = 'fixed bottom-4 right-4 bg-gray-800 text-white p-4 rounded-lg shadow-lg z-50 opacity-0 transform translate-y-16'
+    toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease'
     
-    // Determinar color segn nivel
+    // Determinar color según nivel
     let borderColor = 'border-blue-500'
     switch (notificacion.nivel) {
       case 'error':
@@ -252,7 +264,7 @@ export default class extends Controller {
         break
     }
     
-    // Aadir borde de color
+    // Añadir borde de color
     toast.classList.add('border-l-4', borderColor)
     
     // Contenido del toast
@@ -265,36 +277,48 @@ export default class extends Controller {
           <h4 class="font-bold">${notificacion.titulo}</h4>
           <p class="text-sm text-gray-300">${notificacion.contenido}</p>
         </div>
-        <button class="ml-4 text-gray-400 hover:text-white" data-action="notificaciones#cerrarToast">
+        <button class="ml-4 text-gray-400 hover:text-white" onclick="cerrarToastNotificacion('${toastId}')">
           <i class="fas fa-times"></i>
         </button>
       </div>
     `
     
-    // Aadir a la pgina
+    // Añadir a la página
     this.toastTarget.appendChild(toast)
     
-    // Mostrar con animacin
+    // Script para cerrar toast
+    if (!window.cerrarToastNotificacion) {
+      const script = document.createElement('script')
+      script.textContent = `
+        window.cerrarToastNotificacion = function(id) {
+          const toast = document.getElementById(id);
+          if (toast) {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(16px)';
+            
+            setTimeout(() => {
+              if (toast && toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+              }
+            }, 300);
+          }
+        }
+      `
+      document.body.appendChild(script);
+    }
+    
+    // Mostrar con animación
     setTimeout(() => {
-      toast.classList.remove('translate-y-full', 'opacity-0')
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
     }, 10)
     
-    // Ocultar automticamente despus de 5 segundos
+    // Auto cerrar después de 5 segundos
     setTimeout(() => {
-      this.cerrarToast({ currentTarget: toast.querySelector('button') })
+      if (document.getElementById(toastId)) {
+        window.cerrarToastNotificacion(toastId);
+      }
     }, 5000)
-  }
-  
-  cerrarToast(event) {
-    const toast = event.currentTarget.closest('div')
-    
-    // Ocultar con animacin
-    toast.classList.add('translate-y-full', 'opacity-0')
-    
-    // Eliminar despus de la animacin
-    setTimeout(() => {
-      toast.remove()
-    }, 300)
   }
   
   playNotificationSound() {

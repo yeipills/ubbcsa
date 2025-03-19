@@ -50,7 +50,11 @@ class SesionLaboratoriosController < ApplicationController
       # Verificar si la tabla Ejercicio existe antes de intentar acceder
       if ActiveRecord::Base.connection.table_exists?('ejercicios')
         @ejercicios = @sesion.laboratorio.ejercicios.order(:orden) rescue []
-        @ejercicios_completados = current_usuario.ejercicio_completados.where(laboratorio: @sesion.laboratorio).pluck(:ejercicio_id) rescue []
+        # Obtener los ejercicios completados por el usuario en cualquier sesión de este laboratorio
+        @ejercicios_completados = EjercicioCompletado.joins(:ejercicio)
+                                  .where(usuario_id: current_usuario.id, 
+                                         ejercicios: { laboratorio_id: @sesion.laboratorio_id })
+                                  .pluck(:ejercicio_id) rescue []
       else
         @ejercicios = []
         @ejercicios_completados = []

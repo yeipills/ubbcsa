@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
-  get 'quiz_results/show'
-  get 'quiz_results/index'
+  # Panel de quiz como ruta independiente
+  get 'quizzes/resumen', to: 'quiz_resumen#index', as: 'quiz_resumen'
   # Rutas de autenticación
   devise_for :usuarios, controllers: {
     sessions: 'usuarios/sessions',
@@ -87,7 +87,9 @@ Rails.application.routes.draw do
 
           member do
             delete :delete, as: 'delete'  # Ruta específica para eliminar preguntas
+            post :duplicar, as: 'duplicar'  # Ruta para duplicar preguntas
             get :editar, to: 'quiz_preguntas#edit', as: 'edit'  # Ruta específica para editar preguntas
+            get :preview, as: 'preview'  # Ruta para vista previa de pregunta
           end
           
           collection do

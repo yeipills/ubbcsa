@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_03_17_052205) do
+ActiveRecord::Schema[7.1].define(version: 2025_03_17_063141) do
   create_schema "auth"
   create_schema "extensions"
   create_schema "graphql"
@@ -114,6 +114,20 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_17_052205) do
     t.index ["laboratorio_id", "titulo"], name: "index_ejercicios_on_laboratorio_id_and_titulo", unique: true
     t.index ["laboratorio_id"], name: "index_ejercicios_on_laboratorio_id"
     t.index ["tipo"], name: "index_ejercicios_on_tipo"
+  end
+
+  create_table "eventos_intento", force: :cascade do |t|
+    t.string "tipo", null: false
+    t.bigint "usuario_id", null: false
+    t.bigint "intento_quiz_id", null: false
+    t.jsonb "detalles", default: {}
+    t.datetime "timestamp", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["intento_quiz_id"], name: "index_eventos_intento_on_intento_quiz_id"
+    t.index ["timestamp"], name: "index_eventos_intento_on_timestamp"
+    t.index ["tipo"], name: "index_eventos_intento_on_tipo"
+    t.index ["usuario_id"], name: "index_eventos_intento_on_usuario_id"
   end
 
   create_table "intentos_quiz", force: :cascade do |t|
@@ -247,6 +261,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_17_052205) do
     t.datetime "updated_at", null: false
     t.text "retroalimentacion"
     t.string "respuesta_correcta"
+    t.jsonb "metadata", default: {}
     t.index ["quiz_id", "orden"], name: "index_quiz_preguntas_on_quiz_id_and_orden"
     t.index ["quiz_id"], name: "index_quiz_preguntas_on_quiz_id"
   end
@@ -370,6 +385,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_17_052205) do
   add_foreign_key "ejercicio_completados", "sesion_laboratorios"
   add_foreign_key "ejercicio_completados", "usuarios"
   add_foreign_key "ejercicios", "laboratorios"
+  add_foreign_key "eventos_intento", "intentos_quiz"
+  add_foreign_key "eventos_intento", "usuarios"
   add_foreign_key "intentos_quiz", "quizzes"
   add_foreign_key "intentos_quiz", "usuarios"
   add_foreign_key "laboratorios", "cursos"
@@ -381,13 +398,13 @@ ActiveRecord::Schema[7.1].define(version: 2025_03_17_052205) do
   add_foreign_key "preferencias_notificaciones", "usuarios", name: "fk_rails_usuario"
   add_foreign_key "quiz_opciones", "quiz_preguntas", column: "pregunta_id"
   add_foreign_key "quiz_preguntas", "quizzes"
-  add_foreign_key "quiz_results", "intentos_quiz", column: "intento_quiz_id"
+  add_foreign_key "quiz_results", "intentos_quiz"
   add_foreign_key "quiz_results", "quizzes"
   add_foreign_key "quiz_results", "usuarios"
   add_foreign_key "quizzes", "cursos"
   add_foreign_key "quizzes", "laboratorios"
   add_foreign_key "quizzes", "usuarios"
-  add_foreign_key "respuestas_quiz", "intentos_quiz", column: "intento_quiz_id"
+  add_foreign_key "respuestas_quiz", "intentos_quiz"
   add_foreign_key "respuestas_quiz", "quiz_opciones", column: "opcion_id"
   add_foreign_key "respuestas_quiz", "quiz_preguntas", column: "pregunta_id"
   add_foreign_key "sesion_laboratorios", "laboratorios"

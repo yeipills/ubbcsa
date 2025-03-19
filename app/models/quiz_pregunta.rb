@@ -12,12 +12,15 @@ class QuizPregunta < ApplicationRecord
   
   accepts_nested_attributes_for :opciones, allow_destroy: true, reject_if: :all_blank
 
-  validates :contenido, presence: true
-  validates :puntaje, presence: true, numericality: { greater_than: 0 }
-  validates :orden, presence: true, uniqueness: { scope: :quiz_id }
-  validates :respuesta_correcta, presence: true, if: -> { respuesta_corta? }
-  validate :validar_opciones_correctas, if: -> { opcion_multiple? || verdadero_falso? }
+  validates :contenido, presence: { message: "El enunciado de la pregunta no puede estar vacío" }
+  validates :puntaje, presence: { message: "El puntaje es obligatorio" }, 
+                     numericality: { greater_than: 0, message: "El puntaje debe ser mayor que cero" }
+  validates :orden, presence: true, uniqueness: { scope: :quiz_id, message: "El orden debe ser único dentro del quiz" }
+  validates :respuesta_correcta, presence: { message: "La respuesta correcta es obligatoria para preguntas de respuesta corta" }, 
+                               if: -> { respuesta_corta? }
+  validate :validar_opciones_correctas, if: -> { opcion_multiple? || verdadero_falso? || multiple_respuesta? }
   validate :validar_emparejamiento, if: -> { emparejamiento? }
+  validate :validar_opciones_suficientes, if: -> { requiere_opciones? }
 
   enum tipo: {
     opcion_multiple: 0,
@@ -162,6 +165,56 @@ class QuizPregunta < ApplicationRecord
               &.to_i || 0
   end
   
+  # Obtiene la lista de preguntas adyacentes (anterior y siguiente) para navegación
+  def preguntas_adyacentes
+    {
+      anterior: pregunta_anterior,
+      siguiente: siguiente_pregunta
+    }
+  end
+
+  # Verifica si una respuesta es correcta
+  # @param respuesta [String|Integer|Array] La respuesta proporcionada
+  # @return [Boolean] Si la respuesta es correcta o no
+  def verificar_respuesta(respuesta)
+    case tipo
+    when 'opcion_multiple', 'verdadero_falso'
+      # Para opciones múltiples, la respuesta debe ser el ID de la opción correcta
+      opcion_id = respuesta.to_i
+      opciones.find_by(id: opcion_id)&.es_correcta? || false
+    when 'respuesta_corta'
+      # Para respuesta corta, comparar ignorando mayúsculas/minúsculas y espacios
+      respuesta_normalizada = respuesta.to_s.strip.downcase
+      respuesta_correcta_normalizada = respuesta_correcta.strip.downcase
+      respuesta_normalizada == respuesta_correcta_normalizada
+    when 'multiple_respuesta'
+      # Para selección múltiple, todas las opciones seleccionadas deben ser correctas
+      # y todas las correctas deben estar seleccionadas
+      seleccionadas = Array(respuesta).map(&:to_i)
+      correctas = opciones.where(es_correcta: true).pluck(:id)
+      
+      # Verificar que todas las seleccionadas son correctas
+      return false if seleccionadas.any? { |id| !correctas.include?(id) }
+      
+      # Verificar que todas las correctas están seleccionadas
+      correctas.all? { |id| seleccionadas.include?(id) }
+    when 'emparejamiento'
+      # Para emparejamiento, verificar que todos los pares estén bien asociados
+      emparejamientos = JSON.parse(respuesta) rescue {}
+      return false if emparejamientos.empty?
+      
+      # Iterar por cada término y verificar su definición
+      terminos.all? do |termino|
+        next false unless termino.par_relacionado.present? && termino.par_relacionado["id"].present?
+        
+        definicion_id = termino.par_relacionado["id"].to_i
+        emparejamientos[termino.id.to_s] == definicion_id.to_s
+      end
+    else
+      false
+    end
+  end
+
   private
   
   def validar_opciones_correctas
@@ -171,6 +224,19 @@ class QuizPregunta < ApplicationRecord
       errors.add(:base, 'Debe haber exactamente una opción correcta para preguntas de verdadero/falso')
     elsif multiple_respuesta? && opciones.select(&:es_correcta?).count < 1
       errors.add(:base, 'Debe haber al menos una opción correcta para preguntas de selección múltiple')
+    end
+  end
+  
+  def validar_opciones_suficientes
+    unless tiene_opciones_suficientes?
+      case tipo
+      when 'opcion_multiple', 'multiple_respuesta'
+        errors.add(:base, 'Debe definir al menos 2 opciones para este tipo de pregunta')
+      when 'verdadero_falso'
+        errors.add(:base, 'Debe definir exactamente 2 opciones para preguntas de verdadero/falso')
+      when 'emparejamiento'
+        errors.add(:base, 'Debe definir al menos 2 pares de términos y definiciones')
+      end
     end
   end
   

@@ -1,16 +1,19 @@
-# spec/factories/quizzes.rb
 FactoryBot.define do
   factory :quiz do
-    titulo { Faker::Educator.course_name }
-    descripcion { Faker::Lorem.paragraph }
-    association :curso
-    association :laboratorio
-    association :usuario
-    estado { :borrador }
-    tiempo_limite { 30 }
+    titulo { "MyString" }
+    descripcion { "MyText" }
+    estado { 1 }
+    tiempo_limite { 1 }
     intentos_permitidos { 1 }
-    activo { true }
-    fecha_inicio { Time.current }
-    fecha_fin { 1.week.from_now }
+    fecha_inicio { "2025-03-17 03:23:01" }
+    fecha_fin { "2025-03-17 03:23:01" }
+    peso_calificacion { 1 }
+    codigo_acceso { "MyString" }
+    aleatorizar_preguntas { false }
+    aleatorizar_opciones { false }
+    mostrar_resultados_inmediatos { false }
+    curso { nil }
+    laboratorio { nil }
+    usuario { nil }
   end
 end

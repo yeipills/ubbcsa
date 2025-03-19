@@ -14,6 +14,14 @@ class QuizPreguntasController < ApplicationController
     # Definir orden por defecto (siguiente orden disponible)
     ultimo_orden = @quiz.preguntas.maximum(:orden)
     @pregunta.orden = ultimo_orden ? ultimo_orden + 1 : 1
+    
+    # Asignar un tipo por defecto para evitar error de tipo nil
+    @pregunta.tipo = 'opcion_multiple' unless @pregunta.tipo.present?
+    
+    # Conteo de preguntas y datos para la vista
+    @preguntas_count = @quiz.preguntas.count
+    @puntaje_total = @quiz.preguntas.sum(:puntaje)
+    @tipos_preguntas = @quiz.preguntas.select('DISTINCT tipo').count
   end
 
   def create
@@ -29,11 +37,20 @@ class QuizPreguntasController < ApplicationController
 
       redirect_to quiz_path(@quiz), notice: 'Pregunta creada exitosamente.'
     else
+      # Conteo de preguntas y datos para la vista en caso de error
+      @preguntas_count = @quiz.preguntas.count
+      @puntaje_total = @quiz.preguntas.sum(:puntaje)
+      @tipos_preguntas = @quiz.preguntas.select('DISTINCT tipo').count
+      
       render :new, status: :unprocessable_entity
     end
   end
 
   def edit
+    # Conteo de preguntas y datos para la vista
+    @preguntas_count = @quiz.preguntas.count
+    @puntaje_total = @quiz.preguntas.sum(:puntaje)
+    @tipos_preguntas = @quiz.preguntas.select('DISTINCT tipo').count
   end
 
   def update
@@ -47,6 +64,11 @@ class QuizPreguntasController < ApplicationController
       
       redirect_to quiz_path(@quiz), notice: 'Pregunta actualizada exitosamente.'
     else
+      # Datos para la vista en caso de error
+      @preguntas_count = @quiz.preguntas.count
+      @puntaje_total = @quiz.preguntas.sum(:puntaje)
+      @tipos_preguntas = @quiz.preguntas.select('DISTINCT tipo').count
+      
       render :edit, status: :unprocessable_entity
     end
   end
@@ -60,6 +82,87 @@ class QuizPreguntasController < ApplicationController
   def delete
     @pregunta.destroy
     redirect_to quiz_path(@quiz || @pregunta.quiz), notice: 'Pregunta eliminada exitosamente.'
+  end
+  
+  # Método para duplicar una pregunta existente
+  def duplicar
+    pregunta_original = QuizPregunta.find(params[:id])
+    @quiz = pregunta_original.quiz
+    
+    # Verificar permisos
+    unless current_usuario.profesor? && @quiz.curso.profesor_id == current_usuario.id
+      return redirect_to quizzes_path, alert: 'No tienes permiso para realizar esta acción.'
+    end
+    
+    # Duplicar la pregunta
+    ActiveRecord::Base.transaction do
+      # Crear nueva pregunta con los mismos atributos
+      nueva_pregunta = @quiz.preguntas.create!(
+        contenido: "#{pregunta_original.contenido} (copia)",
+        tipo: pregunta_original.tipo,
+        puntaje: pregunta_original.puntaje,
+        retroalimentacion: pregunta_original.retroalimentacion,
+        respuesta_correcta: pregunta_original.respuesta_correcta,
+        # Asignar el siguiente orden disponible
+        orden: (@quiz.preguntas.maximum(:orden) || 0) + 1
+      )
+      
+      # Duplicar opciones
+      if pregunta_original.requiere_opciones?
+        pregunta_original.opciones.each do |opcion_original|
+          nueva_opcion = nueva_pregunta.opciones.create!(
+            contenido: opcion_original.contenido,
+            es_correcta: opcion_original.es_correcta,
+            orden: opcion_original.orden,
+            es_termino: opcion_original.es_termino,
+            par_relacionado: opcion_original.par_relacionado
+          )
+        end
+      end
+      
+      # Duplicar imagen si existe
+      if pregunta_original.imagen.attached?
+        nueva_pregunta.imagen.attach(
+          io: StringIO.new(pregunta_original.imagen.download),
+          filename: pregunta_original.imagen.filename.to_s,
+          content_type: pregunta_original.imagen.content_type
+        )
+      end
+      
+      # Procesar relaciones de emparejamiento después de duplicar
+      if nueva_pregunta.emparejamiento?
+        nueva_pregunta.terminos.each_with_index do |termino, index|
+          definicion = nueva_pregunta.definiciones[index]
+          next unless definicion
+          
+          termino.update(par_relacionado: { id: definicion.id, tipo: "definicion" })
+        end
+      end
+      
+      redirect_to edit_quiz_pregunta_path(@quiz, nueva_pregunta), notice: 'Pregunta duplicada exitosamente. Puedes editarla ahora.'
+    end
+    
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to quiz_path(@quiz), alert: "Error al duplicar la pregunta: #{e.message}"
+  end
+  
+  # Método para mostrar una vista previa de la pregunta
+  def preview
+    @pregunta = QuizPregunta.find(params[:id])
+    @quiz = @pregunta.quiz
+    
+    # Verificar permisos
+    unless current_usuario.profesor? && @quiz.curso.profesor_id == current_usuario.id
+      return render plain: "No autorizado", status: :unauthorized
+    end
+    
+    # Renderizar una vista parcial de la pregunta
+    render layout: false, partial: "intentos_quiz/pregunta", locals: {
+      pregunta: @pregunta,
+      intento: nil, # No hay intento activo en vista previa
+      index: 1,     # Índice fijo para la vista previa
+      solo_lectura: true # Modo de solo lectura para vista previa
+    }
   end
 
   def reordenar

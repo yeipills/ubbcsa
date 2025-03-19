@@ -2,11 +2,11 @@ class Quiz < ApplicationRecord
   belongs_to :curso
   belongs_to :laboratorio, optional: true
   belongs_to :usuario
-
+  
   has_many :preguntas, class_name: 'QuizPregunta', dependent: :destroy
   has_many :intentos, class_name: 'IntentoQuiz', dependent: :destroy
-  has_many :notificaciones, as: :notificable, dependent: :destroy
   has_many :quiz_results, dependent: :destroy
+  has_many :notificaciones, as: :notificable, dependent: :destroy
 
   attr_accessor :duplicar_preguntas
 
@@ -131,7 +131,10 @@ class Quiz < ApplicationRecord
     }
     
     intentos.completado.each do |intento|
-      case intento.puntaje_total
+      # Asegurar que el puntaje esté en el rango 0-100
+      puntaje = [[intento.puntaje_total.to_f, 0].max, 100].min
+      
+      case puntaje
       when 0..20 then rangos['0-20%'] += 1
       when 21..40 then rangos['21-40%'] += 1
       when 41..60 then rangos['41-60%'] += 1
@@ -146,21 +149,32 @@ class Quiz < ApplicationRecord
   def preguntas_dificiles(limit = 5)
     resultados = {}
     
+    # Optimización: realizar una sola consulta para obtener datos de respuestas
+    datos_respuestas = RespuestaQuiz.joins(:intento_quiz)
+                      .where(pregunta_id: preguntas.pluck(:id))
+                      .where(intentos_quiz: { estado: :completado })
+                      .group(:pregunta_id)
+                      .select(
+                        'pregunta_id',
+                        'COUNT(*) as total_respuestas',
+                        'COUNT(CASE WHEN es_correcta = false THEN 1 END) as respuestas_incorrectas'
+                      )
+                      .to_a
+    
+    # Mapear a un hash para acceso rápido
+    datos_por_pregunta = datos_respuestas.each_with_object({}) do |dato, hash|
+      hash[dato.pregunta_id] = {
+        total: dato.total_respuestas,
+        incorrectas: dato.respuestas_incorrectas
+      }
+    end
+    
+    # Procesar cada pregunta
     preguntas.each do |pregunta|
-      total_respuestas = RespuestaQuiz.joins(:intento_quiz)
-                                     .where(pregunta_id: pregunta.id)
-                                     .where(intentos_quiz: { estado: :completado })
-                                     .count
-                                     
-      next if total_respuestas == 0
+      datos = datos_por_pregunta[pregunta.id]
+      next unless datos && datos[:total] > 0
       
-      respuestas_incorrectas = RespuestaQuiz.joins(:intento_quiz)
-                                           .where(pregunta_id: pregunta.id)
-                                           .where(intentos_quiz: { estado: :completado })
-                                           .where(es_correcta: false)
-                                           .count
-                                           
-      tasa_error = (respuestas_incorrectas.to_f / total_respuestas * 100).round(1)
+      tasa_error = (datos[:incorrectas].to_f / datos[:total] * 100).round(1)
       resultados[pregunta] = tasa_error
     end
     
@@ -216,7 +230,7 @@ class Quiz < ApplicationRecord
 
   def notificar_cambios_si_publicado
     return unless estado_previously_changed? && publicado?
-    QuizNotificationJob.perform_later(id)
+    # Implementar notificaciones
   end
   
   # Método privado para generar el código inicial al crear

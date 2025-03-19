@@ -41,7 +41,7 @@ class Usuario < ApplicationRecord
   end
   
   def todos_cursos
-    if profesor?
+    if profesor? || admin?
       cursos_como_profesor
     else
       cursos
@@ -72,14 +72,6 @@ class Usuario < ApplicationRecord
     
     Rails.logger.info("[CAMBIO ROL] Usuario #{nombre_usuario} (#{id}) cambió de #{old_rol} a #{nuevo_rol}")
     true
-  end
-
-  def todos_cursos
-    if profesor?
-      cursos_como_profesor
-    else
-      cursos
-    end
   end
 
   private

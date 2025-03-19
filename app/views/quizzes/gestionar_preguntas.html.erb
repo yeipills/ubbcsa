@@ -53,21 +53,147 @@
           <div class="bg-gray-900 p-4 rounded-lg border border-gray-700">
             <div class="flex justify-between items-center mb-4">
               <h2 class="text-xl font-medium text-white">Lista de Preguntas</h2>
-              <div class="text-sm text-gray-400">Total: <%= @preguntas.count %></div>
+              <div class="text-sm text-gray-400" data-quiz-preguntas-target="contador">Total: <%= @preguntas.count %></div>
             </div>
             
             <% if @preguntas.any? %>
-              <div id="lista-preguntas" class="space-y-4" data-controller="quiz-pregunta-sorter">
-                <% @preguntas.each do |pregunta| %>
-                  <div class="sortable-item" data-id="<%= pregunta.id %>">
-                    <%= render 'quiz_preguntas/pregunta_card', pregunta: pregunta, quiz: @quiz %>
+              <div class="mb-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
+                <div class="w-full sm:w-1/2">
+                  <label for="filtro-tipo" class="block text-sm font-medium text-gray-400 mb-1">Filtrar por tipo</label>
+                  <select 
+                    id="filtro-tipo" 
+                    data-quiz-preguntas-target="filtro"
+                    data-action="change->quiz-preguntas#filtrarPorTipo"
+                    class="bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                      <option value="todos">Todos los tipos</option>
+                      <option value="opcion_multiple">Opción Múltiple</option>
+                      <option value="verdadero_falso">Verdadero/Falso</option>
+                      <option value="respuesta_corta">Respuesta Corta</option>
+                      <option value="emparejamiento">Términos Pareados</option>
+                      <option value="multiple_respuesta">Selección Múltiple</option>
+                  </select>
+                </div>
+                <div class="w-full sm:w-1/2">
+                  <label for="buscar-pregunta" class="block text-sm font-medium text-gray-400 mb-1">Buscar pregunta</label>
+                  <div class="relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <svg class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                      </svg>
+                    </div>
+                    <input 
+                      type="text" 
+                      id="buscar-pregunta" 
+                      data-quiz-preguntas-target="busqueda"
+                      data-action="input->quiz-preguntas#buscarPreguntas"
+                      class="bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5" 
+                      placeholder="Buscar por contenido...">
                   </div>
-                <% end %>
+                </div>
               </div>
-              <div class="text-right mt-4">
-                <button id="guardar-orden" class="hidden px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors">
-                  Guardar nuevo orden
-                </button>
+              
+              <div>
+                <p class="text-sm text-gray-400 mb-3">
+                  <span>Arrastra las preguntas para reordenarlas</span>
+                </p>
+              </div>
+              
+              <div id="lista-preguntas" 
+                   class="space-y-4" 
+                   data-controller="quiz-preguntas" 
+                   data-quiz-id="<%= @quiz.id %>">
+                   
+                <div data-quiz-preguntas-target="listado" class="space-y-4">
+                  <% @preguntas.each do |pregunta| %>
+                    <div class="border border-gray-700 rounded-lg bg-gray-800 shadow cursor-grab" 
+                         data-quiz-preguntas-target="pregunta"
+                         data-pregunta-id="<%= pregunta.id %>"
+                         data-tipo="<%= pregunta.tipo %>">
+                         
+                      <div class="p-4 flex items-start justify-between">
+                        <div class="flex items-start gap-3">
+                          <!-- Manejador de arrastre -->
+                          <div class="flex-shrink-0 mt-1 text-gray-500 cursor-grab">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+                            </svg>
+                          </div>
+                          
+                          <!-- Información de la pregunta -->
+                          <div>
+                            <div class="flex items-center">
+                              <span class="inline-flex items-center justify-center h-6 w-6 rounded-md bg-indigo-900/50 text-indigo-300 border border-indigo-800/50 mr-2 text-sm font-medium">
+                                <%= pregunta.orden %>
+                              </span>
+                              <h3 class="text-md font-medium text-white"><%= truncate(pregunta.contenido, length: 60) %></h3>
+                            </div>
+                            
+                            <div class="mt-2 flex flex-wrap gap-2">
+                              <span class="px-2 py-1 rounded-md text-xs font-medium text-indigo-300 bg-indigo-900/30 border border-indigo-800/30" data-quiz-preguntas-target="tipoBadge">
+                                <%= pregunta.tipo_display %>
+                              </span>
+                              <span class="px-2 py-1 rounded-md text-xs font-medium text-emerald-300 bg-emerald-900/30 border border-emerald-800/30">
+                                <%= pregunta.puntaje %> puntos
+                              </span>
+                              <% if pregunta.opciones.any? %>
+                                <span class="px-2 py-1 rounded-md text-xs font-medium text-blue-300 bg-blue-900/30 border border-blue-800/30">
+                                  <%= pregunta.opciones.count %> opciones
+                                </span>
+                              <% end %>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- Acciones -->
+                        <div class="flex items-center space-x-2">
+                          <!-- Botón de Vista Previa -->
+                          <button type="button"
+                              class="p-1.5 text-yellow-400 hover:text-yellow-300 hover:bg-gray-700 rounded transition-colors"
+                              title="Vista previa"
+                              data-action="click->quiz-preguntas#mostrarVistaPrevia"
+                              data-pregunta-id="<%= pregunta.id %>">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                              <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                            </svg>
+                          </button>
+
+                          <%= link_to edit_quiz_pregunta_path(@quiz, pregunta), 
+                              class: "p-1.5 text-blue-400 hover:text-blue-300 hover:bg-gray-700 rounded transition-colors",
+                              title: "Editar pregunta" do %>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                            </svg>
+                          <% end %>
+                          
+                          <%= button_to duplicar_pregunta_path(pregunta), 
+                              method: :post,
+                              form: { data: { turbo: true } },
+                              class: "p-1.5 text-green-400 hover:text-green-300 hover:bg-gray-700 rounded transition-colors",
+                              title: "Duplicar pregunta" do %>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M7 9a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H9a2 2 0 01-2-2V9z" />
+                              <path d="M5 3a2 2 0 00-2 2v6a2 2 0 002 2V5h8a2 2 0 00-2-2H5z" />
+                            </svg>
+                          <% end %>
+                          
+                          <%= link_to quiz_pregunta_path(@quiz, pregunta), 
+                              method: :delete,
+                              data: { 
+                                confirm: "¿Estás seguro de eliminar esta pregunta? Esta acción no se puede deshacer.",
+                                turbo_confirm: "¿Estás seguro de eliminar esta pregunta? Esta acción no se puede deshacer."
+                              },
+                              class: "p-1.5 text-red-400 hover:text-red-300 hover:bg-gray-700 rounded transition-colors",
+                              title: "Eliminar pregunta" do %>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
               </div>
             <% else %>
               <div class="text-center py-12 px-4">
@@ -78,14 +204,154 @@
                 </div>
                 <h3 class="text-lg font-medium text-white">No hay preguntas</h3>
                 <p class="mt-2 text-gray-400">Usa el formulario para agregar preguntas a este quiz.</p>
+                <%= link_to new_quiz_pregunta_path(@quiz), class: "mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                  </svg>
+                  Agregar pregunta
+                <% end %>
               </div>
             <% end %>
           </div>
+          
+          <% if @preguntas.any? %>
+            <div class="mt-4 flex flex-wrap gap-2 justify-end">
+              <button type="button" class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0l-4 4m4-4v12"></path>
+                </svg>
+                Exportar preguntas
+              </button>
+              <button type="button" class="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
+                <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                Importar preguntas
+              </button>
+            </div>
+            <div class="mt-4 bg-yellow-900/30 p-3 rounded-lg border border-yellow-800/30">
+              <p class="text-yellow-300 text-sm flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+                El orden de las preguntas se guarda automáticamente al arrastrarlas.
+              </p>
+            </div>
+          <% end %>
         </div>
         
         <div class="lg:col-span-1">
           <div id="form-pregunta-rapida" class="bg-gray-900 p-4 rounded-lg border border-gray-700 sticky top-4">
-            <%= render 'form_pregunta_rapida', quiz: @quiz, pregunta: @nueva_pregunta, tipos_pregunta: @tipos_pregunta %>
+            <h3 class="font-medium text-white mb-4">Añadir Nueva Pregunta</h3>
+            
+            <div class="bg-indigo-900/30 p-3 rounded-lg border border-indigo-800/30 mb-4">
+              <p class="text-indigo-300 text-sm">
+                Selecciona un tipo de pregunta para crear. Cada tipo permite diferentes formas de respuesta.
+              </p>
+            </div>
+            
+            <div class="space-y-4">
+              <%= link_to new_quiz_pregunta_path(@quiz, tipo: 'opcion_multiple'), class: "group block w-full p-3 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors" do %>
+                <div class="flex items-start">
+                  <div class="flex-shrink-0 bg-indigo-900/50 rounded-md p-2 mr-3 group-hover:bg-indigo-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="font-medium text-white">Opción Múltiple</h4>
+                    <p class="text-sm text-gray-400 mt-1">Crea una pregunta con múltiples opciones y una correcta</p>
+                    <span class="inline-flex items-center mt-2 px-2 py-1 rounded text-xs font-medium bg-indigo-900/30 text-indigo-300 border border-indigo-800/30">
+                      Mayor claridad y precisión
+                    </span>
+                  </div>
+                </div>
+              <% end %>
+              
+              <%= link_to new_quiz_pregunta_path(@quiz, tipo: 'verdadero_falso'), class: "group block w-full p-3 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors" do %>
+                <div class="flex items-start">
+                  <div class="flex-shrink-0 bg-green-900/50 rounded-md p-2 mr-3 group-hover:bg-green-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="font-medium text-white">Verdadero/Falso</h4>
+                    <p class="text-sm text-gray-400 mt-1">Pregunta simple con dos opciones: verdadero o falso</p>
+                    <span class="inline-flex items-center mt-2 px-2 py-1 rounded text-xs font-medium bg-green-900/30 text-green-300 border border-green-800/30">
+                      Rápida creación
+                    </span>
+                  </div>
+                </div>
+              <% end %>
+              
+              <%= link_to new_quiz_pregunta_path(@quiz, tipo: 'multiple_respuesta'), class: "group block w-full p-3 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors" do %>
+                <div class="flex items-start">
+                  <div class="flex-shrink-0 bg-purple-900/50 rounded-md p-2 mr-3 group-hover:bg-purple-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="font-medium text-white">Selección Múltiple</h4>
+                    <p class="text-sm text-gray-400 mt-1">Pregunta con múltiples respuestas correctas posibles</p>
+                    <span class="inline-flex items-center mt-2 px-2 py-1 rounded text-xs font-medium bg-purple-900/30 text-purple-300 border border-purple-800/30">
+                      Mayor dificultad
+                    </span>
+                  </div>
+                </div>
+              <% end %>
+              
+              <%= link_to new_quiz_pregunta_path(@quiz, tipo: 'respuesta_corta'), class: "group block w-full p-3 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors" do %>
+                <div class="flex items-start">
+                  <div class="flex-shrink-0 bg-blue-900/50 rounded-md p-2 mr-3 group-hover:bg-blue-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="font-medium text-white">Respuesta Corta</h4>
+                    <p class="text-sm text-gray-400 mt-1">Pregunta donde el estudiante debe escribir una respuesta</p>
+                    <span class="inline-flex items-center mt-2 px-2 py-1 rounded text-xs font-medium bg-blue-900/30 text-blue-300 border border-blue-800/30">
+                      Comprensión y recuerdo
+                    </span>
+                  </div>
+                </div>
+              <% end %>
+              
+              <%= link_to new_quiz_pregunta_path(@quiz, tipo: 'emparejamiento'), class: "group block w-full p-3 bg-gray-800 hover:bg-gray-700 rounded-lg border border-gray-700 transition-colors" do %>
+                <div class="flex items-start">
+                  <div class="flex-shrink-0 bg-red-900/50 rounded-md p-2 mr-3 group-hover:bg-red-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="font-medium text-white">Términos Pareados</h4>
+                    <p class="text-sm text-gray-400 mt-1">Pregunta donde se relacionan términos con sus definiciones</p>
+                    <span class="inline-flex items-center mt-2 px-2 py-1 rounded text-xs font-medium bg-red-900/30 text-red-300 border border-red-800/30">
+                      Asociación de conceptos
+                    </span>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+            
+            <div class="bg-blue-900/30 p-3 rounded-lg border border-blue-800/30 mt-4">
+              <h4 class="text-sm font-medium text-blue-300 mb-2 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Consejos para crear buenas preguntas
+              </h4>
+              <ul class="text-blue-200 text-xs space-y-1 list-disc list-inside">
+                <li>Las preguntas deben ser claras y específicas</li>
+                <li>Incluye imágenes cuando sea apropiado</li>
+                <li>Usa retroalimentación personalizada para explicar respuestas</li>
+                <li>Evita opciones ambiguas o demasiado similares</li>
+                <li>Combina diferentes tipos de preguntas para mayor diversidad</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -93,66 +359,34 @@
   </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Inicializar Sortable.js si existe la librería
-  if (typeof Sortable !== 'undefined') {
-    const container = document.getElementById('lista-preguntas');
-    if (container) {
-      const sortable = new Sortable(container, {
-        animation: 150,
-        handle: '.sortable-item',
-        ghostClass: 'sortable-ghost',
-        chosenClass: 'sortable-chosen',
-        dragClass: 'sortable-drag',
-        onEnd: function() {
-          document.getElementById('guardar-orden').classList.remove('hidden');
-        }
-      });
+<!-- Modal de vista previa de la pregunta, inicialmente oculto -->
+<div id="modal-preview-pregunta" class="fixed inset-0 bg-gray-900/80 z-50 flex items-center justify-center hidden" data-quiz-preguntas-target="modalPreview">
+  <div class="relative bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+    <div class="absolute top-4 right-4">
+      <button type="button" class="text-gray-400 hover:text-white" data-action="click->quiz-preguntas#cerrarVistaPrevia">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    
+    <div class="p-6">
+      <h2 class="text-xl font-medium text-white mb-2">Vista Previa de la Pregunta</h2>
+      <p class="text-gray-400 text-sm mb-6">Esta es la vista que verán los estudiantes al responder.</p>
       
-      // Guardar orden al hacer clic en el botón
-      document.getElementById('guardar-orden').addEventListener('click', function() {
-        const items = container.querySelectorAll('.sortable-item');
-        const orden = {};
-        
-        items.forEach((item, index) => {
-          orden[item.dataset.id] = index + 1;
-        });
-        
-        // Enviar orden al servidor
-        fetch('<%= reordenar_preguntas_quiz_path(@quiz) %>', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
-          },
-          body: JSON.stringify({ orden: orden })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.status === 'success') {
-            document.getElementById('guardar-orden').classList.add('hidden');
-            // Opcional: Mostrar mensaje de éxito
-            const flashContainer = document.getElementById('flash-container');
-            if (flashContainer) {
-              flashContainer.innerHTML = `
-                <div class="bg-green-800 text-green-100 px-4 py-3 rounded relative mb-4" role="alert">
-                  <span class="block sm:inline">Orden actualizado correctamente.</span>
-                  <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
-                    <svg class="fill-current h-6 w-6 text-green-100" role="button" onclick="this.parentElement.parentElement.remove();" viewBox="0 0 20 20">
-                      <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
-                    </svg>
-                  </span>
-                </div>
-              `;
-            }
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-        });
-      });
-    }
-  }
-});
+      <div class="bg-gray-900 rounded-lg p-6 border border-gray-700" data-quiz-preguntas-target="previewContenido">
+        <!-- El contenido se llenará dinámicamente -->
+        <div class="animate-pulse">
+          <div class="h-6 bg-gray-700 rounded mb-4 w-3/4"></div>
+          <div class="h-4 bg-gray-700 rounded mb-2 w-full"></div>
+          <div class="h-4 bg-gray-700 rounded mb-2 w-5/6"></div>
+          <div class="h-10 bg-gray-700 rounded mb-4"></div>
+          <div class="h-10 bg-gray-700 rounded mb-4"></div>
+          <div class="h-10 bg-gray-700 rounded mb-4"></div>
+          <div class="h-10 bg-gray-700 rounded"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 </script>

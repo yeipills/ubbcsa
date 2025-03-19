@@ -8,7 +8,16 @@
   }
 
   .animate-fade-out {
-    animation: fadeOut 0.3s ease-in-out;
+    animation: fadeOut 0.3s ease-in-out forwards; /* forwards mantiene el estado final */
+  }
+
+  /* Añadir clases para las notificaciones */
+  .flash-message {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .toast-notification {
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
   }
 }
 
@@ -31,5 +40,6 @@
   to {
     opacity: 0;
     transform: translateY(-1rem);
+    visibility: hidden; /* Asegura que el elemento no sea interactivo */
   }
 }

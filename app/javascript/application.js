@@ -1,6 +1,21 @@
 // Configure your import map in config/importmap.rb
 import "@hotwired/turbo-rails"
 
+// Configurar Turbo para preservar elementos específicos durante la navegación
+document.addEventListener("turbo:before-render", (event) => {
+  // Preservar notificaciones flash durante la navegación
+  const flashMessages = document.querySelectorAll('.flash-message');
+  flashMessages.forEach(element => {
+    event.detail.newBody.appendChild(element.cloneNode(true));
+  });
+  
+  // Preservar notificaciones toast durante la navegación  
+  const toastMessages = document.querySelectorAll('.toast-notification');
+  toastMessages.forEach(element => {
+    event.detail.newBody.appendChild(element.cloneNode(true));
+  });
+});
+
 // Import all controllers (fallback for stimulus-loading)
 import { application } from "./controllers/application"
 

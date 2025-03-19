@@ -14,12 +14,7 @@
   <% end %>
 </head>
 <body class="h-full antialiased" <%= 'data-usuario-id="' + current_usuario.id.to_s + '"' if usuario_signed_in? %>>
-  <% unless controller_name == 'home' ||
-   (controller_name == 'sessions' || controller_name == 'registrations') && controller.devise_controller? %>
-    <%= render "shared/navbar" %>
-  <% end %>
-  
-  <% unless content_for?(:navbar) %>
+  <% if usuario_signed_in? && !(controller_name == 'sessions' && controller.devise_controller?) %>
     <%= render 'shared/navbar' %>
   <% end %>
   
@@ -28,33 +23,5 @@
   <main>
     <%= yield %>
   </main>
-  
-  <%# Script para manejar las notificaciones %>
-  <script>
-    document.addEventListener('turbo:load', () => {
-      // Función para cerrar una notificación
-      function closeNotification(notification) {
-        notification.classList.add('animate-fade-out');
-        setTimeout(() => notification.remove(), 300);
-      }
-      
-      // Manejador de click para los botones de cerrar
-      document.querySelectorAll('.flash-message button').forEach(button => {
-        button.addEventListener('click', () => {
-          const notification = button.closest('.flash-message');
-          closeNotification(notification);
-        });
-      });
-      
-      // Auto-cerrar notificaciones después de 5 segundos
-      document.querySelectorAll('.flash-message').forEach(notification => {
-        setTimeout(() => {
-          if (notification && notification.isConnected) {
-            closeNotification(notification);
-          }
-        }, 5000);
-      });
-    });
-  </script>
 </body>
 </html>

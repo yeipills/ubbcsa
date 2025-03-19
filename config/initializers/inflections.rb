@@ -1,16 +1,13 @@
-# Be sure to restart your server when you modify this file.
-
-# Add new inflection rules using the following format. Inflections
-# are locale specific, and you may define rules for as many different
-# locales as you wish. All of these examples are active by default:
-# ActiveSupport::Inflector.inflections(:en) do |inflect|
-#   inflect.plural /^(ox)$/i, "\\1en"
-#   inflect.singular /^(ox)en/i, "\\1"
-#   inflect.irregular "person", "people"
-#   inflect.uncountable %w( fish sheep )
-# end
-
-# These inflection rules are supported but not enabled by default:
-# ActiveSupport::Inflector.inflections(:en) do |inflect|
-#   inflect.acronym "RESTful"
-# end
+# Configuración de inflection para modelos
+ActiveSupport::Inflector.inflections(:en) do |inflect|
+  # Configuraciones generales
+  inflect.irregular 'quiz', 'quizzes'
+  
+  # Configuraciones específicas para modelos compuestos
+  inflect.irregular 'quiz_pregunta', 'quiz_preguntas'
+  inflect.irregular 'quiz_opcion', 'quiz_opciones'
+  inflect.irregular 'intento_quiz', 'intentos_quiz'
+  inflect.irregular 'respuesta_quiz', 'respuestas_quiz'
+  inflect.irregular 'evento_intento', 'eventos_intento'
+  inflect.irregular 'quiz_result', 'quiz_results'
+end

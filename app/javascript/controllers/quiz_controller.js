@@ -15,7 +15,7 @@ export default class extends Controller {
     "preguntaContainer", "preguntaNav", "navItem", 
     "progressBar", "progressText", "timerDisplay", 
     "formContainer", "saveIndicator", "submitButton",
-    "finishButton"
+    "finishButton", "finishButtonFloat", "saveIndicatorFloat"
   ]
   
   static values = {
@@ -317,11 +317,19 @@ export default class extends Controller {
       this.progressTextTarget.textContent = `${porcentaje}%`
     }
     
-    // Habilitar botón de finalizar si todas han sido respondidas
-    if (this.hasFinishButtonTarget && respondidas === this.totalPreguntasValue) {
-      this.finishButtonTarget.disabled = false
-      this.finishButtonTarget.classList.remove("opacity-50", "cursor-not-allowed")
-      this.finishButtonTarget.classList.add("animate-pulse")
+    // Habilitar botones de finalizar si todas han sido respondidas
+    if (respondidas === this.totalPreguntasValue) {
+      if (this.hasFinishButtonTarget) {
+        this.finishButtonTarget.disabled = false
+        this.finishButtonTarget.classList.remove("opacity-75", "cursor-not-allowed")
+        this.finishButtonTarget.classList.add("animate-pulse")
+      }
+      
+      if (this.hasFinishButtonFloatTarget) {
+        this.finishButtonFloatTarget.disabled = false
+        this.finishButtonFloatTarget.classList.remove("opacity-75")
+        this.finishButtonFloatTarget.classList.add("animate-pulse")
+      }
     }
   }
   
@@ -345,7 +353,12 @@ export default class extends Controller {
     // Deshabilitar botones para evitar doble envío
     if (this.hasFinishButtonTarget) {
       this.finishButtonTarget.disabled = true
-      this.finishButtonTarget.textContent = "Finalizando..."
+      this.finishButtonTarget.querySelector("span, svg + span").textContent = "Finalizando..."
+    }
+    
+    if (this.hasFinishButtonFloatTarget) {
+      this.finishButtonFloatTarget.disabled = true
+      this.finishButtonFloatTarget.classList.add("opacity-75")
     }
     
     if (this.hasSubmitButtonTarget) {
@@ -383,7 +396,15 @@ export default class extends Controller {
       // Reactivar botones
       if (this.hasFinishButtonTarget) {
         this.finishButtonTarget.disabled = false
-        this.finishButtonTarget.textContent = "Finalizar intento"
+        const textElement = this.finishButtonTarget.querySelector("span, svg + span")
+        if (textElement) {
+          textElement.textContent = "Finalizar Intento"
+        }
+      }
+      
+      if (this.hasFinishButtonFloatTarget) {
+        this.finishButtonFloatTarget.disabled = false
+        this.finishButtonFloatTarget.classList.remove("opacity-75")
       }
       
       if (this.hasSubmitButtonTarget) {

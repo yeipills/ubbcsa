@@ -2,12 +2,13 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["tipoSelect", "respuestaCorta", "emparejamiento", "imagePreview", "previewImage", "opcionesContainer", "multipleRespuesta"]
+  static targets = ["tipoSelect", "respuestaCorta", "emparejamiento", "imagePreview", "previewImage", "opcionesContainer", "multipleRespuesta", "previewContainer", "previewContent", "previewButton", "contenidoField", "retroalimentacionField"]
 
   connect() {
     this.tipoChanged()
     this.initEmparejamiento()
     this.initOpcionesMultiples()
+    this.initPreview()
   }
 
   tipoChanged() {
@@ -284,5 +285,182 @@ export default class extends Controller {
         opcionItem.style.display = 'none'
       }
     }
+  }
+  
+  // Inicializa la función de previsualización
+  initPreview() {
+    // Añadimos esta función si el botón de previsualización existe
+    if (!this.hasPreviewButtonTarget) return
+    
+    this.previewButtonTarget.addEventListener('click', this.mostrarPreview.bind(this))
+  }
+  
+  // Genera una previsualización de la pregunta
+  mostrarPreview(event) {
+    event.preventDefault()
+    
+    // Obtener datos actuales del formulario
+    const tipo = this.tipoSelectTarget.value
+    const contenido = this.hasContenidoFieldTarget ? this.contenidoFieldTarget.value : "Sin contenido"
+    const retroalimentacion = this.hasRetroalimentacionFieldTarget ? this.retroalimentacionFieldTarget.value : ""
+    
+    // Preparar contenido según el tipo de pregunta
+    let previewHTML = `
+      <div class="relative bg-gray-800 p-5 rounded-lg border border-gray-700">
+        <button type="button" class="absolute top-2 right-2 text-gray-400 hover:text-white" data-action="pregunta-form#cerrarPreview">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+        
+        <div class="mb-4">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+            Vista previa
+          </span>
+        </div>
+        
+        <h3 class="text-lg font-medium text-white mb-4">${contenido}</h3>
+    `
+    
+    // Mostrar opciones según el tipo de pregunta
+    if (tipo === 'opcion_multiple' || tipo === 'multiple_respuesta') {
+      // Recopilar todas las opciones del formulario
+      const opciones = []
+      const opcionesElements = this.opcionesContainerTarget.querySelectorAll('.opcion-item:not([style*="display: none"])')
+      
+      opcionesElements.forEach((opcion, index) => {
+        const contenidoInput = opcion.querySelector('input[name$="[contenido]"]')
+        if (contenidoInput && contenidoInput.value) {
+          opciones.push(contenidoInput.value)
+        }
+      })
+      
+      // Botones de radio para opción múltiple, checkboxes para selección múltiple
+      const inputType = tipo === 'opcion_multiple' ? 'radio' : 'checkbox'
+      const inputName = tipo === 'opcion_multiple' ? 'preview_opcion' : 'preview_opcion[]'
+      
+      previewHTML += `<div class="space-y-3 mb-4">`
+      
+      opciones.forEach((opcion, index) => {
+        previewHTML += `
+          <div class="flex items-center">
+            <input type="${inputType}" id="preview_opcion_${index}" name="${inputName}" 
+                   class="${inputType === 'radio' ? 'form-radio' : 'form-checkbox'} h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 focus:ring-blue-500 focus:ring-offset-gray-800" disabled>
+            <label for="preview_opcion_${index}" class="ml-2 block text-sm text-gray-300">
+              ${opcion}
+            </label>
+          </div>
+        `
+      })
+      
+      previewHTML += `</div>`
+      
+    } else if (tipo === 'verdadero_falso') {
+      previewHTML += `
+        <div class="space-y-3 mb-4">
+          <div class="flex items-center">
+            <input type="radio" id="preview_verdadero" name="preview_vf" class="form-radio h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 focus:ring-blue-500 focus:ring-offset-gray-800" disabled>
+            <label for="preview_verdadero" class="ml-2 block text-sm text-gray-300">Verdadero</label>
+          </div>
+          <div class="flex items-center">
+            <input type="radio" id="preview_falso" name="preview_vf" class="form-radio h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 focus:ring-blue-500 focus:ring-offset-gray-800" disabled>
+            <label for="preview_falso" class="ml-2 block text-sm text-gray-300">Falso</label>
+          </div>
+        </div>
+      `
+    } else if (tipo === 'respuesta_corta') {
+      previewHTML += `
+        <div class="mb-4">
+          <input type="text" class="w-full bg-gray-700 border border-gray-600 rounded-md py-2 px-3 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500" 
+                 placeholder="Escribe tu respuesta aquí..." disabled>
+        </div>
+      `
+    } else if (tipo === 'emparejamiento') {
+      // Recopilar términos y definiciones
+      const terminos = []
+      const definiciones = []
+      
+      if (this.hasEmparejamientoTarget) {
+        const paresElements = this.emparejamientoTarget.querySelectorAll('.par-item:not([style*="display: none"])')
+        
+        paresElements.forEach(par => {
+          const terminoInput = par.querySelector('input[name$="[contenido]"][id*="es_termino"][id$="_contenido"]')
+          const definicionInput = par.querySelector('input[name$="[contenido]"]:not([id*="es_termino"])[id$="_contenido"]')
+          
+          if (terminoInput && terminoInput.value) {
+            terminos.push(terminoInput.value)
+          }
+          
+          if (definicionInput && definicionInput.value) {
+            definiciones.push(definicionInput.value)
+          }
+        })
+      }
+      
+      // Mezclar definiciones para mostrar
+      const definicionesMezcladas = [...definiciones].sort(() => Math.random() - 0.5)
+      
+      previewHTML += `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <h4 class="text-sm font-medium text-gray-400 mb-2">Términos</h4>
+            <div class="space-y-2">
+      `
+      
+      terminos.forEach((termino, index) => {
+        previewHTML += `
+          <div class="flex items-center">
+            <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-blue-900 text-blue-300 text-sm font-medium mr-2">${index + 1}</span>
+            <span class="text-gray-300">${termino}</span>
+          </div>
+        `
+      })
+      
+      previewHTML += `
+            </div>
+          </div>
+          <div>
+            <h4 class="text-sm font-medium text-gray-400 mb-2">Definiciones</h4>
+            <div class="space-y-2">
+      `
+      
+      definicionesMezcladas.forEach((definicion, index) => {
+        previewHTML += `
+          <div class="flex items-center">
+            <span class="inline-flex items-center justify-center h-6 w-6 rounded-full bg-purple-900 text-purple-300 text-sm font-medium mr-2">${String.fromCharCode(65 + index)}</span>
+            <span class="text-gray-300">${definicion}</span>
+          </div>
+        `
+      })
+      
+      previewHTML += `
+            </div>
+          </div>
+        </div>
+      `
+    }
+    
+    // Añadir retroalimentación si existe
+    if (retroalimentacion) {
+      previewHTML += `
+        <div class="mt-6 p-3 bg-gray-900 rounded border border-gray-700">
+          <h4 class="text-sm font-medium text-blue-400 mb-1">Retroalimentación (visible después de responder)</h4>
+          <p class="text-gray-300 text-sm">${retroalimentacion}</p>
+        </div>
+      `
+    }
+    
+    // Cerrar el contenedor
+    previewHTML += `</div>`
+    
+    // Mostrar la previsualización
+    this.previewContentTarget.innerHTML = previewHTML
+    this.previewContainerTarget.classList.remove('hidden')
+  }
+  
+  // Cierra la vista previa
+  cerrarPreview(event) {
+    event.preventDefault()
+    this.previewContainerTarget.classList.add('hidden')
   }
 }

@@ -4,8 +4,8 @@ class NotificacionesController < ApplicationController
   before_action :set_notificacion, only: %i[mostrar marcar_como_leida marcar_como_no_leida eliminar]
 
   def index
-    # Obtener todas las notificaciones del usuario
-    @notificaciones = current_usuario.notificaciones.recientes.paginate(page: params[:page], per_page: 20)
+    # Obtener todas las notificaciones del usuario paginadas con Kaminari
+    @notificaciones = current_usuario.notificaciones.recientes.page(params[:page]).per(20)
 
     # Filtrar por tipo si se especifica
     @notificaciones = @notificaciones.del_tipo(params[:tipo]) if params[:tipo].present?

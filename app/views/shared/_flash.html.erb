@@ -35,8 +35,7 @@
                 end
   %>
   
-  <div class="fixed top-4 right-4 z-50 bg-gray-800 text-white px-6 py-4 rounded-lg shadow-lg border-l-4 flash-alert <%= border_color %>"
-       data-controller="flash">
+  <div id="flash-<%= type %>" class="fixed top-4 right-4 z-50 bg-gray-800 text-white px-6 py-4 rounded-lg shadow-lg border-l-4 <%= border_color %>">
     <div class="flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
         <svg class="w-5 h-5 <%= icon_color %>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,11 +44,36 @@
         <p><%= message %></p>
       </div>
 
-      <button data-action="flash#close" class="text-gray-400 hover:text-white">
+      <button onclick="closeFlash('flash-<%= type %>')" class="text-gray-400 hover:text-white">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
       </button>
     </div>
   </div>
+
+  <script>
+    // Auto close after 5 seconds
+    setTimeout(() => {
+      closeFlash('flash-<%= type %>');
+    }, 5000);
+    
+    // Function to close flash message
+    function closeFlash(id) {
+      const element = document.getElementById(id);
+      if (element) {
+        // Fade out animation
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(-20px)';
+        element.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        
+        // Remove after animation
+        setTimeout(() => {
+          if (element && element.parentNode) {
+            element.parentNode.removeChild(element);
+          }
+        }, 300);
+      }
+    }
+  </script>
 <% end %>

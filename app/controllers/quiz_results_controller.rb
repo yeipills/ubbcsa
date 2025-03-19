@@ -48,9 +48,18 @@ class QuizResultsController < ApplicationController
     respond_to do |format|
       format.html
       format.pdf do
-        render pdf: "resultado_#{@result.id}", 
-               template: "quiz_results/show.pdf.erb", 
-               layout: "pdf.html"
+        begin
+          require 'prawn'
+          require 'prawn/table'
+          
+          render pdf: "resultado_#{@result.id}", 
+                 template: "quiz_results/show", 
+                 layout: "layouts/pdf"
+        rescue LoadError => e
+          Rails.logger.error("Error al cargar las gemas de PDF: #{e.message}")
+          flash[:error] = "No se pudo generar el PDF. Por favor, contacte al administrador."
+          redirect_to quiz_quiz_result_path(@quiz, @result)
+        end
       end
       format.json { render json: @result.generar_resumen }
     end
@@ -67,9 +76,18 @@ class QuizResultsController < ApplicationController
                   type: 'text/csv'
       end
       format.pdf do
-        render pdf: "resultados_quiz_#{@quiz.id}",
-               template: "quiz_results/export.pdf.erb",
-               layout: "pdf.html"
+        begin
+          require 'prawn'
+          require 'prawn/table'
+          
+          render pdf: "resultados_quiz_#{@quiz.id}",
+                 template: "quiz_results/index",
+                 layout: "layouts/pdf"
+        rescue LoadError => e
+          Rails.logger.error("Error al cargar las gemas de PDF: #{e.message}")
+          flash[:error] = "No se pudo generar el PDF. Por favor, contacte al administrador."
+          redirect_to quiz_quiz_results_path(@quiz)
+        end
       end
       format.json { render json: @results.map(&:generar_resumen) }
     end

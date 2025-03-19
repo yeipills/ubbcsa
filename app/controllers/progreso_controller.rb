@@ -50,9 +50,8 @@ class ProgresoController < ApplicationController
       ejercicio_id: @laboratorio.ejercicios.pluck(:id)
     ).includes(:ejercicio)
 
-    @intentos = IntentoEjercicio.where(
-      sesion_laboratorio_id: @sesiones.pluck(:id)
-    ).order(timestamp: :desc)
+    # No se necesita obtener intentos, ya que no existe la tabla IntentoEjercicio
+    @intentos = []
 
     respond_to do |format|
       format.html
@@ -155,11 +154,26 @@ class ProgresoController < ApplicationController
           curso_id: @curso_id
         ).load_data
 
-        render pdf: "progreso_#{current_usuario.nombre_usuario}",
-               template: 'progreso/exportar_pdf',
-               layout: 'pdf'
+        # Verificar que las gemas de PDF estén disponibles
+        begin
+          require 'prawn'
+          require 'prawn/table'
+          
+          render pdf: "progreso_#{current_usuario.nombre_usuario}",
+                template: 'progreso/exportar_pdf',
+                layout: 'pdf'
+        rescue LoadError => e
+          Rails.logger.error("Error al cargar las gemas de PDF: #{e.message}")
+          flash[:error] = "No se pudo generar el PDF. Por favor, contacte al administrador."
+          redirect_to progreso_path
+        end
       end
     end
+  rescue StandardError => e
+    Rails.logger.error("Error al generar PDF: #{e.message}")
+    Rails.logger.error(e.backtrace.join("\n"))
+    flash[:error] = "Ocurrió un error al generar el PDF. Por favor, inténtelo de nuevo."
+    redirect_to progreso_path
   end
 
   private

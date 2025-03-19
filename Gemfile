@@ -28,6 +28,13 @@ gem 'turbo-rails'
 gem 'redis'
 gem 'sidekiq'
 
+# Generación de PDF y CSV
+gem 'prawn'
+gem 'prawn-table'
+
+# Paginación
+gem 'kaminari'
+
 group :development, :test do
   gem 'debug'
   gem 'dotenv-rails'

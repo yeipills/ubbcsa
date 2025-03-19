@@ -25,5 +25,14 @@ module CiberseguridadMvp
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+    
+    # Cargar gemas de paginación explícitamente
+    config.after_initialize do
+      begin
+        require 'kaminari'
+      rescue LoadError => e
+        Rails.logger.warn "Kaminari no pudo cargarse: #{e.message}"
+      end
+    end
   end
 end
