@@ -21,7 +21,30 @@ class ProgresoController < ApplicationController
     Rails.logger.error(e.backtrace.join("\n"))
 
     flash.now[:alert] = 'Hubo un problema al cargar los datos del progreso. Por favor, inténtalo de nuevo.'
-    @dashboard_data = { error: true, actividad_reciente: [] } # Datos mínimos para evitar errores en la vista
+    # Datos mínimos para evitar errores en la vista, incluyendo todas las claves necesarias
+    @dashboard_data = { 
+      error: true, 
+      actividad_reciente: [],
+      estadisticas: {
+        total_sesiones: 0,
+        sesiones_activas: 0,
+        sesiones_completadas: 0,
+        tiempo_total: "0 minutos",
+        promedio_completado: "0 minutos"
+      },
+      estadisticas_estudiantes: {
+        total_estudiantes: 0,
+        estudiantes_activos: 0,
+        promedio_completados: 0,
+        nuevos_estudiantes: 0
+      },
+      cursos_activos: [],
+      laboratorios_populares: [],
+      estudiantes_destacados: [],
+      chart_data: { labels: [], values: [] },
+      distribucion_completados: { 'principiante' => 0, 'intermedio' => 0, 'avanzado' => 0 },
+      progreso_promedio: []
+    }
 
     respond_to do |format|
       format.html { render :index }

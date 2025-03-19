@@ -9,10 +9,10 @@
 -%>
 <span class="page<%= ' current' if page.current? %>">
   <% if page.current? %>
-    <span class="px-3 py-2 border border-blue-500 bg-blue-600 text-white font-bold">
+    <span class="min-w-[2rem] h-8 flex items-center justify-center rounded-md bg-indigo-600 text-white text-sm font-medium">
       <%= page %>
     </span>
   <% else %>
-    <%= link_to page, url, {remote: remote, rel: page.rel, class: "px-3 py-2 border border-gray-700 bg-gray-700 text-white hover:bg-gray-600 hover:text-white transition-colors"} %>
+    <%= link_to page, url, {remote: remote, rel: page.rel, class: "min-w-[2rem] h-8 flex items-center justify-center rounded-md text-gray-300 hover:bg-gray-700 hover:text-white text-sm transition-colors"} %>
   <% end %>
 </span>

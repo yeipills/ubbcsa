@@ -50,30 +50,55 @@ class ProgresoDashboardService
 
     cursos = cursos.where(id: curso_id) if curso_id.present?
 
+    # Inicializar estadísticas de estudiantes con valores por defecto
+    estudiantes_stats = {
+      total_estudiantes: 0,
+      estudiantes_activos: 0,
+      promedio_completados: 0,
+      nuevos_estudiantes: 0
+    }
+    
+    # Solo calcular estadísticas de estudiantes si hay cursos
+    estudiantes_stats = estadisticas_estudiantes(cursos) if cursos.any?
+
+    # Inicializar con arrays vacíos para evitar errores de nil
+    empty_labs = []
+    empty_students = []
+
     {
       estadisticas: estadisticas_generales,
-      estadisticas_estudiantes: estadisticas_estudiantes(cursos),
+      estadisticas_estudiantes: estudiantes_stats,
       actividad_reciente: actividad_reciente_profesor,
       cursos_activos: cursos.where(estado: :publicado),
-      laboratorios_populares: laboratorios_populares(cursos),
-      estudiantes_destacados: estudiantes_destacados(cursos),
+      laboratorios_populares: cursos.any? ? laboratorios_populares(cursos) : empty_labs,
+      estudiantes_destacados: cursos.any? ? estudiantes_destacados(cursos) : empty_students,
       chart_data: chart_data,
       distribucion_completados: distribucion_por_dificultad,
-      progreso_promedio: progreso_promedio_cursos(cursos)
+      progreso_promedio: cursos.any? ? progreso_promedio_cursos(cursos) : []
     }
   end
 
   # Dashboard para estudiantes
   def load_estudiante_dashboard
+    # Asegurarse que siempre haya datos mínimos para todos los componentes del dashboard
+    stats = estadisticas_generales
+    chart = habilidades_chart_data
+    proximos = proximos_laboratorios
+    cursos_data = progreso_cursos
+    tiempo = tiempo_dedicado
+    distribucion = distribucion_actividad
+    actividad = actividad_reciente_estudiante
+    logros_data = usuario.logros.where(visible: true).order(otorgado_en: :desc).limit(5)
+    
     {
-      estadisticas: estadisticas_generales,
-      chart_data: habilidades_chart_data,
-      proximos_labs: proximos_laboratorios,
-      cursos: progreso_cursos,
-      tiempo_dedicado: tiempo_dedicado,
-      distribucion_actividad: distribucion_actividad,
-      actividad_reciente: actividad_reciente_estudiante, # Añadimos la actividad reciente
-      logros: usuario.logros.where(visible: true).order(otorgado_en: :desc).limit(5)
+      estadisticas: stats,
+      chart_data: chart,
+      proximos_labs: proximos,
+      cursos: cursos_data,
+      tiempo_dedicado: tiempo,
+      distribucion_actividad: distribucion,
+      actividad_reciente: actividad,
+      logros: logros_data
     }
   end
 
@@ -148,41 +173,67 @@ class ProgresoDashboardService
 
   def estadisticas_estudiantes(cursos)
     # Si no hay cursos, devolver valores por defecto
-    if cursos.blank?
-      return {
-        total_estudiantes: 0,
-        estudiantes_activos: 0,
-        promedio_completados: 0,
-        nuevos_estudiantes: 0
-      }
-    end
+    return {
+      total_estudiantes: 0,
+      estudiantes_activos: 0,
+      promedio_completados: 0,
+      nuevos_estudiantes: 0
+    } if cursos.blank?
     
     estudiantes_ids = CursoEstudiante.where(curso_id: cursos.pluck(:id)).pluck(:usuario_id).uniq
+    
+    # Si no hay estudiantes, devolver valores por defecto
+    return {
+      total_estudiantes: 0,
+      estudiantes_activos: 0,
+      promedio_completados: 0,
+      nuevos_estudiantes: 0
+    } if estudiantes_ids.blank?
+    
     estudiantes = Usuario.where(id: estudiantes_ids)
+
+    # Calcular promedio de completados con manejo de errores
+    counts = SesionLaboratorio.completadas
+                             .where(usuario_id: estudiantes_ids)
+                             .group(:usuario_id)
+                             .count
+                             .values
+    
+    promedio = if counts.empty?
+                 0
+               else
+                 begin
+                   counts.sum.to_f / counts.size
+                 rescue StandardError
+                   0
+                 end
+               end
 
     {
       total_estudiantes: estudiantes.count,
       estudiantes_activos: estudiantes.joins(:sesion_laboratorios)
                                       .where(sesion_laboratorios: { estado: 'activa' })
                                       .distinct.count,
-      promedio_completados: SesionLaboratorio.completadas
-                                             .where(usuario_id: estudiantes_ids)
-                                             .group(:usuario_id)
-                                             .count
-                                             .values
-                                             .then do |counts|
-        counts.empty? ? 0 : (counts.sum.to_f / counts.size)
-      rescue StandardError
-        0
-      end,
+      promedio_completados: promedio,
       nuevos_estudiantes: estudiantes.where('created_at >= ?', 30.days.ago).count
     }
   end
 
   # Laboratorios más populares (para profesores)
   def laboratorios_populares(cursos)
+    return [] if cursos.blank?
+    
+    cursos_ids = cursos.pluck(:id)
+    return [] if cursos_ids.empty?
+    
+    # Verificar si hay sesiones de laboratorio para estos cursos
+    has_sesiones = SesionLaboratorio.joins(:laboratorio)
+                                    .where(laboratorios: { curso_id: cursos_ids })
+                                    .exists?
+    return [] unless has_sesiones
+    
     Laboratorio.joins(:sesion_laboratorios)
-               .where(curso_id: cursos.pluck(:id))
+               .where(curso_id: cursos_ids)
                .select('laboratorios.*, COUNT(sesion_laboratorios.id) as intentos_count')
                .group('laboratorios.id')
                .order('intentos_count DESC')
@@ -191,7 +242,19 @@ class ProgresoDashboardService
 
   # Estudiantes destacados (para profesores)
   def estudiantes_destacados(cursos)
-    estudiantes_ids = CursoEstudiante.where(curso_id: cursos.pluck(:id)).pluck(:usuario_id).uniq
+    return [] if cursos.blank?
+    
+    cursos_ids = cursos.pluck(:id)
+    return [] if cursos_ids.empty?
+    
+    estudiantes_ids = CursoEstudiante.where(curso_id: cursos_ids).pluck(:usuario_id).uniq
+    return [] if estudiantes_ids.empty?
+    
+    # Verificar si hay sesiones completadas para estos estudiantes
+    has_sesiones_completadas = SesionLaboratorio.where(usuario_id: estudiantes_ids)
+                                              .where(estado: 'completada')
+                                              .exists?
+    return [] unless has_sesiones_completadas
 
     Usuario.where(id: estudiantes_ids)
            .joins(:sesion_laboratorios)
@@ -205,7 +268,14 @@ class ProgresoDashboardService
   # Actividad reciente (para profesores)
   def actividad_reciente_profesor
     cursos_ids = usuario.cursos_como_profesor.pluck(:id)
+    
+    # Si no hay cursos, devolver una colección vacía
+    return SesionLaboratorio.none if cursos_ids.empty?
+    
     laboratorios_ids = Laboratorio.where(curso_id: cursos_ids).pluck(:id)
+    
+    # Si no hay laboratorios, devolver una colección vacía
+    return SesionLaboratorio.none if laboratorios_ids.empty?
 
     SesionLaboratorio.where(laboratorio_id: laboratorios_ids)
                      .includes(:usuario, :laboratorio)
@@ -357,43 +427,80 @@ class ProgresoDashboardService
 
   # Distribución por nivel de dificultad
   def distribucion_por_dificultad
-    usuario.sesion_laboratorios
-           .completadas
-           .joins(:laboratorio)
-           .group('laboratorios.nivel_dificultad')
-           .count
-           .transform_keys(&:to_s)
+    # Si no hay sesiones, devolver una estructura vacía con los niveles de dificultad comunes
+    has_sesiones = usuario.sesion_laboratorios.completadas.exists?
+    
+    unless has_sesiones
+      return {
+        'principiante' => 0,
+        'intermedio' => 0,
+        'avanzado' => 0
+      }
+    end
+    
+    # Obtener distribución real
+    result = usuario.sesion_laboratorios
+                   .completadas
+                   .joins(:laboratorio)
+                   .group('laboratorios.nivel_dificultad')
+                   .count
+                   .transform_keys(&:to_s)
+    
+    # Asegurarse de que todos los niveles estén presentes
+    ['principiante', 'intermedio', 'avanzado'].each do |nivel|
+      result[nivel] ||= 0
+    end
+    
+    result
   end
 
   # Progreso promedio en los cursos (para profesores)
   def progreso_promedio_cursos(cursos)
-    cursos.map do |curso|
+    return [] if cursos.blank?
+    
+    resultado = []
+    
+    cursos.each do |curso|
       laboratorios = curso.laboratorios
-      return [] if laboratorios.empty?
+      next if laboratorios.empty?
 
       estudiantes = curso.estudiantes
-      return [] if estudiantes.empty?
+      next if estudiantes.empty?
 
       # Calcular progreso de cada estudiante
-      progreso_total = estudiantes.sum do |estudiante|
-        completados = estudiante.sesion_laboratorios
-                                .completadas
-                                .where(laboratorio_id: laboratorios.pluck(:id))
-                                .select(:laboratorio_id)
-                                .distinct
-                                .count
+      progreso_total = 0
+      begin
+        progreso_total = estudiantes.sum do |estudiante|
+          lab_ids = laboratorios.pluck(:id)
+          completados = estudiante.sesion_laboratorios
+                                  .completadas
+                                  .where(laboratorio_id: lab_ids)
+                                  .select(:laboratorio_id)
+                                  .distinct
+                                  .count
 
-        completados.to_f / laboratorios.count * 100
+          # Evitar división por cero
+          laboratorios.count > 0 ? (completados.to_f / laboratorios.count * 100) : 0
+        end
+
+        # Calcular promedio - evitar división por cero
+        promedio = estudiantes.count > 0 ? (progreso_total / estudiantes.count).round : 0
+
+        resultado << {
+          curso: curso,
+          promedio: promedio
+        }
+      rescue StandardError => e
+        # Registrar error pero continuar con el siguiente curso
+        Rails.logger.error("Error calculando progreso promedio para curso #{curso.id}: #{e.message}")
+        resultado << {
+          curso: curso,
+          promedio: 0
+        }
       end
-
-      # Calcular promedio
-      promedio = (progreso_total / estudiantes.count).round
-
-      {
-        curso: curso,
-        promedio: promedio
-      }
     end
+    
+    resultado
   end
 
   # Cálculo del tiempo total en laboratorios

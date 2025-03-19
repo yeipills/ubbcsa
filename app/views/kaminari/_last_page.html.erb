@@ -7,11 +7,13 @@
     remote:        data-remote
 -%>
 <span class="last">
-  <% if current_page.last? %>
-    <span class="px-3 py-2 rounded-r-md border border-gray-700 bg-gray-800 text-gray-500 cursor-not-allowed">
-      <%= t('views.pagination.last').html_safe %>
-    </span>
-  <% else %>
-    <%= link_to t('views.pagination.last').html_safe, url, remote: remote, class: "px-3 py-2 rounded-r-md border border-gray-700 bg-gray-700 text-white hover:bg-gray-600 hover:text-white transition-colors" %>
+  <%= link_to url, 
+      title: t('views.pagination.last').html_safe, 
+      rel: 'last', 
+      remote: remote, 
+      class: "h-8 w-8 flex items-center justify-center rounded-md text-gray-300 hover:bg-gray-700 hover:text-white transition-colors" do %>
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7m-8-14l7 7-7 7" />
+    </svg>
   <% end %>
 </span>

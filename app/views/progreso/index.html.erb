@@ -74,7 +74,13 @@
             </div>
             <div class="ml-4">
               <h2 class="text-gray-400 text-sm font-medium">Laboratorios Completados</h2>
-              <p class="text-2xl font-semibold text-white"><%= @dashboard_data[:estadisticas][:sesiones_completadas] %></p>
+              <p class="text-2xl font-semibold text-white">
+                <% if @dashboard_data && @dashboard_data[:estadisticas] %>
+                  <%= @dashboard_data[:estadisticas][:sesiones_completadas] %>
+                <% else %>
+                  0
+                <% end %>
+              </p>
             </div>
           </div>
         </div>
@@ -88,7 +94,13 @@
             </div>
             <div class="ml-4">
               <h2 class="text-gray-400 text-sm font-medium">Tiempo Total</h2>
-              <p class="text-2xl font-semibold text-white"><%= @dashboard_data[:estadisticas][:tiempo_total] %></p>
+              <p class="text-2xl font-semibold text-white">
+                <% if @dashboard_data && @dashboard_data[:estadisticas] %>
+                  <%= @dashboard_data[:estadisticas][:tiempo_total] %>
+                <% else %>
+                  0 minutos
+                <% end %>
+              </p>
             </div>
           </div>
         </div>
@@ -102,7 +114,13 @@
             </div>
             <div class="ml-4">
               <h2 class="text-gray-400 text-sm font-medium">Sesiones Activas</h2>
-              <p class="text-2xl font-semibold text-white"><%= @dashboard_data[:estadisticas][:sesiones_activas] %></p>
+              <p class="text-2xl font-semibold text-white">
+                <% if @dashboard_data && @dashboard_data[:estadisticas] %>
+                  <%= @dashboard_data[:estadisticas][:sesiones_activas] %>
+                <% else %>
+                  0
+                <% end %>
+              </p>
             </div>
           </div>
         </div>
@@ -131,7 +149,13 @@
             </div>
             <div class="ml-4">
               <h2 class="text-gray-400 text-sm font-medium">Total Estudiantes</h2>
-              <p class="text-2xl font-semibold text-white"><%= @dashboard_data[:estadisticas_estudiantes][:total_estudiantes] %></p>
+              <p class="text-2xl font-semibold text-white">
+                <% if @dashboard_data && @dashboard_data[:estadisticas_estudiantes] %>
+                  <%= @dashboard_data[:estadisticas_estudiantes][:total_estudiantes] %>
+                <% else %>
+                  0
+                <% end %>
+              </p>
             </div>
           </div>
         </div>
@@ -146,7 +170,13 @@
             </div>
             <div class="ml-4">
               <h2 class="text-gray-400 text-sm font-medium">Estudiantes Activos</h2>
-              <p class="text-2xl font-semibold text-white"><%= @dashboard_data[:estadisticas_estudiantes][:estudiantes_activos] %></p>
+              <p class="text-2xl font-semibold text-white">
+                <% if @dashboard_data && @dashboard_data[:estadisticas_estudiantes] %>
+                  <%= @dashboard_data[:estadisticas_estudiantes][:estudiantes_activos] %>
+                <% else %>
+                  0
+                <% end %>
+              </p>
             </div>
           </div>
         </div>
@@ -160,7 +190,13 @@
             </div>
             <div class="ml-4">
               <h2 class="text-gray-400 text-sm font-medium">Promedio Completados</h2>
-              <p class="text-2xl font-semibold text-white"><%= @dashboard_data[:estadisticas_estudiantes][:promedio_completados].round(1) %></p>
+              <p class="text-2xl font-semibold text-white">
+                <% if @dashboard_data && @dashboard_data[:estadisticas_estudiantes] %>
+                  <%= @dashboard_data[:estadisticas_estudiantes][:promedio_completados].to_f.round(1) %>
+                <% else %>
+                  0
+                <% end %>
+              </p>
             </div>
           </div>
         </div>
@@ -174,7 +210,13 @@
             </div>
             <div class="ml-4">
               <h2 class="text-gray-400 text-sm font-medium">Nuevos Estudiantes</h2>
-              <p class="text-2xl font-semibold text-white"><%= @dashboard_data[:estadisticas_estudiantes][:nuevos_estudiantes] %></p>
+              <p class="text-2xl font-semibold text-white">
+                <% if @dashboard_data && @dashboard_data[:estadisticas_estudiantes] %>
+                  <%= @dashboard_data[:estadisticas_estudiantes][:nuevos_estudiantes] %>
+                <% else %>
+                  0
+                <% end %>
+              </p>
             </div>
           </div>
         </div>
@@ -233,7 +275,7 @@
         <div class="bg-gray-800 rounded-lg shadow p-6 border border-gray-700">
           <h2 class="text-lg font-semibold text-white mb-4">Estudiantes Destacados</h2>
           
-          <% if @dashboard_data[:estudiantes_destacados].any? %>
+          <% if @dashboard_data && @dashboard_data[:estudiantes_destacados] && @dashboard_data[:estudiantes_destacados].any? %>
             <div class="overflow-x-auto">
               <table class="min-w-full divide-y divide-gray-700">
                 <thead>
@@ -284,7 +326,7 @@
           <h2 class="text-lg font-semibold text-white">Actividad Reciente</h2>
         </div>
         
-        <% if @dashboard_data[:actividad_reciente].any? %>
+        <% if @dashboard_data && @dashboard_data[:actividad_reciente] && @dashboard_data[:actividad_reciente].any? %>
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-700">
               <thead>
@@ -345,7 +387,7 @@
           <h2 class="text-lg font-semibold text-white">Laboratorios Más Populares</h2>
         </div>
         
-        <% if @dashboard_data[:laboratorios_populares].any? %>
+        <% if @dashboard_data && @dashboard_data[:laboratorios_populares] && @dashboard_data[:laboratorios_populares].any? %>
           <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-700">
               <thead>
