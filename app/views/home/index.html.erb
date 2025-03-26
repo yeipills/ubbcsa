@@ -6,36 +6,36 @@
         Bienvenido a <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-blue-300">UBB CSA</span>
       </h1>
       <p class="text-lg text-gray-300 max-w-4xl mx-auto">
-        Formación avanzada en ciberseguridad con especialización en seguridad ofensiva, defensa digital e inteligencia cibernética. Aprende de expertos en un entorno seguro.
+        Plataforma educativa de ciberseguridad con laboratorios interactivos, terminales web en vivo y evaluaciones dinámicas. Aprende en entornos seguros con infraestructura real.
       </p>
       <!-- BOTONES -->
       <div class="mt-10 flex flex-col sm:flex-row justify-center gap-6 w-full">
         <%= link_to "Iniciar Sesión", 
             new_usuario_session_path, 
             class: "px-8 py-4 text-lg font-medium text-white bg-blue-600 rounded-lg shadow-lg hover:bg-blue-500 focus:ring focus:ring-blue-400 transition-all" %>
-        <%= link_to "Explorar Programas", 
-            "#programs", 
+        <%= link_to "Explorar Laboratorios", 
+            "#laboratorios", 
             class: "px-8 py-4 text-lg font-medium text-white bg-gray-800 border border-gray-600 rounded-lg hover:bg-gray-700 focus:ring focus:ring-gray-500 transition-all" %>
       </div>
     </header>
 
-    <!-- PROGRAMAS -->
-    <main id="programs" class="mt-24 max-w-6xl mx-auto py-20 w-full">
-      <h2 class="text-4xl font-bold text-white text-center mb-12">Nuestros Programas</h2>
+    <!-- LABORATORIOS -->
+    <main id="laboratorios" class="mt-24 max-w-6xl mx-auto py-20 w-full">
+      <h2 class="text-4xl font-bold text-white text-center mb-12">Nuestros Laboratorios</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <% programs = [
-          { title: "Seguridad Ofensiva", icon: "💀", description: "Domina técnicas de pentesting y explotación de vulnerabilidades.", topics: ["Red Team Operations", "Exploit Development", "Vulnerability Research"] },
-          { title: "Defensa Digital", icon: "🔒", description: "Aprende estrategias de ciberdefensa y respuesta a incidentes.", topics: ["Blue Team Strategies", "SIEM Implementation", "Incident Response"] },
-          { title: "Inteligencia Ciber", icon: "🕵️", description: "Analiza amenazas y protege sistemas con inteligencia cibernética.", topics: ["Threat Intelligence", "Malware Analysis", "Digital Forensics"] }
+        <% laboratorios = [
+          { title: "Pentesting", icon: "🔍", description: "Entornos prácticos para pruebas de penetración con máquinas vulnerables como Metasploitable y DVWA.", topics: ["Escaneo de Vulnerabilidades", "Explotación de Servicios", "Pruebas de Penetración Web"] },
+          { title: "Forense", icon: "🔎", description: "Escenarios de análisis forense digital para recuperación de evidencias e investigación de incidentes.", topics: ["Análisis de Memoria", "Recuperación de Archivos", "Investigación de Logs"] },
+          { title: "Redes", icon: "🌐", description: "Laboratorios para configuración y análisis de seguridad en infraestructuras de red.", topics: ["Configuración de Firewalls", "Análisis de Tráfico", "Detección de Intrusiones"] }
         ] %>
         
-        <% programs.each do |program| %>
+        <% laboratorios.each do |laboratorio| %>
           <article class="bg-gray-800 rounded-xl p-8 shadow-lg flex flex-col items-center text-center w-full space-y-6 hover:scale-105 transition-transform">
-            <div class="text-6xl"><%= program[:icon] %></div>
-            <h3 class="text-2xl font-bold text-white"><%= program[:title] %></h3>
-            <p class="text-gray-300 text-md leading-relaxed w-full"><%= program[:description] %></p>
+            <div class="text-6xl"><%= laboratorio[:icon] %></div>
+            <h3 class="text-2xl font-bold text-white"><%= laboratorio[:title] %></h3>
+            <p class="text-gray-300 text-md leading-relaxed w-full"><%= laboratorio[:description] %></p>
             <ul class="text-gray-400 text-sm space-y-2 w-full">
-              <% program[:topics].each do |topic| %>
+              <% laboratorio[:topics].each do |topic| %>
                 <li class="flex items-center justify-center gap-2">
                   ✅ <%= topic %>
                 </li>
@@ -46,10 +46,63 @@
       </div>
     </main>
 
+    <!-- CARACTERÍSTICAS -->
+    <section class="mt-24 py-10 bg-gray-800 rounded-xl p-8 w-full">
+      <h2 class="text-3xl font-bold text-white text-center mb-8">Características de la Plataforma</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="flex flex-col space-y-4">
+          <div class="flex items-start gap-3">
+            <div class="text-blue-400 text-2xl">💻</div>
+            <div>
+              <h3 class="text-xl font-semibold text-white">Terminal Web en Vivo</h3>
+              <p class="text-gray-300">Accede a entornos Linux completos directamente desde tu navegador con nuestras terminales ttyd.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="text-blue-400 text-2xl">📊</div>
+            <div>
+              <h3 class="text-xl font-semibold text-white">Métricas en Tiempo Real</h3>
+              <p class="text-gray-300">Monitorea recursos y rendimiento durante las sesiones de laboratorio.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="text-blue-400 text-2xl">👨‍🏫</div>
+            <div>
+              <h3 class="text-xl font-semibold text-white">Gestión de Cursos</h3>
+              <p class="text-gray-300">Sistema completo para profesores y estudiantes con administración de materiales.</p>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col space-y-4">
+          <div class="flex items-start gap-3">
+            <div class="text-blue-400 text-2xl">🎯</div>
+            <div>
+              <h3 class="text-xl font-semibold text-white">Ejercicios Prácticos</h3>
+              <p class="text-gray-300">Completa desafíos técnicos y verifica tus habilidades con ejercicios específicos.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="text-blue-400 text-2xl">📝</div>
+            <div>
+              <h3 class="text-xl font-semibold text-white">Evaluaciones Dinámicas</h3>
+              <p class="text-gray-300">Sistema de quizzes con preguntas de opción múltiple y emparejamiento.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="text-blue-400 text-2xl">🏆</div>
+            <div>
+              <h3 class="text-xl font-semibold text-white">Seguimiento de Progreso</h3>
+              <p class="text-gray-300">Dashboard personalizado con estadísticas y actividades completadas.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- CALL TO ACTION -->
     <section class="mt-24 py-20 text-center">
-      <h2 class="text-4xl font-bold text-white">¿Listo para mejorar tus habilidades?</h2>
-      <p class="text-gray-300 text-lg mt-4">Únete a nuestra academia hoy mismo.</p>
+      <h2 class="text-4xl font-bold text-white">¿Listo para probar entornos reales?</h2>
+      <p class="text-gray-300 text-lg mt-4">Regístrate y comienza tu aprendizaje práctico hoy mismo.</p>
       <div class="mt-6">
         <%= link_to "Registrarme Ahora", 
             new_usuario_registration_path, 
@@ -59,11 +112,11 @@
 
     <!-- FOOTER -->
     <footer class="mt-24 py-10 border-t border-gray-700 text-center">
-      <p class="text-gray-400">© 2024 UBB CSA. Todos los derechos reservados.</p>
+      <p class="text-gray-400">© 2024 UBB CSA - Plataforma de Laboratorios de Ciberseguridad. Todos los derechos reservados.</p>
       <div class="flex justify-center gap-6 mt-4">
-        <%= link_to "Facebook", "https://facebook.com", target: "_blank", class: "text-gray-400 hover:text-white" %>
-        <%= link_to "Twitter", "https://twitter.com", target: "_blank", class: "text-gray-400 hover:text-white" %>
-        <%= link_to "LinkedIn", "https://linkedin.com", target: "_blank", class: "text-gray-400 hover:text-white" %>
+        <%= link_to "Términos de Uso", "#", class: "text-gray-400 hover:text-white" %>
+        <%= link_to "Política de Privacidad", "#", class: "text-gray-400 hover:text-white" %>
+        <%= link_to "Contacto", "#", class: "text-gray-400 hover:text-white" %>
       </div>
     </footer>
   </div>
